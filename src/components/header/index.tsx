@@ -22,8 +22,8 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { usePathname } from "next/navigation";
 
 const navigationItems = [
-  { title: "בקשות", href: "/requests", icon: ShoppingBagIcon },
-  { title: "קבוצות פעילות", href: "/groups", icon: GroupIcon },
+  { title: "בקשות", href: "/requestGroups", icon: ShoppingBagIcon },
+  { title: "קבוצות פעילות", href: "/activeGroups", icon: GroupIcon },
   { title: "חיפוש חכם", href: "/search", icon: SearchIcon },
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
 ];
