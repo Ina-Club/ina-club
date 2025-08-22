@@ -21,6 +21,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { usePathname } from "next/navigation";
 
+const loggedIn = true;
 const navigationItems = [
   { title: "בקשות", href: "/requestGroups", icon: ShoppingBagIcon },
   { title: "קבוצות פעילות", href: "/activeGroups", icon: GroupIcon },
@@ -150,7 +151,16 @@ export default function Header() {
             <FavoriteIcon />
           </IconButton>
           <IconButton sx={{ color: "#64748b" }}>
-            <AccountCircleIcon />
+            {loggedIn ? (
+              <Image
+                src="/InaclubAppLogo.png"
+                alt="Ina Club App Logo"
+                width={80}
+                height={60}
+              />
+            ) : (
+              <AccountCircleIcon />
+            )}
           </IconButton>
         </Box>
       </Toolbar>
