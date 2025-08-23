@@ -3,13 +3,14 @@ import {
   InputBase,
   TextField,
   MenuItem,
-  InputAdornment
+  InputAdornment,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-interface RequestGroupFiltersProps { }
+interface RequestGroupFiltersProps {}
 
-export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => {
+export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({}) => {
   return (
     <Box
       component="section"
@@ -26,83 +27,194 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
         px: { xs: 2, md: 2 },
         flexDirection: "column",
         gap: 2,
+        direction: "rtl", // 🟢 כל הקומפוננטה בכיווניות עברית
       }}
     >
-      {/* 🎛️ Filters row */}
+      {/* 🎛️ שורת פילטרים */}
       <Box
         sx={{
           display: "flex",
           gap: 2,
         }}
       >
-        <TextField
-          select
-          label="קטגוריה"
-          variant="standard"
-          size="small"
-          sx={{ flex: 1 }}
-        >
-          <MenuItem value="all">הכל</MenuItem>
-          <MenuItem value="electronics">אלקטרוניקה</MenuItem>
-          <MenuItem value="clothing">ביגוד</MenuItem>
-          <MenuItem value="food">מזון</MenuItem>
-        </TextField>
+        {/* קטגוריה */}
+        <Box sx={{ width: "100%" }}>
+          <Typography>קטגוריה</Typography>
+          <TextField
+            select
+            fullWidth
+            variant="outlined"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
+              },
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
+              },
+            }}
+          >
+            <MenuItem value="all">הכול</MenuItem>
+            <MenuItem value="electronics">אלקטרוניקה</MenuItem>
+            <MenuItem value="clothing">ביגוד</MenuItem>
+            <MenuItem value="food">מזון</MenuItem>
+          </TextField>
+        </Box>
+        {/* מחיר */}
+        <Box sx={{ width: "100%" }}>
+          <Typography>מחיר</Typography>
+          <TextField
+            variant="outlined"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
+                textAlign: "right",
+              },
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
+              },
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">₪</InputAdornment>
+                ),
+              },
+            }}
+          ></TextField>
+        </Box>
 
-        <TextField
-          label="מחיר"
-          variant="standard"
-          sx={{ flex: 1, direction: "rtl" }}
-          slotProps={{
-            input: {
-              startAdornment: <InputAdornment position="end">₪</InputAdornment>,
-            },
-          }}
-        >
-        </TextField>
+        {/* מיקום */}
+        <Box sx={{ width: "100%" }}>
+          <Typography>מיקום</Typography>
+          <TextField
+            select
+            fullWidth
+            variant="outlined"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
+              },
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
+              },
+            }}
+          >
+            <MenuItem value="all">כל המקומות</MenuItem>
+            <MenuItem value="north">צפון</MenuItem>
+            <MenuItem value="center">מרכז</MenuItem>
+            <MenuItem value="south">דרום</MenuItem>
+          </TextField>
+        </Box>
 
-        <TextField
-          select
-          label="מיקום"
-          variant="standard"
-          size="small"
-          sx={{ flex: 1 }}
-        >
-          <MenuItem value="all">כל המקומות</MenuItem>
-          <MenuItem value="north">צפון</MenuItem>
-          <MenuItem value="center">מרכז</MenuItem>
-          <MenuItem value="south">דרום</MenuItem>
-        </TextField>
-
-        <TextField
-          select
-          label="פופולריות"
-          variant="standard"
-          size="small"
-          sx={{ flex: 1 }}
-        >
-          <MenuItem value="all">הכל</MenuItem>
-          <MenuItem value="popular">פופולרי</MenuItem>
-          <MenuItem value="new">חדש</MenuItem>
-        </TextField>
+        {/* פופולריות */}
+        <Box sx={{ width: "100%" }}>
+          <Typography>פופולריות</Typography>
+          <TextField
+            select
+            variant="outlined"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
+              },
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
+              },
+            }}
+          >
+            <MenuItem value="all">הכול</MenuItem>
+            <MenuItem value="popular">פופולרי</MenuItem>
+            <MenuItem value="new">חדש</MenuItem>
+          </TextField>
+        </Box>
       </Box>
 
-      {/* Search bar */}
+      {/* 🔍 שדה חיפוש */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          width: "100%",
           backgroundColor: "#e5e7eb",
-          borderRadius: 1,
+          borderRadius: "10px",
           borderColor: "grey.500",
           py: 1,
+          px: 1,
         }}
       >
-        <SearchIcon sx={{ color: "action.active", mr: 1 }} />
+        <SearchIcon sx={{ color: "action.active", ml: 1 }} />
         <InputBase
           placeholder="חפש בקשות..."
           inputProps={{ "aria-label": "search" }}
-          sx={{ flex: 1, px: 1 }}
+          sx={{
+            flex: 1,
+            px: 1,
+            textAlign: "right",
+          }}
         />
       </Box>
     </Box>

@@ -95,8 +95,7 @@ export default function Header() {
                       py: 1,
                       borderRadius: "1rem",
                       transition: "all 0.2s",
-                      color: isActive ? "#1a2a5a" : "#64748b",
-                      backgroundColor: isActive ? "#dbeafe" : "transparent",
+                      color: isActive ? "#1a2a5a" : "#1a2a5a",
                       "&:hover": {
                         color: "#1a2a5a",
                         backgroundColor: "#f8fafc",
