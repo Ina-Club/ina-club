@@ -1,12 +1,9 @@
-"use client";
 
 import React from "react";
 import {
   Box,
   Button,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { ShoppingBag, People } from "@mui/icons-material";
 
@@ -15,8 +12,6 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   return (
     <Box
       component="section"
