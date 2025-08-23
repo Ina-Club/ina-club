@@ -1,8 +1,8 @@
 import {
   Box,
-  Button,
-  Typography,
+  InputBase,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 interface RequestGroupFiltersProps { }
 
@@ -14,17 +14,33 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
         maxWidth: 1280,
         mx: "auto",
         position: "relative",
-        color: "white",
         borderColor: "#e5e7eb",
         overflow: "hidden",
         boxShadow: 3,
         borderRadius: 1,
-        background:
-          "rgba(255, 255, 255, 0.96)",
-        py: { xs: 6, md: 8 },
-        px: { xs: 2, md: 4 },
+        py: { xs: 2, md: 2 },
+        px: { xs: 2, md: 2 },
       }}
     >
+      {/* Search bar */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+          backgroundColor: "#e5e7eb",
+          borderRadius: 1,
+          borderColor: "grey.500",
+          py: 1,
+        }}
+      >
+        <SearchIcon sx={{ color: "action.active", mr: 1 }} />
+        <InputBase
+          placeholder="חפש בקשות..."
+          inputProps={{ "aria-label": "search" }}
+          sx={{ flex: 1, px: 1 }}
+        />
+      </Box>
     </Box>
   );
 };
