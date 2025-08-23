@@ -1,15 +1,5 @@
-
 import React from "react";
-import {
-  Box,
-  Button,
-  Typography,
-} from "@mui/material";
-import { ShoppingBag, People } from "@mui/icons-material";
-
-// interface PageBannerProps {
-//   onOpenQuickRequest?: () => void;
-// }
+import { Box, Typography } from "@mui/material";
 
 export const PageBanner: React.FC = () => {
   return (
@@ -22,11 +12,12 @@ export const PageBanner: React.FC = () => {
         overflow: "hidden",
         background:
           "linear-gradient(140deg,rgba(255, 255, 255, 1) 0%, rgba(211, 224, 235, 1) 100%)",
-        py: { xs: 2, md: 4 },
+        pt: { xs: 2, md: 3 }, // רק padding-top, כדי שהפילטרים יישבו על החצי התחתון
+        pb: { xs: 10, md: 14 }, // מוסיפים מקום לפילטרים
         px: { xs: 2, md: 4 },
       }}
     >
-      {/* Background Circles */}
+      {/* רקעים מטושטשים */}
       <Box
         sx={{
           position: "absolute",
@@ -60,14 +51,16 @@ export const PageBanner: React.FC = () => {
         />
       </Box>
 
+      {/* תוכן */}
       <Box
         sx={{
           position: "relative",
           maxWidth: 1280,
           mx: "auto",
+          textAlign: "right",
+          direction: "rtl",
         }}
       >
-        {/* Heading */}
         <Typography
           sx={{
             fontWeight: "bold",
@@ -83,7 +76,7 @@ export const PageBanner: React.FC = () => {
           variant="h5"
           sx={{
             color: "#1a2a5a",
-            mb: 4,
+            mb: 2,
             fontSize: { md: "1.5rem", xs: "1rem" },
           }}
         >

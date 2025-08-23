@@ -15,19 +15,20 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({}) => {
     <Box
       component="section"
       sx={{
-        display: "flex",
         maxWidth: 1280,
         mx: "auto",
         position: "relative",
-        borderColor: "#e5e7eb",
-        overflow: "hidden",
+        mt: { xs: -6, md: -10 }, // 🟢 מרים את הפילטרים חצי על הגרדיאנט
+        zIndex: 10,
+        bgcolor: "white",
         boxShadow: 3,
-        borderRadius: 1,
-        py: { xs: 2, md: 2 },
-        px: { xs: 2, md: 2 },
+        borderRadius: 2,
+        py: { xs: 2, md: 3 },
+        px: { xs: 2, md: 3 },
+        display: "flex",
         flexDirection: "column",
         gap: 2,
-        direction: "rtl", // 🟢 כל הקומפוננטה בכיווניות עברית
+        direction: "rtl",
       }}
     >
       {/* 🎛️ שורת פילטרים */}
