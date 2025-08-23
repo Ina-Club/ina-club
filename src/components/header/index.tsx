@@ -27,7 +27,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 
-const loggedIn = false;
+const loggedIn = true;
 
 const navigationItems = [
   { title: "בקשות", href: "/requestGroups", icon: ShoppingBagIcon },
