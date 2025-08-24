@@ -1,10 +1,5 @@
-
 import React from "react";
-import {
-  Box,
-  Button,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { ShoppingBag, People } from "@mui/icons-material";
 
 interface HeroProps {
@@ -144,7 +139,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
               gap: 2,
               borderRadius: 3,
               border: "1px solid  #1a2a5a",
-              "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
+              fontWeight: "bold",
+              "&:hover": { backgroundColor: "rgba(145, 57, 214, 0.04)" },
             }}
           >
             עיין בקבוצות פעילות
