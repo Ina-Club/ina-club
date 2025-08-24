@@ -2,8 +2,9 @@ import { PageBanner } from "@/components/page-banner";
 import { RequestGroupFilters } from "@/components/request-group-filters"
 import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
 import RequestGroupSectionWrapper from "@/components/wrapper/request-group-section-wrapper";
-import { Container } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { Suspense } from "react";
+import TempCard from "@/components/temp-card"
 
 export default function Page() {
   return (
@@ -18,6 +19,22 @@ export default function Page() {
         <Suspense fallback={<RequestGroupSectionSkeleton />}>
           <RequestGroupSectionWrapper />
         </Suspense>
+        {[...Array(3)].map((_, i) => (
+          <Box sx={{
+            key: { i },
+            display: "flex",
+            maxWidth: 1280,
+            mx: "auto",
+            position: "inherit",
+            py: { xs: 2, md: 2 },
+            px: { xs: 2, md: 2 },
+            gap: 2,
+            justifyContent: "center"
+          }}>
+            <TempCard />
+            <TempCard />
+          </Box>
+        ))}
       </Container>
     </>
   );
