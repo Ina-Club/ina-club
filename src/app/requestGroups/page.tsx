@@ -16,9 +16,10 @@ export default function Page() {
           px: { xs: "17px", md: "0px" },
         }}
       >
-        <Suspense fallback={<RequestGroupSectionSkeleton />}>
+        //TODO: Add this replace mocks later with this
+        {/* <Suspense fallback={<RequestGroupSectionSkeleton />}>
           <RequestGroupSectionWrapper />
-        </Suspense>
+        </Suspense> */}
         {[...Array(3)].map((_, i) => (
           <Box key={i} sx={{
             display: "flex",
