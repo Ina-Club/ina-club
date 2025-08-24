@@ -1,6 +1,11 @@
 "use client";
 import {
   Box,
+  Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
   InputBase,
   useMediaQuery,
   useTheme,
@@ -31,20 +36,36 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
           boxShadow: 3,
           borderRadius: 1,
           py: { xs: 2, md: 2 },
-          px: { xs: 2, md: 2 },
+          px: { xs: 4, md: 2 },
           flexDirection: { xs: "row-reverse", md: "column" },
           gap: 2,
         }}
       >
         {/* 🎛️ שורת פילטרים */}
-        < Box
-          sx={{
-            display: "flex",
-            gap: 2,
-          }}
-        >
-          <Filters />
-        </Box>
+        {isMobile ? (
+          <>
+            <IconButton onClick={() => setOpen(true)}>
+              <FilterListIcon />
+            </IconButton>
+
+            <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
+              <DialogTitle>פילטרים</DialogTitle>
+              {/* <DialogContent>{Filters}</DialogContent> */}
+              <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
+                <Button onClick={() => setOpen(false)}>סגור</Button>
+              </Box>
+            </Dialog>
+          </>
+        ) :
+          < Box
+            sx={{
+              display: "flex",
+              gap: 2,
+            }}
+          >
+            <Filters />
+          </Box>
+        }
 
         {/* 🔍 שדה חיפוש */}
         <Box
