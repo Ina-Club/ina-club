@@ -13,7 +13,7 @@ export const PageBanner: React.FC = () => {
         background:
           "linear-gradient(140deg,rgba(255, 255, 255, 1) 0%, rgba(211, 224, 235, 1) 100%)",
         pt: { xs: 2, md: 4 }, // רק padding-top, כדי שהפילטרים יישבו על החצי התחתון
-        pb: { xs: 10, md: 14 }, // מוסיפים מקום לפילטרים
+        pb: { xs: 5, md: 7 }, // מוסיפים מקום לפילטרים
         px: { xs: 2, md: 4 },
       }}
     >
