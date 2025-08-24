@@ -16,7 +16,7 @@ export default function Page() {
           px: { xs: "17px", md: "0px" },
         }}
       >
-        //TODO: Add this replace mocks later with this
+        {/* TODO: Add this replace mocks later with this */}
         {/* <Suspense fallback={<RequestGroupSectionSkeleton />}>
           <RequestGroupSectionWrapper />
         </Suspense> */}
