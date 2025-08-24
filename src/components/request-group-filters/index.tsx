@@ -49,8 +49,10 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
             </IconButton>
 
             <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-              <DialogTitle>פילטרים</DialogTitle>
-              {/* <DialogContent>{Filters}</DialogContent> */}
+              <DialogTitle>מסננים</DialogTitle>
+              <DialogContent>
+                <Filters />
+              </DialogContent>
               <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
                 <Button onClick={() => setOpen(false)}>סגור</Button>
               </Box>
