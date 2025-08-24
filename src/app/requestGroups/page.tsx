@@ -20,8 +20,7 @@ export default function Page() {
           <RequestGroupSectionWrapper />
         </Suspense>
         {[...Array(3)].map((_, i) => (
-          <Box sx={{
-            key: { i },
+          <Box key={i} sx={{
             display: "flex",
             maxWidth: 1280,
             mx: "auto",
