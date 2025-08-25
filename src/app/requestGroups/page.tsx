@@ -4,9 +4,12 @@ import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-sec
 import RequestGroupSectionWrapper from "@/components/wrapper/request-group-section-wrapper";
 import { Box, Container } from "@mui/material";
 import { Suspense } from "react";
-import TempCard from "@/components/temp-card"
+import { mockRequestGroups } from "lib/mock";
+import RequestGroupCard from "@/components/request-group-card";
 
 export default function Page() {
+  const requestGroups = mockRequestGroups.concat(mockRequestGroups);
+
   return (
     <>
       <PageBanner />
@@ -16,10 +19,6 @@ export default function Page() {
           px: { xs: "17px", md: "0px" },
         }}
       >
-        {/* TODO: Add this replace mocks later with this */}
-        {/* <Suspense fallback={<RequestGroupSectionSkeleton />}>
-          <RequestGroupSectionWrapper />
-        </Suspense> */}
         {[...Array(3)].map((_, i) => (
           <Box key={i} sx={{
             display: "flex",
@@ -31,8 +30,8 @@ export default function Page() {
             gap: 2,
             justifyContent: "center"
           }}>
-            <TempCard />
-            <TempCard />
+            <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
+            <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
           </Box>
         ))}
       </Container>
