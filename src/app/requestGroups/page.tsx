@@ -1,11 +1,10 @@
-import { PageBanner } from "@/components/page-banner";
-import { RequestGroupFilters } from "@/components/request-group-filters"
-import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
-import RequestGroupSectionWrapper from "@/components/wrapper/request-group-section-wrapper";
-import { Box, Container } from "@mui/material";
 import { Suspense } from "react";
 import { mockRequestGroups } from "lib/mock";
+import { Box, Container } from "@mui/material";
+import { PageBanner } from "@/components/page-banner";
 import RequestGroupCard from "@/components/request-group-card";
+import { RequestGroupFilters } from "@/components/request-group-filters"
+import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
 
 export default function Page() {
   const requestGroups = mockRequestGroups.concat(mockRequestGroups);
@@ -30,8 +29,10 @@ export default function Page() {
             gap: 2,
             justifyContent: "center"
           }}>
-            <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
-            <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
+            <Suspense fallback={<RequestGroupSectionSkeleton />}>
+              <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
+              <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
+            </Suspense>
           </Box>
         ))}
       </Container>
