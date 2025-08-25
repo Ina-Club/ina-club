@@ -57,7 +57,7 @@ const ResponsiveHorizontalListWrapper: React.FC<{
         justifyContent: "flex-start",
         width: "100%",
         gap: gap || "10px",
-        px: 1,
+        padding: 1,
         overflowX: "auto", // fixed horizontal scroll for mobile
       }}
     >
@@ -77,7 +77,7 @@ const ResponsiveHorizontalListWrapper: React.FC<{
           width: "100%",
           justifyContent: "flex-start",
           gap: gap || "10px",
-          px: 1,
+          padding: 1,
           overflow: "hidden",
         }}
       >

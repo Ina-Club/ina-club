@@ -21,12 +21,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
   return (
     <Box
       sx={{
-        mt: disableMargin
-          ? "0px"
-          : {
-              xs: "90px",
-              md: "150px",
-            },
+        py: 12
       }}
     >
       <Stack
