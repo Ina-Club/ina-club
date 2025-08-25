@@ -3,7 +3,8 @@ import { RequestGroup } from "./dal";
 export const mockRequestGroups: RequestGroup[] = [
     {
       images: [
-        "https://picsum.photos/seed/laptop/400/300",
+        // "https://picsum.photos/seed/laptop/400/300",
+        "/BravoMateo.png",
         "https://picsum.photos/seed/laptop2/400/300",
       ],
       category: "אלקטרוניקה",
@@ -29,7 +30,8 @@ export const mockRequestGroups: RequestGroup[] = [
     },
     {
       images: [
-        "https://picsum.photos/seed/phone/400/300",
+        // "https://picsum.photos/seed/phone/400/300",
+        "/BravoMateo.png",
         "https://picsum.photos/seed/phone2/400/300",
       ],
       category: "סמארטפונים",
@@ -50,7 +52,8 @@ export const mockRequestGroups: RequestGroup[] = [
     },
     {
       images: [
-        "https://picsum.photos/seed/headphones/400/300",
+        // "https://picsum.photos/seed/headphones/400/300",
+        "/BravoMateo.png",
         "https://picsum.photos/seed/headphones2/400/300",
       ],
       category: "אודיו",
