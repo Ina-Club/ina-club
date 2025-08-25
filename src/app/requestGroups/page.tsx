@@ -32,6 +32,8 @@ export default function Page() {
             <Suspense fallback={<RequestGroupSectionSkeleton />}>
               <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
               <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
+              <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
+
             </Suspense>
           </Box>
         ))}
