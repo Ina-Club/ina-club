@@ -1,23 +1,55 @@
+'use client';
 import { Suspense } from "react";
 import { mockRequestGroups } from "lib/mock";
-import { Box, Container } from "@mui/material";
+import { Box, Container, InputBase } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { PageBanner } from "@/components/page-banner";
 import RequestGroupCard from "@/components/request-group-card";
 import { RequestGroupFilters } from "@/components/request-group-filters"
 import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
+import { useState } from "react";
 
 export default function Page() {
   const requestGroups = mockRequestGroups.concat(mockRequestGroups);
+  const [searchText, setSearchText] = useState("");
 
   return (
     <>
       <PageBanner />
-      <RequestGroupFilters />
-      <Container
+      {/* 🔍 שדה חיפוש */}
+      <Box
         sx={{
-          px: { xs: "17px", md: "0px" },
+          maxWidth: 800,
+          mx: "auto",
+          position: "relative",
+          mt: { xs: -6, md: -3 }, // 🟢 מרים את הפילטרים חצי על הגרדיאנט
+          bgcolor: "white",
+          boxShadow: 3,
+          borderRadius: "12px",
+          py: { xs: 2, md: 1 },
+          px: { xs: 5, md: 1 },
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center"
         }}
       >
+        <SearchIcon sx={{ color: "action.active", ml: 1 }} />
+        <InputBase
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          placeholder={searchText === "" ? "חפש בקשות..." : ""}
+          inputProps={{ "aria-label": "search" }}
+        />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          py: { xs: 2, md: 3 },
+          px: { xs: 0, md: 5 },
+          gap: 5,
+        }}>
+        <RequestGroupFilters />
         <Box
           sx={{
             display: "grid",
@@ -25,11 +57,10 @@ export default function Page() {
               xs: "1fr",        // 1 column on mobile
               md: "repeat(3, 1fr)", // 3 columns on desktop
             },
-            mx: "auto",
-            py: { xs: 3, md: 2 },
             px: { xs: 2, md: 2 },
             position: "inherit",
             justifyContent: "center",
+            alignItems: "center",
             gap: { xs: 3, md: 2 },
           }}>
           <Suspense fallback={<RequestGroupSectionSkeleton />}>
@@ -38,7 +69,7 @@ export default function Page() {
             ))}
           </Suspense>
         </Box>
-      </Container>
+      </Box>
     </>
   );
 }

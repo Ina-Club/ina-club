@@ -17,169 +17,214 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
 
   return (
     <>
-      {/* קטגוריה */}
-      < Box sx={{ width: "100%" }}>
-        <Typography>קטגוריה</Typography>
-        <TextField
-          select
-          fullWidth
-          variant="outlined"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              height: "45px",
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        {/* קטגוריה */}
+        <Box>
+          <Typography>קטגוריה</Typography>
+          <TextField
+            select
+            fullWidth
+            variant="outlined"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
               },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
               },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
-                borderWidth: "1px",
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
               },
-            },
-            "& .MuiInputBase-input": {
-              fontSize: "18px",
-              padding: "0 10px",
-            },
-            "& .MuiSelect-icon": {
-              left: "7px",
-              right: "auto",
-            },
-          }}
-        >
-          <MenuItem value="all">הכול</MenuItem>
-          <MenuItem value="electronics">אלקטרוניקה</MenuItem>
-          <MenuItem value="clothing">ביגוד</MenuItem>
-          <MenuItem value="food">מזון</MenuItem>
-        </TextField>
-      </Box >
-      {/* מחיר */}
-      < Box sx={{ width: "100%" }}>
-        <Typography>מחיר</Typography>
-        <TextField
-          variant="outlined"
-          fullWidth
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              height: "45px",
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+            }}
+          >
+            <MenuItem value="all">הכול</MenuItem>
+            <MenuItem value="electronics">אלקטרוניקה</MenuItem>
+            <MenuItem value="clothing">ביגוד</MenuItem>
+            <MenuItem value="food">מזון</MenuItem>
+          </TextField>
+        </Box >
+        {/* מחיר */}
+        <Box>
+          <Typography>החל מ</Typography>
+          <TextField
+            variant="outlined"
+            fullWidth
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
               },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
+                textAlign: "right",
               },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
-                borderWidth: "1px",
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
               },
-            },
-            "& .MuiInputBase-input": {
-              fontSize: "18px",
-              padding: "0 10px",
-              textAlign: "right",
-            },
-            "& .MuiSelect-icon": {
-              left: "7px",
-              right: "auto",
-            },
-          }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">₪</InputAdornment>
-              ),
-            },
-          }}
-        ></TextField>
-      </Box >
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">₪</InputAdornment>
+                ),
+              },
+            }}
+          ></TextField>
+        </Box >
 
-      {/* מיקום */}
-      < Box sx={{ width: "100%" }}>
-        <Typography>מיקום</Typography>
-        <TextField
-          select
-          fullWidth
-          variant="outlined"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              height: "45px",
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+        {/* מחיר */}
+        < Box>
+          <Typography>עד</Typography>
+          <TextField
+            variant="outlined"
+            fullWidth
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
               },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
+                textAlign: "right",
               },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
-                borderWidth: "1px",
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
               },
-            },
-            "& .MuiInputBase-input": {
-              fontSize: "18px",
-              padding: "0 10px",
-            },
-            "& .MuiSelect-icon": {
-              left: "7px",
-              right: "auto",
-            },
-          }}
-        >
-          <MenuItem value="all">כל המקומות</MenuItem>
-          <MenuItem value="north">צפון</MenuItem>
-          <MenuItem value="center">מרכז</MenuItem>
-          <MenuItem value="south">דרום</MenuItem>
-        </TextField>
-      </Box >
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">₪</InputAdornment>
+                ),
+              },
+            }}
+          ></TextField>
+        </Box >
 
-      {/* פופולריות */}
-      < Box sx={{ width: "100%" }}>
-        <Typography>פופולריות</Typography>
-        <TextField
-          select
-          variant="outlined"
-          fullWidth
-          value={popularity}
-          onChange={(e) => setPopularity(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              height: "45px",
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+        {/* מיקום */}
+        < Box>
+          <Typography>מיקום</Typography>
+          <TextField
+            select
+            fullWidth
+            variant="outlined"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
               },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
               },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#BED6E9",
-                borderWidth: "1px",
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
               },
-            },
-            "& .MuiInputBase-input": {
-              fontSize: "18px",
-              padding: "0 10px",
-            },
-            "& .MuiSelect-icon": {
-              left: "7px",
-              right: "auto",
-            },
-          }}
-        >
-          <MenuItem value="all">הכול</MenuItem>
-          <MenuItem value="popular">פופולרי</MenuItem>
-          <MenuItem value="new">חדש</MenuItem>
-        </TextField>
-      </Box >
+            }}
+          >
+            <MenuItem value="all">כל המקומות</MenuItem>
+            <MenuItem value="north">צפון</MenuItem>
+            <MenuItem value="center">מרכז</MenuItem>
+            <MenuItem value="south">דרום</MenuItem>
+          </TextField>
+        </Box >
+
+        {/* פופולריות */}
+        < Box>
+          <Typography>פופולריות</Typography>
+          <TextField
+            select
+            variant="outlined"
+            fullWidth
+            value={popularity}
+            onChange={(e) => setPopularity(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                height: "45px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#BED6E9",
+                  borderWidth: "1px",
+                },
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "18px",
+                padding: "0 10px",
+              },
+              "& .MuiSelect-icon": {
+                left: "7px",
+                right: "auto",
+              },
+            }}
+          >
+            <MenuItem value="all">הכול</MenuItem>
+            <MenuItem value="popular">פופולרי</MenuItem>
+            <MenuItem value="new">חדש</MenuItem>
+          </TextField>
+        </Box >
+      </Box>
     </>
   );
 };
