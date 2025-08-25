@@ -37,9 +37,9 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({}) => {
           boxShadow: 3,
           borderRadius: 2,
           py: { xs: 2, md: 3 },
-          px: { xs: 2, md: 3 },
+          px: { xs: 5, md: 3 },
           display: "flex",
-          flexDirection: "column",
+          flexDirection: { xs: "row-reverse", md: "column" },
           gap: 2,
           direction: "rtl",
         }}

@@ -26,7 +26,7 @@ export default function Page() {
               md: "repeat(3, 1fr)", // 3 columns on desktop
             },
             mx: "auto",
-            py: { xs: 2, md: 2 },
+            py: { xs: 3, md: 2 },
             px: { xs: 2, md: 2 },
             position: "inherit",
             justifyContent: "center",
