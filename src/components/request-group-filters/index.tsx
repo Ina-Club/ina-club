@@ -21,6 +21,7 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // xs–sm breakpoint
   const [open, setOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   return (
     <>
@@ -83,7 +84,9 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
         >
           <SearchIcon sx={{ color: "action.active", ml: 1 }} />
           <InputBase
-            placeholder="חפש בקשות..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder={searchText === "" ? "חפש בקשות..." : ""}
             inputProps={{ "aria-label": "search" }}
             sx={{
               flex: 1,
