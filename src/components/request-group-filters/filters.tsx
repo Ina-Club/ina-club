@@ -5,10 +5,16 @@ import {
   InputAdornment,
   Typography,
 } from "@mui/material";
+import { useState } from "react";
 
 interface FiltersProps { }
 
 export const Filters: React.FC<FiltersProps> = ({ }) => {
+  const [category, setCategory] = useState('all');
+  const [price, setPrice] = useState('');
+  const [location, setLocation] = useState('all');
+  const [popularity, setPopularity] = useState('all');
+
   return (
     <>
       {/* קטגוריה */}
@@ -18,6 +24,8 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
           select
           fullWidth
           variant="outlined"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "10px",
@@ -55,6 +63,8 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
         <TextField
           variant="outlined"
           fullWidth
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "10px",
@@ -97,6 +107,8 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
           select
           fullWidth
           variant="outlined"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "10px",
@@ -136,6 +148,8 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
           select
           variant="outlined"
           fullWidth
+          value={popularity}
+          onChange={(e) => setPopularity(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "10px",
