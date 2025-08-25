@@ -30,8 +30,8 @@ import { usePathname } from "next/navigation";
 const loggedIn = true;
 
 const navigationItems = [
-  { title: "בקשות", href: "/requestGroups", icon: ShoppingBagIcon },
-  { title: "קבוצות פעילות", href: "/activeGroups", icon: GroupIcon },
+  { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
+  { title: "קבוצות פעילות", href: "/active-groups", icon: GroupIcon },
   { title: "חיפוש חכם", href: "/search", icon: SearchIcon },
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
 ];
