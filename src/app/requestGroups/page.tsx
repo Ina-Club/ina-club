@@ -18,25 +18,26 @@ export default function Page() {
           px: { xs: "17px", md: "0px" },
         }}
       >
-        {[...Array(3)].map((_, i) => (
-          <Box key={i} sx={{
-            display: "flex",
-            maxWidth: 1280,
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",        // 1 column on mobile
+              md: "repeat(3, 1fr)", // 3 columns on desktop
+            },
             mx: "auto",
-            position: "inherit",
             py: { xs: 2, md: 2 },
             px: { xs: 2, md: 2 },
-            gap: 2,
-            justifyContent: "center"
+            position: "inherit",
+            justifyContent: "center",
+            gap: { xs: 3, md: 2 },
           }}>
-            <Suspense fallback={<RequestGroupSectionSkeleton />}>
-              <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
-              <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
-              <RequestGroupCard requestGroup={requestGroups[Math.floor(Math.random() * requestGroups.length)]} />
-
-            </Suspense>
-          </Box>
-        ))}
+          <Suspense fallback={<RequestGroupSectionSkeleton />}>
+            {requestGroups.map((requestGroup, requestGroupIndex) => (
+              <RequestGroupCard key={requestGroupIndex} requestGroup={requestGroup} />
+            ))}
+          </Suspense>
+        </Box>
       </Container>
     </>
   );
