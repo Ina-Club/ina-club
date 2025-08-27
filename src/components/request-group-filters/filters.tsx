@@ -150,7 +150,7 @@ export const Filters: React.FC<FiltersProps> = () => {
               component="span"
               sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
             >
-              {priceRange[1]}₪ - {priceRange[0]}₪
+              {priceRange[0]}₪ - {priceRange[1]}₪
             </Typography>
           )}
         </AccordionSummary>
