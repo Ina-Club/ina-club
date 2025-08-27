@@ -61,7 +61,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({
           sx={{
             position: "absolute",
             top: 8,
-            right: 8,
+            left: 8,
             bgcolor: "rgba(255,255,255,0.7)",
             "&:hover": { bgcolor: "rgba(255,255,255,0.9)" },
           }}
@@ -81,7 +81,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({
           sx={{
             position: "absolute",
             bottom: 8,
-            right: 8,
+            left: 8,
             bgcolor: "rgba(255,255,255,0.9)",
             border: "1px solid",
             borderColor: "grey.300",

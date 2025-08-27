@@ -1,5 +1,6 @@
 import Footer from "@/components/footer";
 import Header from "@/components/header";
+import ThemeRegistry from "@/components/theme-registry/theme-registry";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -15,22 +16,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
-    <html lang="he">
-      <body
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "100vh",
-          direction: "rtl",
-          margin: 0,
-        }}
-      >
-        <Header />
-        <main style={{ flex: 1 }}>{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <ThemeRegistry>
+      <html lang={"he"} dir={"rtl"}>
+        <body
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
+            direction: "rtl",
+            margin: 0,
+          }}
+        >
+          <Header />
+          <main style={{ flex: 1 }}>{children}</main>
+          <Footer />
+        </body>
+      </html>
+    </ThemeRegistry>
   );
 }

@@ -127,7 +127,7 @@ const HorizontalNavigationWrapper: React.FC<{
       onClick={handleStartScrollClick}
       disabled={!displayScroll.start}
       sx={{
-        right: "-15px",
+        left: "-20px",
         zIndex: 2,
       }}
     />
@@ -138,7 +138,7 @@ const HorizontalNavigationWrapper: React.FC<{
       onClick={handleEndScrollClick}
       disabled={!displayScroll.end}
       sx={{
-        left: "-15px",
+        right: "-20px",
         zIndex: 2,
       }}
     />

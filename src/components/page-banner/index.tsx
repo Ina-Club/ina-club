@@ -57,7 +57,7 @@ export const PageBanner: React.FC = () => {
           position: "relative",
           maxWidth: 1280,
           mx: "auto",
-          textAlign: "right",
+          textAlign: "left",
           direction: "rtl",
         }}
       >
@@ -78,6 +78,7 @@ export const PageBanner: React.FC = () => {
             color: "#1a2a5a",
             mb: 6,
             fontSize: { md: "1.5rem", xs: "1rem" },
+            direction: "ltr"
           }}
         >
           גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.

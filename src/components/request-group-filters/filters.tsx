@@ -1,29 +1,18 @@
-import {
-  Box,
-  TextField,
-  MenuItem,
-  Slider,
-  Typography,
-} from "@mui/material";
+import { Box, TextField, MenuItem, Slider, Typography } from "@mui/material";
 import { useState } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import PriceRangeFilter from "./price-range-filter";
 
-interface FiltersProps { }
+interface FiltersProps {}
 
-export const Filters: React.FC<FiltersProps> = ({ }) => {
+export const Filters: React.FC<FiltersProps> = ({}) => {
   const minPrice = 20;
   const maxPrice = 80;
   const rtlTheme = createTheme({ direction: "rtl" });
-  const [category, setCategory] = useState('all');
-  const [location, setLocation] = useState('all');
-  const [popularity, setPopularity] = useState('all');
-  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({ min: minPrice, max: maxPrice });
-
-  const handlePriceRangeChange = (_: Event, newValue: number | number[]) => {
-    if (Array.isArray(newValue)) {
-      setPriceRange({ min: newValue[0], max: newValue[1] });
-    }
-  };
+  const [category, setCategory] = useState("all");
+  const [location, setLocation] = useState("all");
+  const [popularity, setPopularity] = useState("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([100, 10_000]);
 
   return (
     <>
@@ -57,8 +46,7 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
                 padding: "0 10px",
               },
               "& .MuiSelect-icon": {
-                left: "7px",
-                right: "auto",
+                right: "7px",
               },
             }}
           >
@@ -67,10 +55,10 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
             <MenuItem value="clothing">ביגוד</MenuItem>
             <MenuItem value="food">מזון</MenuItem>
           </TextField>
-        </Box >
+        </Box>
 
         {/* מיקום */}
-        < Box>
+        <Box>
           <Typography>מיקום</Typography>
           <TextField
             select
@@ -98,8 +86,7 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
                 padding: "0 10px",
               },
               "& .MuiSelect-icon": {
-                left: "7px",
-                right: "auto",
+                right: "7px",
               },
             }}
           >
@@ -108,10 +95,10 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
             <MenuItem value="center">מרכז</MenuItem>
             <MenuItem value="south">דרום</MenuItem>
           </TextField>
-        </Box >
+        </Box>
 
         {/* פופולריות */}
-        < Box>
+        <Box>
           <Typography>פופולריות</Typography>
           <TextField
             select
@@ -139,8 +126,7 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
                 padding: "0 10px",
               },
               "& .MuiSelect-icon": {
-                left: "7px",
-                right: "auto",
+                right: "7px",
               },
             }}
           >
@@ -148,27 +134,13 @@ export const Filters: React.FC<FiltersProps> = ({ }) => {
             <MenuItem value="popular">פופולרי</MenuItem>
             <MenuItem value="new">חדש</MenuItem>
           </TextField>
-        </Box >
+        </Box>
 
         {/* טווח מחיר */}
-        <ThemeProvider theme={rtlTheme}>
-          <Box sx={{ width: 300, mx: "auto" }}>
-            <Slider
-              value={[priceRange.min, priceRange.max]}
-              onChange={handlePriceRangeChange}
-              valueLabelDisplay="auto"
-              disableSwap
-              min={minPrice}
-              max={maxPrice}
-              sx={{
-                boxSizing: 'content-box',
-                '& .MuiSlider-thumb': { width: 20, height: 20 }, // document the size you matched
-              }}
-            />
-            <Typography>{priceRange.min}</Typography>
-            <Typography>{priceRange.max}</Typography>
-          </Box>
-        </ThemeProvider>
+        <PriceRangeFilter
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+        />
       </Box>
     </>
   );
