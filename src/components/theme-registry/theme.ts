@@ -115,15 +115,7 @@ const theme = () =>
           },
         },
       },
-      MuiAlert: {
-        styleOverrides: {
-          root: ({ ownerState }) => ({
-            ...(ownerState.severity === "info" && {
-              backgroundColor: "#60a5fa",
-            }),
-          }),
-        },
-      },
+    
       // change Card box shadow
       MuiCard: {
         styleOverrides: {

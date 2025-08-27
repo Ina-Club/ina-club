@@ -21,20 +21,20 @@ const RequestGroupSectionWrapper: React.FC<
         linkUrl={`/requestGroups`}
       >
         {}
-          <ResponsiveHorizontalListWrapper gap="16px">
-            {requestGroups.map((requestGroup, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: "flex",
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <RequestGroupCard requestGroup={requestGroup} />
-              </Box>
-            ))}
-          </ResponsiveHorizontalListWrapper>
+        <ResponsiveHorizontalListWrapper gap="16px">
+          {requestGroups.map((requestGroup, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <RequestGroupCard requestGroup={requestGroup} />
+            </Box>
+          ))}
+        </ResponsiveHorizontalListWrapper>
       </SectionWrapper>
     </>
   );

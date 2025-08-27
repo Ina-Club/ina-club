@@ -31,7 +31,7 @@ const ResponsiveHorizontalListWrapper: React.FC<{
   useEffect(() => {
     if (!wrapperRef.current) return;
     const resize = () => {
-      setItemWidth(wrapperRef.current!.offsetWidth / 4.5);
+      setItemWidth(wrapperRef.current!.offsetWidth / 3.7);
     };
     resize();
     const win = ownerWindow(wrapperRef.current);

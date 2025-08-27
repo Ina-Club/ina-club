@@ -2,11 +2,7 @@ import { RequestGroup } from "./dal";
 
 export const mockRequestGroups: RequestGroup[] = [
   {
-    images: [
-      // "https://picsum.photos/seed/laptop/400/300",
-      "/BravoMateo.png",
-      "https://picsum.photos/seed/laptop2/400/300",
-    ],
+    images: ["/BravoMateo.png", "https://picsum.photos/seed/laptop2/400/300"],
     category: "אלקטרוניקה",
     title: "MacBook Pro M3",
     participants: [
@@ -26,15 +22,31 @@ export const mockRequestGroups: RequestGroup[] = [
         mail: "roi@example.com",
       },
     ],
-    price: 6200,
-    openedGroups: [{ id: "sdds" }],
+    openedGroups: [
+      {
+        id: "macbook-group-1",
+        images: [],
+        category: "אלקטרוניקה",
+        title: "MacBook Group 1",
+        participants: [],
+        price: 6200,
+        numberOfParticipants: 0,
+        deadline: new Date("2025-09-15T23:59:59Z"), // 🔥 future date
+      },
+      {
+        id: "macbook-group-2",
+        images: [],
+        category: "אלקטרוניקה",
+        title: "MacBook Group 2",
+        participants: [],
+        price: 6200,
+        numberOfParticipants: 0,
+        deadline: new Date("2025-09-20T23:59:59Z"),
+      },
+    ],
   },
   {
-    images: [
-      // "https://picsum.photos/seed/phone/400/300",
-      "/BravoMateo.png",
-      "https://picsum.photos/seed/phone2/400/300",
-    ],
+    images: ["/BravoMateo.png", "https://picsum.photos/seed/phone2/400/300"],
     category: "סמארטפונים",
     title: "iPhone 16 Pro Max",
     participants: [
@@ -49,12 +61,10 @@ export const mockRequestGroups: RequestGroup[] = [
         mail: "noam@example.com",
       },
     ],
-    price: 4890,
     openedGroups: [],
   },
   {
     images: [
-      // "https://picsum.photos/seed/headphones/400/300",
       "/BravoMateo.png",
       "https://picsum.photos/seed/headphones2/400/300",
     ],
@@ -82,7 +92,17 @@ export const mockRequestGroups: RequestGroup[] = [
         mail: "tamar@example.com",
       },
     ],
-    price: 1290,
-    openedGroups: [],
+    openedGroups: [
+      {
+        id: "sony-group-1",
+        images: [],
+        category: "אודיו",
+        title: "Sony Group 1",
+        participants: [],
+        price: 1290,
+        numberOfParticipants: 0,
+        deadline: new Date("2025-09-05T18:00:00Z"),
+      },
+    ],
   },
 ];
