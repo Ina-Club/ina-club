@@ -15,11 +15,11 @@ const PriceRangeFilter: React.FC<{
         const rawMin = values.minPrice as any;
         const rawMax = values.maxPrice as any;
 
-        let nextMin = rawMin === "" || rawMin == null ? 100 : Number(rawMin);
+        let nextMin = rawMin === "" || rawMin == null ? 0 : Number(rawMin);
         let nextMax = rawMax === "" || rawMax == null ? 10_000 : Number(rawMax);
 
-        if (nextMin < 100) {
-          nextMin = 100;
+        if (nextMin < 0) {
+          nextMin = 0;
         }
         if (nextMax > 10_000) {
           nextMax = 10_000;
@@ -27,8 +27,8 @@ const PriceRangeFilter: React.FC<{
         if (nextMin > 10_000) {
           nextMin = 10_000;
         }
-        if (nextMax < 100) {
-          nextMax = 100;
+        if (nextMax < 0) {
+          nextMax = 0;
         }
         if (nextMin > nextMax) {
           nextMax = nextMin;
@@ -53,7 +53,7 @@ const PriceRangeFilter: React.FC<{
                 setFieldValue("minPrice", (newValue as number[])[0]);
                 setFieldValue("maxPrice", (newValue as number[])[1]);
               }}
-              min={100}
+              min={0}
               max={10_000}
               step={50}
             />
@@ -71,10 +71,11 @@ const PriceRangeFilter: React.FC<{
               label="מינימום"
               value={values.minPrice}
               onChange={handleChange}
+              placeholder="0"
               InputProps={{
                 inputComponent: NumericFormatPrice as any,
                 inputProps: {
-                  min: 100,
+                  min: 0,
                   max: 10000,
                 },
               }}
@@ -86,10 +87,11 @@ const PriceRangeFilter: React.FC<{
               label="מקסימום"
               value={values.maxPrice}
               onChange={handleChange}
+              placeholder="+10,000₪"
               InputProps={{
                 inputComponent: NumericFormatPrice as any,
                 inputProps: {
-                  min: 100,
+                  min: 0,
                   max: 10000,
                 },
               }}
@@ -112,9 +114,6 @@ export const PriceRangeSlider = styled(Slider)(({ theme }) => ({
     border: "3px solid currentColor",
     "&:focus, &:hover, &.Mui-active, &.Mui-focusVisible": {
       boxShadow: "inherit",
-    },
-    "& input": {
-      "--webkit-appearance": "slider-vertical",
     },
   },
   "& .MuiSlider-track": {

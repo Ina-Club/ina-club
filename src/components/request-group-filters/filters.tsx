@@ -12,7 +12,7 @@ export const Filters: React.FC<FiltersProps> = ({}) => {
   const [category, setCategory] = useState("all");
   const [location, setLocation] = useState("all");
   const [popularity, setPopularity] = useState("all");
-  const [priceRange, setPriceRange] = useState<[number, number]>([100, 10_000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10_000]);
 
   return (
     <>
