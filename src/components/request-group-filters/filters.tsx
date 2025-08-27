@@ -1,147 +1,166 @@
-import { Box, TextField, MenuItem, Slider, Typography } from "@mui/material";
+import {
+  Box,
+  MenuItem,
+  Slider,
+  Typography,
+  styled,
+  Divider,
+} from "@mui/material";
+import * as React from "react";
+import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
+import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
+import MuiAccordionSummary, {
+  AccordionSummaryProps,
+  accordionSummaryClasses,
+} from "@mui/material/AccordionSummary";
+import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import { useState } from "react";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import PriceRangeFilter from "./price-range-filter";
 
 interface FiltersProps {}
 
-export const Filters: React.FC<FiltersProps> = ({}) => {
-  const minPrice = 20;
-  const maxPrice = 80;
-  const rtlTheme = createTheme({ direction: "rtl" });
-  const [category, setCategory] = useState("all");
-  const [location, setLocation] = useState("all");
-  const [popularity, setPopularity] = useState("all");
+const Accordion = styled((props: AccordionProps) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  border: "none",
+  "&::before": { display: "none" },
+}));
+
+const AccordionSummary = styled((props: AccordionSummaryProps) => (
+  <MuiAccordionSummary
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />}
+    {...props}
+  />
+))(() => ({
+  minHeight: 55,
+  "& .MuiAccordionSummary-content": {
+    margin: 0,
+    display: "flex",
+    alignItems: "center",
+    fontSize: "14px",
+    fontWeight: 500,
+  },
+  [`& .${accordionSummaryClasses.expandIconWrapper}.${accordionSummaryClasses.expanded}`]:
+    {
+      transform: "rotate(90deg)",
+    },
+}));
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: "3px 14px 14px 18px",
+}));
+
+const OptionItem = styled(MenuItem)(({ theme }) => ({
+  fontSize: "0.9rem",
+  color: theme.palette.text.secondary,
+  paddingTop: 4,
+  paddingBottom: 4,
+}));
+
+export const Filters: React.FC<FiltersProps> = () => {
+  const [category, setCategory] = useState("בחר");
+  const [location, setLocation] = useState("בחר");
+  const [popularity, setPopularity] = useState("בחר");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10_000]);
 
   return (
-    <>
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        {/* קטגוריה */}
-        <Box>
-          <Typography>קטגוריה</Typography>
-          <TextField
-            select
-            fullWidth
-            variant="outlined"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                height: "45px",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                  borderWidth: "1px",
-                },
-              },
-              "& .MuiInputBase-input": {
-                fontSize: "18px",
-                padding: "0 10px",
-              },
-              "& .MuiSelect-icon": {
-                right: "7px",
-              },
-            }}
-          >
-            <MenuItem value="all">הכול</MenuItem>
-            <MenuItem value="electronics">אלקטרוניקה</MenuItem>
-            <MenuItem value="clothing">ביגוד</MenuItem>
-            <MenuItem value="food">מזון</MenuItem>
-          </TextField>
-        </Box>
+    <Box
+      sx={{
+        overflow: "hidden",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+      }}
+    >
+      {/* קטגוריה */}
+      <Accordion>
+        <AccordionSummary>
+          <Typography component="span">קטגוריה</Typography>
+          {category !== "בחר" && (
+            <Typography
+              component="span"
+              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+            >
+              {category}
+            </Typography>
+          )}
+        </AccordionSummary>
+        <AccordionDetails>
+          {["אלקטרוניקה", "ביגוד", "מזון"].map((opt) => (
+            <OptionItem key={opt} onClick={() => setCategory(opt)}>
+              {opt}
+            </OptionItem>
+          ))}
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
 
-        {/* מיקום */}
-        <Box>
-          <Typography>מיקום</Typography>
-          <TextField
-            select
-            fullWidth
-            variant="outlined"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                height: "45px",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                  borderWidth: "1px",
-                },
-              },
-              "& .MuiInputBase-input": {
-                fontSize: "18px",
-                padding: "0 10px",
-              },
-              "& .MuiSelect-icon": {
-                right: "7px",
-              },
-            }}
-          >
-            <MenuItem value="all">כל המקומות</MenuItem>
-            <MenuItem value="north">צפון</MenuItem>
-            <MenuItem value="center">מרכז</MenuItem>
-            <MenuItem value="south">דרום</MenuItem>
-          </TextField>
-        </Box>
+      {/* מיקום */}
+      <Accordion>
+        <AccordionSummary>
+          <Typography component="span">מיקום</Typography>
+          {location !== "בחר" && (
+            <Typography
+              component="span"
+              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+            >
+              {location}
+            </Typography>
+          )}
+        </AccordionSummary>
+        <AccordionDetails>
+          {["צפון", "מרכז", "דרום"].map((opt) => (
+            <OptionItem key={opt} onClick={() => setLocation(opt)}>
+              {opt}
+            </OptionItem>
+          ))}
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
 
-        {/* פופולריות */}
-        <Box>
-          <Typography>פופולריות</Typography>
-          <TextField
-            select
-            variant="outlined"
-            fullWidth
-            value={popularity}
-            onChange={(e) => setPopularity(e.target.value)}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                height: "45px",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#BED6E9",
-                  borderWidth: "1px",
-                },
-              },
-              "& .MuiInputBase-input": {
-                fontSize: "18px",
-                padding: "0 10px",
-              },
-              "& .MuiSelect-icon": {
-                right: "7px",
-              },
-            }}
-          >
-            <MenuItem value="all">הכול</MenuItem>
-            <MenuItem value="popular">פופולרי</MenuItem>
-            <MenuItem value="new">חדש</MenuItem>
-          </TextField>
-        </Box>
+      {/* פופולריות */}
+      <Accordion>
+        <AccordionSummary>
+          <Typography component="span">פופולריות</Typography>
+          {popularity !== "בחר" && (
+            <Typography
+              component="span"
+              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+            >
+              {popularity}
+            </Typography>
+          )}
+        </AccordionSummary>
+        <AccordionDetails>
+          {["הכול", "פופולרי", "חדש"].map((opt) => (
+            <OptionItem key={opt} onClick={() => setPopularity(opt)}>
+              {opt}
+            </OptionItem>
+          ))}
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
 
-        {/* טווח מחיר */}
-        <PriceRangeFilter
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-        />
-      </Box>
-    </>
+      {/* מחיר */}
+      <Accordion>
+        <AccordionSummary>
+          <Typography component="span">מחיר</Typography>
+          {priceRange && (
+            <Typography
+              component="span"
+              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+            >
+              {priceRange[1]}₪ - {priceRange[0]}₪
+            </Typography>
+          )}
+        </AccordionSummary>
+        <AccordionDetails>
+          <PriceRangeFilter
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+          />
+        </AccordionDetails>
+      </Accordion>
+    </Box>
   );
 };
