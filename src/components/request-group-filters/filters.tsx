@@ -73,7 +73,7 @@ export const Filters: React.FC<FiltersProps> = () => {
       }}
     >
       {/* קטגוריה */}
-      <Accordion>
+      <Accordion defaultExpanded>
         <AccordionSummary>
           <Typography component="span">קטגוריה</Typography>
           {category !== "בחר" && (
@@ -142,7 +142,7 @@ export const Filters: React.FC<FiltersProps> = () => {
       <Divider />
 
       {/* מחיר */}
-      <Accordion>
+      <Accordion defaultExpanded>
         <AccordionSummary>
           <Typography component="span">מחיר</Typography>
           {priceRange && (

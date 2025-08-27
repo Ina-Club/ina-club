@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   IconButton,
+  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -27,9 +28,6 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
         sx={{
           display: "flex",
           width: 400,
-          height: 500,
-          // mx: "auto",
-          // position: "relative",
           bgcolor: "white",
           boxShadow: 3,
           borderRadius: 2,
@@ -38,7 +36,7 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
           flexDirection: { xs: "row-reverse", md: "column" },
         }}
       >
-        {/* 🎛️ שורת פילטרים */}
+        {/* 🎛️ עמודת פילטרים */}
         {isMobile ? (
           <>
             <IconButton onClick={() => setOpen(true)}>
@@ -56,13 +54,8 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ }) => 
             </Dialog>
           </>
         ) : (
-          <Box
-            sx={{
-              // display: "flex",
-              // flexDirection: "column",
-              gap: 2,
-            }}
-          >
+          <Box>
+            <Typography variant="h6" component="span">מסננים</Typography>
             <Filters />
           </Box>
         )}

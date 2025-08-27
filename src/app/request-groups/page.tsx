@@ -48,8 +48,11 @@ export default function Page() {
           py: { xs: 2, md: 3 },
           px: { xs: 0, md: 5 },
           gap: 5,
+          alignItems: "flex-start"
         }}>
-        <RequestGroupFilters />
+        <Box>
+          <RequestGroupFilters />
+        </Box>
         <Box
           sx={{
             display: "grid",
