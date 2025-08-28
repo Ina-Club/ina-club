@@ -1,4 +1,4 @@
-import { ActiveGroup, RequestGroup } from "./dal";
+import { ActiveGroup, Company, RequestGroup } from "./dal";
 
 export const mockRequestGroups: RequestGroup[] = [
   {
@@ -161,80 +161,125 @@ export const mockRequestGroups: RequestGroup[] = [
   },
 ];
 
-
 export const mockActiveGroups: ActiveGroup[] = [
-    {
-      id: "macbook-group-1",
-      images: ["/BravoMateo.png", "https://picsum.photos/seed/laptop2/400/300"],
-      category: "אלקטרוניקה",
-      title: "MacBook Group 1",
-      participants: [
-        {
-          image: "https://i.pravatar.cc/150?img=1",
-          name: "דנה לוי",
-          mail: "dana@example.com",
-        },
-        {
-          image: "https://i.pravatar.cc/150?img=2",
-          name: "אורי כהן",
-          mail: "uri@example.com",
-        },
-      ],
-      price: 6200,
-      numberOfParticipants: 2,
-      deadline: new Date("2025-09-15T23:59:59Z"),
-    },
-    {
-      id: "macbook-group-2",
-      images: ["/BravoMateo.png"],
-      category: "אלקטרוניקה",
-      title: "MacBook Group 2",
-      participants: [
-        {
-          image: "https://i.pravatar.cc/150?img=3",
-          name: "רועי ישראלי",
-          mail: "roi@example.com",
-        },
-      ],
-      price: 6200,
-      numberOfParticipants: 1,
-      deadline: new Date("2025-09-20T23:59:59Z"),
-    },
-    {
-      id: "iphone-group-1",
-      images: ["/BravoMateo.png", "https://picsum.photos/seed/phone2/400/300"],
-      category: "סמארטפונים",
-      title: "iPhone Group 1",
-      participants: [
-        {
-          image: "https://i.pravatar.cc/150?img=4",
-          name: "שירה בן דוד",
-          mail: "shira@example.com",
-        },
-      ],
-      price: 4890,
-      numberOfParticipants: 1,
-      deadline: new Date("2025-09-12T20:00:00Z"),
-    },
-    {
-      id: "sony-group-1",
-      images: ["/BravoMateo.png", "https://picsum.photos/seed/headphones2/400/300"],
-      category: "אודיו",
-      title: "Sony Group 1",
-      participants: [
-        {
-          image: "https://i.pravatar.cc/150?img=6",
-          name: "יעל פרידמן",
-          mail: "yael@example.com",
-        },
-        {
-          image: "https://i.pravatar.cc/150?img=7",
-          name: "דניאל לוין",
-          mail: "daniel@example.com",
-        },
-      ],
-      price: 1290,
-      numberOfParticipants: 2,
-      deadline: new Date("2025-09-05T18:00:00Z"),
-    },
-  ];
+  {
+    id: "macbook-group-1",
+    images: ["/BravoMateo.png", "https://picsum.photos/seed/laptop2/400/300"],
+    category: "אלקטרוניקה",
+    title: "MacBook Group 1",
+    participants: [
+      {
+        image: "https://i.pravatar.cc/150?img=1",
+        name: "דנה לוי",
+        mail: "dana@example.com",
+      },
+      {
+        image: "https://i.pravatar.cc/150?img=2",
+        name: "אורי כהן",
+        mail: "uri@example.com",
+      },
+    ],
+    price: 6200,
+    numberOfParticipants: 2,
+    deadline: new Date("2025-09-15T23:59:59Z"),
+  },
+  {
+    id: "macbook-group-2",
+    images: ["/BravoMateo.png"],
+    category: "אלקטרוניקה",
+    title: "MacBook Group 2",
+    participants: [
+      {
+        image: "https://i.pravatar.cc/150?img=3",
+        name: "רועי ישראלי",
+        mail: "roi@example.com",
+      },
+    ],
+    price: 6200,
+    numberOfParticipants: 1,
+    deadline: new Date("2025-09-20T23:59:59Z"),
+  },
+  {
+    id: "iphone-group-1",
+    images: ["/BravoMateo.png", "https://picsum.photos/seed/phone2/400/300"],
+    category: "סמארטפונים",
+    title: "iPhone Group 1",
+    participants: [
+      {
+        image: "https://i.pravatar.cc/150?img=4",
+        name: "שירה בן דוד",
+        mail: "shira@example.com",
+      },
+    ],
+    price: 4890,
+    numberOfParticipants: 1,
+    deadline: new Date("2025-09-12T20:00:00Z"),
+  },
+  {
+    id: "sony-group-1",
+    images: [
+      "/BravoMateo.png",
+      "https://picsum.photos/seed/headphones2/400/300",
+    ],
+    category: "אודיו",
+    title: "Sony Group 1",
+    participants: [
+      {
+        image: "https://i.pravatar.cc/150?img=6",
+        name: "יעל פרידמן",
+        mail: "yael@example.com",
+      },
+      {
+        image: "https://i.pravatar.cc/150?img=7",
+        name: "דניאל לוין",
+        mail: "daniel@example.com",
+      },
+    ],
+    price: 1290,
+    numberOfParticipants: 2,
+    deadline: new Date("2025-09-05T18:00:00Z"),
+  },
+];
+
+export const mockCompanies: Company[] = [
+  {
+    id: "1",
+    logo: "/BravoMateo.png",
+    title: "אלפא טק",
+    subTitle: "חדשנות טכנולוגית",
+    categories: ["טכנולוגיה", "בינה מלאכותית"],
+    url: "https://alpha-tech.co.il",
+  },
+  {
+    id: "2",
+    logo: "/BravoMateo.png",
+    title: "בטא פתרונות",
+    subTitle: "שותף עסקי אמין",
+    categories: ["ייעוץ", "פיננסים"],
+    url: "https://beta-solutions.co.il",
+  },
+  {
+    id: "3",
+    logo: "/BravoMateo.png",
+    title: "מוחות קריאטיביים",
+    subTitle: "שיווק ועיצוב",
+    categories: ["שיווק", "עיצוב"],
+    url: "https://creative-minds.co.il",
+  },
+  {
+    id: "4",
+    logo: "/BravoMateo.png",
+    title: "דלטה הבריאותית",
+    subTitle: "בריאות לעתיד",
+    categories: ["בריאות", "ביוטק"],
+    url: "https://delta-health.co.il",
+  },
+  {
+    id: "5",
+    logo: "/BravoMateo.png",
+    title: "אקואנרגיה",
+    subTitle: "אנרגיה בת קיימא",
+    categories: ["אנרגיה", "טכנולוגיות ירוקות"],
+    url: "https://eco-energy.co.il",
+  },
+];

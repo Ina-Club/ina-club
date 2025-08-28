@@ -2,7 +2,7 @@ import { mockActiveGroups, mockRequestGroups } from "lib/mock";
 import SectionWrapper from "./section-wrapper";
 import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
 import { Box } from "@mui/material";
-import ActiveGroupCard from "../active-group-card";
+import ActiveGroupCard from "../card/active-group-card";
 
 interface GroupSectionWrapperProps {}
 

@@ -1,4 +1,3 @@
-
 export interface RequestGroup {
   images: string[];
   category: string;
@@ -14,12 +13,21 @@ export interface User {
 }
 
 export interface ActiveGroup {
-    id: string;
-    images: string[];
-    category: string;
-    title: string;
-    participants: User[];
-    price: number;
-    numberOfParticipants: number;
-    deadline: Date; // ⬅️ new field
-  }
+  id: string;
+  images: string[];
+  category: string;
+  title: string;
+  participants: User[];
+  price: number;
+  numberOfParticipants: number;
+  deadline: Date; // ⬅️ new field
+}
+
+export interface Company {
+  id: string;
+  logo: string;
+  title: string;
+  subTitle: string;
+  categories: string[];
+  url: string;
+}

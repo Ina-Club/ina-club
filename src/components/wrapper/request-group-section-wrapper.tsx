@@ -3,7 +3,7 @@
 import { mockRequestGroups } from "lib/mock";
 import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
 import { Box } from "@mui/material";
-import RequestGroupCard from "../request-group-card";
+import RequestGroupCard from "../card/request-group-card";
 import SectionWrapper from "./section-wrapper";
 
 interface RequestGroupSectionWrapperProps {}

@@ -1,6 +1,8 @@
+import CompanyCard from "@/components/card/compant-card";
 import { Hero } from "@/components/hero";
 import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
 import ActiveGroupSectionWrapper from "@/components/wrapper/active-group-section-wrapper";
+import CompanySectionWrapper from "@/components/wrapper/company-section-erapper";
 import RequestGroupSectionWrapper from "@/components/wrapper/request-group-section-wrapper";
 import { Box, Container } from "@mui/material";
 import { Suspense } from "react";
@@ -36,6 +38,15 @@ export default function Page() {
           </Suspense>
         </Container>
       </Box>
+      <Container
+        sx={{
+          px: { xs: "17px", md: "0px" },
+        }}
+      >
+        <Suspense fallback={<CompanySectionWrapper />}>
+          <CompanySectionWrapper />
+        </Suspense>
+      </Container>
     </>
   );
 }

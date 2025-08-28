@@ -4,10 +4,10 @@ import { mockRequestGroups } from "lib/mock";
 import { Box, Container, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { PageBanner } from "@/components/page-banner";
-import RequestGroupCard from "@/components/request-group-card";
 import { RequestGroupFilters } from "@/components/request-group-filters"
 import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
 import { useState } from "react";
+import RequestGroupCard from "@/components/card/request-group-card";
 
 export default function Page() {
   const requestGroups = mockRequestGroups.concat(mockRequestGroups);
