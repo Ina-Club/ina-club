@@ -1,14 +1,14 @@
-import { mockRequestGroups } from "lib/mock";
+import { mockActiveGroups, mockRequestGroups } from "lib/mock";
 import SectionWrapper from "./section-wrapper";
 import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
-import RequestGroupCard from "../request-group-card";
 import { Box } from "@mui/material";
+import ActiveGroupCard from "../active-group-card";
 
 interface GroupSectionWrapperProps {}
 
 const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
   //TODO: REMOVE mock
-  const requestGroups = mockRequestGroups.concat(mockRequestGroups);
+  const allOpenedGroupsWithParent = mockActiveGroups.concat(mockActiveGroups);
 
   return (
     <>
@@ -19,7 +19,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
         linkUrl={`/requestGroups`}
       >
         <ResponsiveHorizontalListWrapper gap="16px">
-          {requestGroups.map((requestGroup, index) => (
+          {allOpenedGroupsWithParent.map((activeGroup, index) => (
             <Box
               key={index}
               sx={{
@@ -28,7 +28,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
                 height: "100%",
               }}
             >
-              <RequestGroupCard requestGroup={requestGroup} />
+              <ActiveGroupCard activeGroup={activeGroup} />
             </Box>
           ))}
         </ResponsiveHorizontalListWrapper>

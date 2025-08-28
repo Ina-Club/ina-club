@@ -28,17 +28,6 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({
   const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
 
-  const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % requestGroup.images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImage(
-      (prev) =>
-        (prev - 1 + requestGroup.images.length) % requestGroup.images.length
-    );
-  };
-
   return (
     <Card
       sx={{

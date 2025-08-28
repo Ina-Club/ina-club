@@ -1,4 +1,3 @@
-import { Group } from "next/dist/shared/lib/router/utils/route-regex";
 
 export interface RequestGroup {
   images: string[];
