@@ -4,7 +4,7 @@ import { mockRequestGroups } from "lib/mock";
 import { Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
-import { RequestGroupFilters } from "@/components/request-group-filters";
+import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
 
@@ -59,7 +59,7 @@ export default function Page() {
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <RequestGroupFilters mode="trigger" />
+          <GroupFilters mode="trigger" />
         </Box>
       </Box>
 
@@ -76,7 +76,7 @@ export default function Page() {
       >
         {/* Desktop sidebar filters */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <RequestGroupFilters />
+          <GroupFilters />
         </Box>
 
         {/* Cards grid */}

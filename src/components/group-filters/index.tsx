@@ -4,15 +4,15 @@ import {
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useState } from "react";
-import { Filters } from "@/components/request-group-filters/filters";
+import { Filters } from "@/components/group-filters/filters";
 
 type Mode = "sidebar" | "trigger";
 
-interface RequestGroupFiltersProps {
+interface GroupFiltersProps {
   mode?: Mode; // default: "sidebar"
 }
 
-export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ mode = "sidebar" }) => {
+export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar" }) => {
   const [open, setOpen] = useState(false);
 
   if (mode === "trigger") {
