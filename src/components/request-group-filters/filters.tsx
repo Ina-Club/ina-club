@@ -55,14 +55,10 @@ const OptionItem = styled(MenuItem)(({ theme }) => ({
   color: theme.palette.text.secondary,
   paddingTop: 4,
   paddingBottom: 4,
-  // ensure override wins
-  "&&.Mui-selected": {
-    fontWeight: 700,
+  "&.Mui-selected": {
+    fontWeight: "bold",
     color: theme.palette.text.primary,
-  },
-  "&&.Mui-selected.Mui-focusVisible": {
-    fontWeight: 700,
-    color: theme.palette.text.primary,
+    backgroundColor: "white"
   },
 }));
 
