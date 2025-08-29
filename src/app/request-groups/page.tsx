@@ -60,6 +60,7 @@ export default function Page() {
               xs: "1fr",        // 1 column on mobile
               md: "repeat(3, 1fr)", // 3 columns on desktop
             },
+            width: "100%",
             px: { xs: 2, md: 2 },
             position: "inherit",
             justifyContent: "center",
