@@ -73,9 +73,9 @@ export const Filters: React.FC<FiltersProps> = () => {
   const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
   const locationList: string[] = ["צפון", "מרכז", "דרום"];
   const popularityList: string[] = ["פופולרי", "חדש"];
-  const [category, setCategory] = useState<string[]>([]);
-  const [location, setLocation] = useState<string[]>([]);
-  const [popularity, setPopularity] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedPopularities, setSelectedPopularities] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10_000]);
 
   return (
@@ -95,15 +95,15 @@ export const Filters: React.FC<FiltersProps> = () => {
             component="span"
             sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
           >
-            {category.length > 0 ? '(' + category.length + ')' : "הכל"}
+            {selectedCategories.length > 0 ? '(' + selectedCategories.length + ')' : "הכל"}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {categoryList.map((opt) => (
             <OptionItem
               key={opt}
-              onClick={() => toggleVariable(setCategory, opt)}
-              selected={category.includes(opt)}
+              onClick={() => toggleVariable(setSelectedCategories, opt)}
+              selected={selectedCategories.includes(opt)}
             >
               {opt}
             </OptionItem>
@@ -120,15 +120,15 @@ export const Filters: React.FC<FiltersProps> = () => {
             component="span"
             sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
           >
-            {location.length > 0 ? '(' + location.length + ')' : "הכל"}
+            {selectedLocations.length > 0 ? '(' + selectedLocations.length + ')' : "הכל"}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {locationList.map((opt) => (
             <OptionItem
               key={opt}
-              onClick={() => toggleVariable(setLocation, opt)}
-              selected={location.includes(opt)}
+              onClick={() => toggleVariable(setSelectedLocations, opt)}
+              selected={selectedLocations.includes(opt)}
             >
               {opt}
             </OptionItem>
@@ -145,15 +145,15 @@ export const Filters: React.FC<FiltersProps> = () => {
             component="span"
             sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
           >
-            {popularity.length > 0 ? '(' + popularity.length + ')' : "הכל"}
+            {selectedPopularities.length > 0 ? '(' + selectedPopularities.length + ')' : "הכל"}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {popularityList.map((opt) => (
             <OptionItem
               key={opt}
-              onClick={() => toggleVariable(setPopularity, opt)}
-              selected={popularity.includes(opt)}
+              onClick={() => toggleVariable(setSelectedPopularities, opt)}
+              selected={selectedPopularities.includes(opt)}
             >
               {opt}
             </OptionItem>
