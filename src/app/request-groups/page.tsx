@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { mockRequestGroups } from "lib/mock";
 import { Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -11,6 +11,18 @@ import RequestGroupCard from "@/components/card/request-group-card";
 export default function Page() {
   const requestGroups = mockRequestGroups.concat(mockRequestGroups);
   const [searchText, setSearchText] = useState("");
+
+  // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
+  // useEffect(() => {
+  //   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  //     event.preventDefault();
+  //   };
+
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, []);
 
   return (
     <>
