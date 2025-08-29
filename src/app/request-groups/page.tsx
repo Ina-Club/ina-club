@@ -3,12 +3,14 @@ import { Suspense, useState, useEffect } from "react";
 import { mockRequestGroups } from "lib/mock";
 import { Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { PageBanner } from "@/components/page-banner";
+import { DefaultPageBanner } from "@/components/default-page-banner";
 import { RequestGroupFilters } from "@/components/request-group-filters";
 import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
 
 export default function Page() {
+  const headerText: string = "כל הבקשות";
+  const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
   const requestGroups = mockRequestGroups.concat(mockRequestGroups);
   const [searchText, setSearchText] = useState("");
 
@@ -26,7 +28,7 @@ export default function Page() {
 
   return (
     <>
-      <PageBanner />
+      <DefaultPageBanner header={headerText} description={descriptionText}/>
       {/* Top bar: Search + (mobile) Filters trigger */}
       <Box
         sx={{
@@ -49,7 +51,7 @@ export default function Page() {
           <InputBase
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder={searchText === "" ? "חפש בקשות..." : ""}
+            placeholder={searchText === "" ? "חיפוש בקשות..." : ""}
             inputProps={{ "aria-label": "search" }}
             sx={{ width: "100%" }}
           />
