@@ -1,7 +1,12 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 
-export const PageBanner: React.FC = () => {
+interface DefaultPageBannerProps {
+  header: string;
+  description: string;
+}
+
+export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({ header, description }) => {
   return (
     <Box
       component="section"
@@ -70,7 +75,7 @@ export const PageBanner: React.FC = () => {
             color: "#1a2a5a",
           }}
         >
-          כל הבקשות
+          {header}
         </Typography>
         <Typography
           variant="h5"
@@ -81,7 +86,7 @@ export const PageBanner: React.FC = () => {
             direction: "ltr"
           }}
         >
-          גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.
+          {description}
         </Typography>
       </Box>
     </Box>
