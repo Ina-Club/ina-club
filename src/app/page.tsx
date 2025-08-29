@@ -1,6 +1,6 @@
 import CompanyCard from "@/components/card/compant-card";
 import { Hero } from "@/components/hero";
-import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
+import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import ActiveGroupSectionWrapper from "@/components/wrapper/active-group-section-wrapper";
 import CompanySectionWrapper from "@/components/wrapper/company-section-erapper";
 import RequestGroupSectionWrapper from "@/components/wrapper/request-group-section-wrapper";
@@ -16,7 +16,7 @@ export default function Page() {
           px: { xs: "17px", md: "0px" },
         }}
       >
-        <Suspense fallback={<RequestGroupSectionSkeleton />}>
+        <Suspense fallback={<GroupSectionSkeleton />}>
           <RequestGroupSectionWrapper />
         </Suspense>
       </Container>

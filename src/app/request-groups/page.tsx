@@ -5,7 +5,7 @@ import { Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { RequestGroupFilters } from "@/components/request-group-filters";
-import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
+import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
 
 export default function Page() {
@@ -92,7 +92,7 @@ export default function Page() {
             gap: { xs: 3, md: 2 },
           }}
         >
-          <Suspense fallback={<RequestGroupSectionSkeleton />}>
+          <Suspense fallback={<GroupSectionSkeleton />}>
             {requestGroups.map((requestGroup, index) => (
               <RequestGroupCard key={index} requestGroup={requestGroup} />
             ))}

@@ -1,17 +1,17 @@
 'use client';
 import { Suspense, useState, useEffect } from "react";
-import { mockRequestGroups } from "lib/mock";
+import { mockActiveGroups } from "lib/mock";
 import { Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { RequestGroupFilters } from "@/components/request-group-filters";
-import RequestGroupSectionSkeleton from "@/components/skeleton/request-group-section-skeleton";
-import RequestGroupCard from "@/components/card/request-group-card";
+import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
+import ActiveGroupCard from "@/components/card/active-group-card";
 
 export default function Page() {
   const headerText: string = "קבוצות הרכישה הפעילות";
   const descriptionText: string = "בעמוד זה חברות מציגות את ההצעות והבקשות שלהן, כדי לאפשר ללקוחות להצטרף לרכישות קבוצתיות וליהנות ממחירים משתלמים.";
-  const requestGroups = mockRequestGroups.concat(mockRequestGroups);
+  const activeGroups = mockActiveGroups.concat(mockActiveGroups);
   const [searchText, setSearchText] = useState("");
 
   // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
@@ -92,9 +92,9 @@ export default function Page() {
             gap: { xs: 3, md: 2 },
           }}
         >
-          <Suspense fallback={<RequestGroupSectionSkeleton />}>
-            {requestGroups.map((requestGroup, index) => (
-              <RequestGroupCard key={index} requestGroup={requestGroup} />
+          <Suspense fallback={<GroupSectionSkeleton />}>
+            {activeGroups.map((activeGroup, index) => (
+              <ActiveGroupCard key={index} activeGroup={activeGroup} />
             ))}
           </Suspense>
         </Box>
