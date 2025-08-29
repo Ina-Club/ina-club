@@ -22,7 +22,7 @@ export const RequestGroupFilters: React.FC<RequestGroupFiltersProps> = ({ mode =
         <IconButton aria-label="open filters" onClick={() => setOpen(true)}>
           <FilterListIcon />
         </IconButton>
-        <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
+        <Dialog open={open} onClose={() => setOpen(false)} fullWidth keepMounted>
           <DialogTitle>מסננים</DialogTitle>
           <DialogContent>
             <Filters />
