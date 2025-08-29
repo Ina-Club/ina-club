@@ -51,7 +51,7 @@ export default function Page() {
           <InputBase
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder={searchText === "" ? "חפש בקשות..." : ""}
+            placeholder={searchText === "" ? "חיפוש בקשות..." : ""}
             inputProps={{ "aria-label": "search" }}
             sx={{ width: "100%" }}
           />
