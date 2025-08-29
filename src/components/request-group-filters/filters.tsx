@@ -17,7 +17,7 @@ import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import { useState } from "react";
 import PriceRangeFilter from "./price-range-filter";
 
-interface FiltersProps {}
+interface FiltersProps { }
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -41,9 +41,9 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
     fontWeight: 500,
   },
   [`& .${accordionSummaryClasses.expandIconWrapper}.${accordionSummaryClasses.expanded}`]:
-    {
-      transform: "rotate(90deg)",
-    },
+  {
+    transform: "rotate(90deg)",
+  },
 }));
 
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
@@ -55,13 +55,28 @@ const OptionItem = styled(MenuItem)(({ theme }) => ({
   color: theme.palette.text.secondary,
   paddingTop: 4,
   paddingBottom: 4,
+  // ensure override wins
+  "&&.Mui-selected": {
+    fontWeight: 700,
+    color: theme.palette.text.primary,
+  },
+  "&&.Mui-selected.Mui-focusVisible": {
+    fontWeight: 700,
+    color: theme.palette.text.primary,
+  },
 }));
 
 export const Filters: React.FC<FiltersProps> = () => {
-  const [category, setCategory] = useState("בחר");
+  const [category, setCategory] = useState<string[]>([]);
   const [location, setLocation] = useState("בחר");
   const [popularity, setPopularity] = useState("בחר");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10_000]);
+
+  const toggleCategory = (opt: string) => {
+    setCategory(prev =>
+      prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev, opt]
+    );
+  };
 
   return (
     <Box
@@ -76,18 +91,20 @@ export const Filters: React.FC<FiltersProps> = () => {
       <Accordion defaultExpanded>
         <AccordionSummary>
           <Typography component="span">קטגוריה</Typography>
-          {category !== "בחר" && (
-            <Typography
-              component="span"
-              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
-            >
-              {category}
-            </Typography>
-          )}
+          <Typography
+            component="span"
+            sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+          >
+            {category.length > 0 ? '(' + category.length + ')' : "הכל"}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {["אלקטרוניקה", "ביגוד", "מזון"].map((opt) => (
-            <OptionItem key={opt} onClick={() => setCategory(opt)}>
+            <OptionItem
+              key={opt}
+              onClick={() => toggleCategory(opt)}
+              selected={category.includes(opt)}
+            >
               {opt}
             </OptionItem>
           ))}
