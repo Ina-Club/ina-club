@@ -1,7 +1,6 @@
 import {
   Box,
   MenuItem,
-  Slider,
   Typography,
   styled,
   Divider,
@@ -69,7 +68,11 @@ export function toggleVariable<T>(
   setVariable(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
 }
 
+// TODO: Receive prop of should display price slider or not.
 export const Filters: React.FC<FiltersProps> = () => {
+  const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
+  const locationList: string[] = ["צפון", "מרכז", "דרום"];
+  const popularityList: string[] = ["פופולרי", "חדש"];
   const [category, setCategory] = useState<string[]>([]);
   const [location, setLocation] = useState<string[]>([]);
   const [popularity, setPopularity] = useState<string[]>([]);
@@ -96,7 +99,7 @@ export const Filters: React.FC<FiltersProps> = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {["אלקטרוניקה", "ביגוד", "מזון"].map((opt) => (
+          {categoryList.map((opt) => (
             <OptionItem
               key={opt}
               onClick={() => toggleVariable(setCategory, opt)}
@@ -121,7 +124,7 @@ export const Filters: React.FC<FiltersProps> = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {["צפון", "מרכז", "דרום"].map((opt) => (
+          {locationList.map((opt) => (
             <OptionItem
               key={opt}
               onClick={() => toggleVariable(setLocation, opt)}
@@ -146,7 +149,7 @@ export const Filters: React.FC<FiltersProps> = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {["פופולרי", "חדש"].map((opt) => (
+          {popularityList.map((opt) => (
             <OptionItem
               key={opt}
               onClick={() => toggleVariable(setPopularity, opt)}
