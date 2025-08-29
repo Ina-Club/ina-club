@@ -66,17 +66,18 @@ const OptionItem = styled(MenuItem)(({ theme }) => ({
   },
 }));
 
+export function toggleVariable<T>(
+  setVariable: React.Dispatch<React.SetStateAction<T[]>>,
+  value: T
+) {
+  setVariable(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
+}
+
 export const Filters: React.FC<FiltersProps> = () => {
   const [category, setCategory] = useState<string[]>([]);
   const [location, setLocation] = useState("בחר");
   const [popularity, setPopularity] = useState("בחר");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10_000]);
-
-  const toggleCategory = (opt: string) => {
-    setCategory(prev =>
-      prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev, opt]
-    );
-  };
 
   return (
     <Box
@@ -102,7 +103,7 @@ export const Filters: React.FC<FiltersProps> = () => {
           {["אלקטרוניקה", "ביגוד", "מזון"].map((opt) => (
             <OptionItem
               key={opt}
-              onClick={() => toggleCategory(opt)}
+              onClick={() => toggleVariable(setCategory, opt)}
               selected={category.includes(opt)}
             >
               {opt}
