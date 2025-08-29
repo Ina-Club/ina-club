@@ -75,8 +75,8 @@ export function toggleVariable<T>(
 
 export const Filters: React.FC<FiltersProps> = () => {
   const [category, setCategory] = useState<string[]>([]);
-  const [location, setLocation] = useState("בחר");
-  const [popularity, setPopularity] = useState("בחר");
+  const [location, setLocation] = useState<string[]>([]);
+  const [popularity, setPopularity] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10_000]);
 
   return (
@@ -117,18 +117,20 @@ export const Filters: React.FC<FiltersProps> = () => {
       <Accordion>
         <AccordionSummary>
           <Typography component="span">מיקום</Typography>
-          {location !== "בחר" && (
-            <Typography
-              component="span"
-              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
-            >
-              {location}
-            </Typography>
-          )}
+          <Typography
+            component="span"
+            sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+          >
+            {location.length > 0 ? '(' + location.length + ')' : "הכל"}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {["צפון", "מרכז", "דרום"].map((opt) => (
-            <OptionItem key={opt} onClick={() => setLocation(opt)}>
+            <OptionItem
+              key={opt}
+              onClick={() => toggleVariable(setLocation, opt)}
+              selected={location.includes(opt)}
+            >
               {opt}
             </OptionItem>
           ))}
@@ -140,18 +142,20 @@ export const Filters: React.FC<FiltersProps> = () => {
       <Accordion>
         <AccordionSummary>
           <Typography component="span">פופולריות</Typography>
-          {popularity !== "בחר" && (
-            <Typography
-              component="span"
-              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
-            >
-              {popularity}
-            </Typography>
-          )}
+          <Typography
+            component="span"
+            sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+          >
+            {popularity.length > 0 ? '(' + popularity.length + ')' : "הכל"}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {["הכול", "פופולרי", "חדש"].map((opt) => (
-            <OptionItem key={opt} onClick={() => setPopularity(opt)}>
+          {["פופולרי", "חדש"].map((opt) => (
+            <OptionItem
+              key={opt}
+              onClick={() => toggleVariable(setPopularity, opt)}
+              selected={popularity.includes(opt)}
+            >
               {opt}
             </OptionItem>
           ))}
