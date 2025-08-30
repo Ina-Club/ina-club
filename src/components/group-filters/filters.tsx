@@ -70,7 +70,7 @@ export function toggleVariable<T>(
 interface FiltersProps {
   group: GroupType // There is no default
 }
-// TODO: Receive prop of should display price slider or not.
+
 export const Filters: React.FC<FiltersProps> = ({ group }) => {
   const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
   const locationList: string[] = ["צפון", "מרכז", "דרום"];
