@@ -59,7 +59,7 @@ export default function Page() {
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" />
+          <GroupFilters mode="trigger" group="request"/>
         </Box>
       </Box>
 
@@ -76,7 +76,7 @@ export default function Page() {
       >
         {/* Desktop sidebar filters */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <GroupFilters />
+          <GroupFilters mode="sidebar" group="request"/>
         </Box>
 
         {/* Cards grid */}

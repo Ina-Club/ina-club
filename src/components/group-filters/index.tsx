@@ -7,12 +7,14 @@ import { useState } from "react";
 import { Filters } from "@/components/group-filters/filters";
 
 type Mode = "sidebar" | "trigger";
+export type GroupType = "request" | "active";
 
 interface GroupFiltersProps {
   mode?: Mode; // default: "sidebar"
+  group: GroupType // There is no default
 }
 
-export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar" }) => {
+export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar", group }) => {
   const [open, setOpen] = useState(false);
 
   if (mode === "trigger") {
@@ -25,7 +27,7 @@ export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar" }) 
         <Dialog open={open} onClose={() => setOpen(false)} fullWidth keepMounted>
           <DialogTitle>מסננים</DialogTitle>
           <DialogContent>
-            <Filters />
+            <Filters group={group}/>
           </DialogContent>
           <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
             <Button onClick={() => setOpen(false)}>סגור</Button>
@@ -52,7 +54,7 @@ export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar" }) 
     >
       <Box>
         <Typography variant="h6" component="span">מסננים</Typography>
-        <Filters />
+        <Filters group={group}/>
       </Box>
     </Box>
   );

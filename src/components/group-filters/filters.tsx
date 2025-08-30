@@ -15,8 +15,7 @@ import MuiAccordionSummary, {
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import { useState } from "react";
 import PriceRangeFilter from "./price-range-filter";
-
-interface FiltersProps { }
+import { GroupType } from "./index";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -68,8 +67,11 @@ export function toggleVariable<T>(
   setVariable(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
 }
 
+interface FiltersProps {
+  group: GroupType // There is no default
+}
 // TODO: Receive prop of should display price slider or not.
-export const Filters: React.FC<FiltersProps> = () => {
+export const Filters: React.FC<FiltersProps> = ({ group }) => {
   const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
   const locationList: string[] = ["צפון", "מרכז", "דרום"];
   const popularityList: string[] = ["פופולרי", "חדש"];
@@ -160,28 +162,32 @@ export const Filters: React.FC<FiltersProps> = () => {
           ))}
         </AccordionDetails>
       </Accordion>
-      <Divider />
 
       {/* מחיר */}
-      <Accordion defaultExpanded>
-        <AccordionSummary>
-          <Typography component="span">מחיר</Typography>
-          {priceRange && (
-            <Typography
-              component="span"
-              sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
-            >
-              {priceRange[0]}₪ - {priceRange[1]}₪
-            </Typography>
-          )}
-        </AccordionSummary>
-        <AccordionDetails>
-          <PriceRangeFilter
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-          />
-        </AccordionDetails>
-      </Accordion>
+      {group === "active" && (
+        <>
+          <Divider />
+          <Accordion defaultExpanded>
+            <AccordionSummary>
+              <Typography component="span">מחיר</Typography>
+              {priceRange && (
+                <Typography
+                  component="span"
+                  sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
+                >
+                  {priceRange[0]}₪ - {priceRange[1]}₪
+                </Typography>
+              )}
+            </AccordionSummary>
+            <AccordionDetails>
+              <PriceRangeFilter
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+              />
+            </AccordionDetails>
+          </Accordion>
+        </>
+      )}
     </Box>
   );
 };
