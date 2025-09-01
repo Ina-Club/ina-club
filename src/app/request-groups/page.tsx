@@ -124,10 +124,15 @@ export default function Page() {
             ) : (
               <Box
                 sx={{
-                  gridColumn: "1 / -1",
-                  textAlign: "center",
-                  py: 4,
-                  color: "text.secondary"
+                  position: "absolute",
+                  left: "50%",
+                  width: "100%",
+                  transform: "translateX(-50%)",
+                  mt: { xs: 4, md: 2 }, // space below search bar
+                  display: "flex",
+                  justifyContent: "center",
+                  color: "text.secondary",
+                  textAlign: "center"
                 }}
               >
                 לא נמצאו בקשות התואמות לחיפוש שלך

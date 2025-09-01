@@ -34,7 +34,7 @@ export default function Page() {
 
   return (
     <>
-      <DefaultPageBanner header={headerText} description={descriptionText}/>
+      <DefaultPageBanner header={headerText} description={descriptionText} />
       {/* Top bar: Search + (mobile) Filters trigger */}
       <Box
         sx={{
@@ -83,7 +83,7 @@ export default function Page() {
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" group="active"/>
+          <GroupFilters mode="trigger" group="active" />
         </Box>
       </Box>
 
@@ -100,7 +100,7 @@ export default function Page() {
       >
         {/* Desktop sidebar filters */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <GroupFilters mode="sidebar" group="active"/>
+          <GroupFilters mode="sidebar" group="active" />
         </Box>
 
         {/* Cards grid */}
@@ -124,10 +124,15 @@ export default function Page() {
             ) : (
               <Box
                 sx={{
-                  gridColumn: "1 / -1",
-                  textAlign: "center",
-                  py: 4,
-                  color: "text.secondary"
+                  position: "absolute",
+                  left: "50%",
+                  width: "100%",
+                  transform: "translateX(-50%)",
+                  mt: { xs: 4, md: 2 }, // space below search bar
+                  display: "flex",
+                  justifyContent: "center",
+                  color: "text.secondary",
+                  textAlign: "center"
                 }}
               >
                 לא נמצאו קבוצות רכישה התואמות לחיפוש שלך
