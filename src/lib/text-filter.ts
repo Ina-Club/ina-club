@@ -8,6 +8,7 @@ export function filterByText<T extends ActiveGroup | RequestGroup>(items: T[], s
 
     const searchLowerTrimmed: string = searchText.toLowerCase().trim();
 
+    // TODO: Improve filters when card data is fully fetched from card object.
     return items.filter((item) => {
         if (item.title.toLowerCase().includes(searchLowerTrimmed)) {
             return true;
