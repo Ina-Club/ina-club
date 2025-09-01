@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { mockRequestGroups } from "lib/mock";
 import { Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -7,12 +7,18 @@ import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
+import { filterByText } from "lib/text-filter";
 
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
-  const requestGroups = mockRequestGroups.concat(mockRequestGroups);
+  const allRequestGroups = mockRequestGroups.concat(mockRequestGroups);
   const [searchText, setSearchText] = useState("");
+
+  // Filter request groups based on search text
+  const filteredRequestGroups = useMemo(() => {
+    return filterByText(allRequestGroups, searchText);
+  }, [allRequestGroups, searchText]);
 
   // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
   // useEffect(() => {
@@ -28,7 +34,7 @@ export default function Page() {
 
   return (
     <>
-      <DefaultPageBanner header={headerText} description={descriptionText}/>
+      <DefaultPageBanner header={headerText} description={descriptionText} />
       {/* Top bar: Search + (mobile) Filters trigger */}
       <Box
         sx={{
@@ -55,11 +61,29 @@ export default function Page() {
             inputProps={{ "aria-label": "search" }}
             sx={{ width: "100%" }}
           />
+          {searchText && (
+            <Box
+              onClick={() => setSearchText("")}
+              sx={{
+                cursor: "pointer",
+                color: "text.secondary",
+                fontSize: "0.9rem",
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                "&:hover": {
+                  bgcolor: "grey.100"
+                }
+              }}
+            >
+              נקה
+            </Box>
+          )}
         </Box>
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" group="request"/>
+          <GroupFilters mode="trigger" group="request" />
         </Box>
       </Box>
 
@@ -76,7 +100,7 @@ export default function Page() {
       >
         {/* Desktop sidebar filters */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <GroupFilters mode="sidebar" group="request"/>
+          <GroupFilters mode="sidebar" group="request" />
         </Box>
 
         {/* Cards grid */}
@@ -93,9 +117,22 @@ export default function Page() {
           }}
         >
           <Suspense fallback={<GroupSectionSkeleton />}>
-            {requestGroups.map((requestGroup, index) => (
-              <RequestGroupCard key={index} requestGroup={requestGroup} />
-            ))}
+            {filteredRequestGroups.length > 0 ? (
+              filteredRequestGroups.map((requestGroup, index) => (
+                <RequestGroupCard key={index} requestGroup={requestGroup} />
+              ))
+            ) : (
+              <Box
+                sx={{
+                  gridColumn: "1 / -1",
+                  textAlign: "center",
+                  py: 4,
+                  color: "text.secondary"
+                }}
+              >
+                לא נמצאו בקשות התואמות לחיפוש שלך
+              </Box>
+            )}
           </Suspense>
         </Box>
       </Box>
