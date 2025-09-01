@@ -43,7 +43,7 @@ export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar", gr
       component="section"
       sx={{
         display: "flex",
-        width: 400,
+        width: 275,
         bgcolor: "white",
         boxShadow: 3,
         borderRadius: 2,
