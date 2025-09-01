@@ -6,7 +6,7 @@ export function filterByText<T extends ActiveGroup | RequestGroup>(items: T[], s
         return items;
     }
 
-    const searchLowerTrimmed = searchText.toLowerCase().trim();
+    const searchLowerTrimmed: string = searchText.toLowerCase().trim();
 
     return items.filter((item) => {
         if (item.title.toLowerCase().includes(searchLowerTrimmed)) {
@@ -36,15 +36,15 @@ export function filterByText<T extends ActiveGroup | RequestGroup>(items: T[], s
             }
 
             // Search in countdown text (days, hours, minutes in Hebrew)
-            const now = new Date().getTime();
-            const end = new Date(activeGroup.deadline).getTime();
-            const diff = end - now;
+            const now: number = new Date().getTime();
+            const end: number = new Date(activeGroup.deadline).getTime();
+            const diff: number = end - now;
 
             if (diff > 0) {
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const minutes = Math.floor((diff / (1000 * 60)) % 60);
-                const seconds = Math.floor((diff / 1000) % 60);
+                const days: number = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours: number = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes: number = Math.floor((diff / (1000 * 60)) % 60);
+                const seconds: number = Math.floor((diff / 1000) % 60);
 
                 if (searchLowerTrimmed.includes('ימים') && days > 0) {
                     return true;
