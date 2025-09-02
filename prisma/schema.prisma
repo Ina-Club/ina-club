@@ -1,9 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// ----------------------------------------------------
+// Generators & datasource
+// ----------------------------------------------------
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,56 +11,186 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
-model RequestGroup {
-  id            String       @id @default(uuid())
-  images        String[]
-  category      Category?    @relation("RequestGroupCategory", fields: [categoryId], references: [id])
-  categoryId    String?
-  title         String
-  participants  User[]       @relation("RequestGroupParticipants")
-  openedGroups  ActiveGroup[]
+// ----------------------------------------------------
+// Enums
+// ----------------------------------------------------
+enum GroupStatus {
+  OPEN
+  CLOSED
+  CANCELED
+  EXPIRED
 }
 
+// ----------------------------------------------------
+// Core: User, Company, Category
+// ----------------------------------------------------
 model User {
-  id            String       @id @default(uuid())
-  image         String
-  name          String
-  mail          String       @unique
-  requestGroups RequestGroup[] @relation("RequestGroupParticipants")
-  activeGroups  ActiveGroup[]  @relation("ActiveGroupParticipants")
-}
+  id               String                     @id @default(uuid())
+  profilePicture   String?
+  name             String
+  email            String                     @unique
+  createdAt        DateTime                   @default(now())
 
-model ActiveGroup {
-  id                  String     @id @default(uuid())
-  images              String[]
-  category            Category?  @relation("ActiveGroupCategory", fields: [categoryId], references: [id])
-  categoryId          String?
-  title               String
-  participants        User[]     @relation("ActiveGroupParticipants")
-  price               Float
-  numberOfParticipants Int
-  deadline            DateTime
-  requestGroupId      String?
-  requestGroup        RequestGroup? @relation(fields: [requestGroupId], references: [id])
-  companyId           String?
-  company             Company?   @relation(fields: [companyId], references: [id])
+  // Participation
+  requestGroupMemberships RequestGroupParticipant[]
+  activeGroupMemberships  ActiveGroupParticipant[]
+
+  // Ownership
+  requestGroups    RequestGroup[]             @relation("RequestGroupOwners")
+  activeGroups     ActiveGroup[]              @relation("ActiveGroupOwners")
+
+  // Images
+  images           UserImage[]
 }
 
 model Company {
-  id         String     @id @default(uuid())
-  logo       String
-  title      String
-  subTitle   String
-  url        String
-  categories Category[] @relation("CompanyCategories")
-  activeGroups ActiveGroup[]
+  id            String        @id @default(uuid())
+  logo          String?
+  title         String
+  websiteUrl    String?       @unique
+  description   String?
+  phone         String?
+  email         String?
+  address       String?
+  city          String?
+  verified      Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  categories    Category[]    @relation("CompanyCategories")
+  activeGroups  ActiveGroup[]
 }
 
 model Category {
-  id        String        @id @default(uuid())
-  name      String        @unique
-  companies Company[]     @relation("CompanyCategories")
-  activeGroups ActiveGroup[] @relation("ActiveGroupCategory")
-  requestGroups RequestGroup[] @relation("RequestGroupCategory")
+  id             String         @id @default(uuid())
+  name           String         @unique
+
+  companies      Company[]      @relation("CompanyCategories")
+  activeGroups   ActiveGroup[]  @relation("ActiveGroupCategory")
+  requestGroups  RequestGroup[] @relation("RequestGroupCategory")
+}
+
+// ----------------------------------------------------
+// Images (ordered & reusable)
+// ----------------------------------------------------
+model Image {
+  id       String   @id @default(uuid())
+  url      String
+
+  // Relations
+  userImages         UserImage[]
+  requestGroupImages RequestGroupImage[]
+  activeGroupImages  ActiveGroupImage[]
+}
+
+// ----------------------------------------------------
+// Pivot tables for attaching images
+// ----------------------------------------------------
+model UserImage {
+  id       String   @id @default(uuid())
+  userId   String
+  imageId  String
+  order    Int?
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image    Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, imageId])
+}
+
+model RequestGroupImage {
+  id             String       @id @default(uuid())
+  requestGroupId String
+  imageId        String
+  order          Int?
+
+  requestGroup   RequestGroup @relation(fields: [requestGroupId], references: [id], onDelete: Cascade)
+  image          Image        @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([requestGroupId, imageId])
+}
+
+model ActiveGroupImage {
+  id            String      @id @default(uuid())
+  activeGroupId String
+  imageId       String
+  order         Int?
+
+  activeGroup   ActiveGroup @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+  image         Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([activeGroupId, imageId])
+}
+
+// ----------------------------------------------------
+// RequestGroup (pre-deal crowd intent)
+// ----------------------------------------------------
+model RequestGroup {
+  id               String        @id @default(uuid())
+  title            String
+  description      String?
+  status           GroupStatus   @default(OPEN)
+  categoryId       String?
+  category         Category?     @relation("RequestGroupCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt        DateTime      @default(now())
+  createdById      String?
+  createdBy        User?         @relation("RequestGroupOwners", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Relations
+  participants     RequestGroupParticipant[]
+  images           RequestGroupImage[]
+  activeGroups     ActiveGroup[]             @relation("RequestGroupToActiveGroup")
+}
+
+model RequestGroupParticipant {
+  id               String       @id @default(uuid())
+  userId           String
+  requestGroupId   String
+  joinedAt         DateTime     @default(now())
+
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestGroup     RequestGroup @relation(fields: [requestGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, requestGroupId])
+}
+
+// ----------------------------------------------------
+// ActiveGroup (live deal)
+// ----------------------------------------------------
+model ActiveGroup {
+  id                    String        @id @default(uuid())
+  title                 String
+  description           String?
+  status                GroupStatus   @default(OPEN)
+  categoryId            String?
+  category              Category?     @relation("ActiveGroupCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  basePrice             Float
+  groupPrice            Float
+  minParticipants       Int?
+  maxParticipants       Int?
+  deadline              DateTime
+  createdAt             DateTime      @default(now())
+  requestGroupId        String?
+  requestGroup          RequestGroup? @relation("RequestGroupToActiveGroup", fields: [requestGroupId], references: [id], onDelete: SetNull)
+  companyId             String?
+  company               Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdById           String?
+  createdBy             User?         @relation("ActiveGroupOwners", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Relations
+  participants          ActiveGroupParticipant[]
+  images                ActiveGroupImage[]
+}
+
+model ActiveGroupParticipant {
+  id              String          @id @default(uuid())
+  userId          String
+  activeGroupId   String
+  joinedAt        DateTime        @default(now())
+  lastPing        DateTime       
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeGroup     ActiveGroup     @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activeGroupId])
 }
