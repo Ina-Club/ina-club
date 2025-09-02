@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { mockActiveGroups } from "lib/mock";
 import { Box, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -7,12 +7,18 @@ import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import ActiveGroupCard from "@/components/card/active-group-card";
+import { filterByText } from "lib/text-filter";
 
 export default function Page() {
   const headerText: string = "קבוצות הרכישה הפעילות";
   const descriptionText: string = "בעמוד זה חברות מציגות את ההצעות והבקשות שלהן, כדי לאפשר ללקוחות להצטרף לרכישות קבוצתיות וליהנות ממחירים משתלמים.";
-  const activeGroups = mockActiveGroups.concat(mockActiveGroups);
+  const allActiveGroups = mockActiveGroups.concat(mockActiveGroups);
   const [searchText, setSearchText] = useState("");
+
+  // Filter active groups based on search text
+  const filteredActiveGroups = useMemo(() => {
+    return filterByText(allActiveGroups, searchText);
+  }, [allActiveGroups, searchText]);
 
   // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
   // useEffect(() => {
@@ -28,7 +34,7 @@ export default function Page() {
 
   return (
     <>
-      <DefaultPageBanner header={headerText} description={descriptionText}/>
+      <DefaultPageBanner header={headerText} description={descriptionText} />
       {/* Top bar: Search + (mobile) Filters trigger */}
       <Box
         sx={{
@@ -55,11 +61,29 @@ export default function Page() {
             inputProps={{ "aria-label": "search" }}
             sx={{ width: "100%" }}
           />
+          {searchText && (
+            <Box
+              onClick={() => setSearchText("")}
+              sx={{
+                cursor: "pointer",
+                color: "text.secondary",
+                fontSize: "0.9rem",
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                "&:hover": {
+                  bgcolor: "grey.100"
+                }
+              }}
+            >
+              נקה
+            </Box>
+          )}
         </Box>
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" group="active"/>
+          <GroupFilters mode="trigger" group="active" />
         </Box>
       </Box>
 
@@ -76,7 +100,7 @@ export default function Page() {
       >
         {/* Desktop sidebar filters */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <GroupFilters mode="sidebar" group="active"/>
+          <GroupFilters mode="sidebar" group="active" />
         </Box>
 
         {/* Cards grid */}
@@ -93,9 +117,27 @@ export default function Page() {
           }}
         >
           <Suspense fallback={<GroupSectionSkeleton />}>
-            {activeGroups.map((activeGroup, index) => (
-              <ActiveGroupCard key={index} activeGroup={activeGroup} />
-            ))}
+            {filteredActiveGroups.length > 0 ? (
+              filteredActiveGroups.map((activeGroup, index) => (
+                <ActiveGroupCard key={index} activeGroup={activeGroup} />
+              ))
+            ) : (
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: "50%",
+                  width: "100%",
+                  transform: "translateX(-50%)",
+                  mt: { xs: 4, md: 2 }, // space below search bar
+                  display: "flex",
+                  justifyContent: "center",
+                  color: "text.secondary",
+                  textAlign: "center"
+                }}
+              >
+                לא נמצאו קבוצות רכישה התואמות לחיפוש שלך
+              </Box>
+            )}
           </Suspense>
         </Box>
       </Box>
