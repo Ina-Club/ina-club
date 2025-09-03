@@ -1,4 +1,5 @@
 "use client";
+
 import {
   AppBar,
   Toolbar,
@@ -13,21 +14,24 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
-import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import AddIcon from "@mui/icons-material/Add";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import GroupIcon from "@mui/icons-material/Group";
-import SearchIcon from "@mui/icons-material/Search";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import {
+  Menu as MenuIcon,
+  AccountCircle as AccountCircleIcon,
+  Favorite as FavoriteIcon,
+  Add as AddIcon,
+  ShoppingBag as ShoppingBagIcon,
+  Group as GroupIcon,
+  Search as SearchIcon,
+  TrendingUp as TrendingUpIcon,
+} from "@mui/icons-material";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-
-const loggedIn = true;
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const navigationItems = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
@@ -49,19 +53,59 @@ export default function Header() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // NextAuth session
+  const { data: session } = useSession();
+  const loggedIn = !!session;
+
+  // Profile Menu
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
+    setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+
+  const profileMenuItems = loggedIn
+    ? [
+        <MenuItem
+          key="signout"
+          onClick={() => {
+            handleMenuClose();
+            signOut();
+          }}
+        >
+          Sign Out
+        </MenuItem>,
+      ]
+    : [
+        <MenuItem
+          key="signin"
+          onClick={() => {
+            handleMenuClose();
+            window.location.href = "/auth/signin";
+          }}
+        >
+          Sign In
+        </MenuItem>,
+        <MenuItem
+          key="signup"
+          onClick={() => {
+            handleMenuClose();
+            window.location.href = "/auth/signup";
+          }}
+        >
+          Sign Up
+        </MenuItem>,
+      ];
+
   return (
     <>
       <AppBar
         position="static"
-        sx={{
-          background: "#fff",
-          boxShadow: "0px 3px 10px rgba(0,0,0,0.2)",
-        }}
+        sx={{ background: "#fff", boxShadow: "0px 3px 10px rgba(0,0,0,0.2)" }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          {/* Right side (Logo + Tabs) */}
+          {/* Logo + Tabs */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* לוגו */}
             <Link href="/" style={{ display: "flex", alignItems: "center" }}>
               <Image
                 src="/InaClubLogo.png"
@@ -70,44 +114,36 @@ export default function Header() {
                 height={60}
               />
             </Link>
-
-            {/* ניווט מרכזי (רק בדסקטופ) */}
             <Tabs
               value={currentTab >= 0 ? currentTab : false}
               sx={{ display: { xs: "none", md: "flex" } }}
             >
-              {navigationItems.map((item, index) => {
-                const isActive = index === currentTab;
-                return (
-                  <Tab
-                    key={item.title}
-                    label={item.title}
-                    icon={<item.icon />}
-                    iconPosition="start"
-                    component={Link}
-                    href={item.href}
-                    sx={{
-                      textTransform: "none",
-                      fontSize: "0.875rem",
-                      fontWeight: 500,
-                      gap: 1,
-                      px: 2,
-                      py: 1,
-                      borderRadius: "1rem",
-                      transition: "all 0.2s",
-                      color: isActive ? "#1a2a5a" : "#1a2a5a",
-                      "&:hover": {
-                        color: "#1a2a5a",
-                        backgroundColor: "#f8fafc",
-                      },
-                    }}
-                  />
-                );
-              })}
+              {navigationItems.map((item, index) => (
+                <Tab
+                  key={item.title}
+                  label={item.title}
+                  icon={<item.icon />}
+                  iconPosition="start"
+                  component={Link}
+                  href={item.href}
+                  sx={{
+                    textTransform: "none",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    gap: 1,
+                    px: 2,
+                    py: 1,
+                    borderRadius: "1rem",
+                    transition: "all 0.2s",
+                    color: index === currentTab ? "#1a2a5a" : "#64748b",
+                    "&:hover": { color: "#1a2a5a", backgroundColor: "#f8fafc" },
+                  }}
+                />
+              ))}
             </Tabs>
           </Box>
 
-          {/* Left side */}
+          {/* Desktop Right Side */}
           <Box
             sx={{
               display: { xs: "none", md: "flex" },
@@ -115,9 +151,6 @@ export default function Header() {
               alignItems: "center",
             }}
           >
-            {/* מועדפים */}
-
-            {/* צור בקשה */}
             <Button
               component={Link}
               href="/create"
@@ -134,47 +167,46 @@ export default function Header() {
                 borderColor: "#1a2a5a",
               }}
             >
-              <AddIcon sx={{ ml: 1 }} />
-              צור בקשה
+              <AddIcon sx={{ ml: 1 }} /> צור בקשה
             </Button>
 
             <IconButton sx={{ color: "#64748b" }}>
               <FavoriteIcon />
             </IconButton>
 
-            {/* פרופיל */}
-            <IconButton sx={{ color: "#64748b" }}>
-              {loggedIn ? (
+            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+              {loggedIn && session?.user?.image ? (
                 <Image
-                  src="/InaclubAppLogo.png"
-                  alt="Ina Club App Logo"
+                  src={session.user.image}
+                  alt="Avatar"
                   width={40}
                   height={40}
+                  style={{ borderRadius: "50%" }}
+                  unoptimized // optional: bypass optimization if needed
                 />
               ) : (
-                <AccountCircleIcon />
+                <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
               )}
             </IconButton>
+
+            <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
+              {profileMenuItems}
+            </Menu>
           </Box>
 
-          {/* Mobile Menu Button */}
-          <Box
-            sx={{
-              display: { xs: "flex", md: "none" },
-              py: "12px",
-              justifyContent: "center",
-            }}
-          >
-            <IconButton sx={{ color: "#64748b" }}>
-              {loggedIn ? (
+          {/* Mobile Right Side */}
+          <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
+            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+              {loggedIn && session?.user?.image ? (
                 <Image
-                  src="/InaclubAppLogo.png"
-                  alt="Ina Club App Logo"
+                  src={session.user.image}
+                  alt="Avatar"
                   width={40}
                   height={40}
+                  style={{ borderRadius: "50%" }}
                 />
               ) : (
-                <AccountCircleIcon />
+                <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
               )}
             </IconButton>
             <IconButton
@@ -192,10 +224,15 @@ export default function Header() {
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        sx={{ "& .MuiDrawer-paper": { width: 250 } }}
       >
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          {/* Logo */}
+        <Box
+          sx={{
+            width: 250,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+          }}
+        >
           <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
             <Image
               src="/InaClubLogo.png"
@@ -204,8 +241,6 @@ export default function Header() {
               height={70}
             />
           </Box>
-
-          {/* צור בקשה - ממורכז */}
 
           <Divider>
             <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -223,39 +258,35 @@ export default function Header() {
                 }}
                 onClick={() => setDrawerOpen(false)}
               >
-                <AddIcon sx={{ ml: 1 }} />
-                צור בקשה
+                <AddIcon sx={{ ml: 1 }} /> צור בקשה
               </Button>
             </Box>
           </Divider>
 
-          {/* Navigation Links */}
           <List sx={{ flexGrow: 1 }}>
-            {mobileNavigationItems.map((item) => {
-              const isActive = item.href === pathname;
-              return (
-                <ListItemButton
-                  key={item.title}
-                  component={Link}
-                  href={item.href}
-                  onClick={() => setDrawerOpen(false)}
-                  sx={{
-                    color: isActive ? "#1a2a5a" : "#64748b",
-                    backgroundColor: isActive ? "#dbeafe" : "transparent",
-                    "&:hover": { backgroundColor: "#f8fafc" },
-                  }}
-                >
-                  <ListItemText
-                    dir="rtl"
-                    sx={{ textAlign: "start" }}
-                    primary={item.title}
-                  />
-                  <ListItemIcon dir="ltr">
-                    <item.icon />
-                  </ListItemIcon>
-                </ListItemButton>
-              );
-            })}
+            {mobileNavigationItems.map((item) => (
+              <ListItemButton
+                key={item.title}
+                component={Link}
+                href={item.href}
+                onClick={() => setDrawerOpen(false)}
+                sx={{
+                  color: item.href === pathname ? "#1a2a5a" : "#64748b",
+                  backgroundColor:
+                    item.href === pathname ? "#dbeafe" : "transparent",
+                  "&:hover": { backgroundColor: "#f8fafc" },
+                }}
+              >
+                <ListItemText
+                  dir="rtl"
+                  sx={{ textAlign: "start" }}
+                  primary={item.title}
+                />
+                <ListItemIcon dir="ltr">
+                  <item.icon />
+                </ListItemIcon>
+              </ListItemButton>
+            ))}
           </List>
         </Box>
       </Drawer>
