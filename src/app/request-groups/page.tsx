@@ -18,8 +18,7 @@ export default function Page() {
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
     locations: [],
-    popularities: [],
-    priceRange: [0, 10_000]
+    popularities: []
   });
 
   // Apply all filters (text + categories + future filters)

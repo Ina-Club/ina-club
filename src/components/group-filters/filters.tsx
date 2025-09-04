@@ -71,7 +71,7 @@ export interface FilterState {
   categories: string[];
   locations: string[];
   popularities: string[];
-  priceRange: [number, number]; // Required in active-groups only
+  priceRange?: [number, number]; // Required in active-groups only
 }
 
 interface FiltersProps {
@@ -89,7 +89,7 @@ export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterCh
     categories: [],
     locations: [],
     popularities: [],
-    priceRange: [0, 10_000]
+    ...(group === "active" ? { priceRange: [0, 10_000] } : {})
   });
 
   const effectiveFilterState = filterState ?? internalFilterState;
@@ -230,7 +230,7 @@ export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterCh
             </AccordionSummary>
             <AccordionDetails>
               <PriceRangeFilter
-                priceRange={effectiveFilterState.priceRange}
+                priceRange={effectiveFilterState.priceRange!}
                 setPriceRange={handlePriceRangeChange}
               />
             </AccordionDetails>
