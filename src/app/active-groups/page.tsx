@@ -7,18 +7,26 @@ import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import ActiveGroupCard from "@/components/card/active-group-card";
-import { filterByText } from "lib/text-filter";
+import { applyFilters } from "lib/filters";
+import { FilterState } from "@/components/group-filters/filters";
+import { ActiveGroup } from "lib/dal";
 
 export default function Page() {
   const headerText: string = "קבוצות הרכישה הפעילות";
   const descriptionText: string = "בעמוד זה חברות מציגות את ההצעות והבקשות שלהן, כדי לאפשר ללקוחות להצטרף לרכישות קבוצתיות וליהנות ממחירים משתלמים.";
-  const allActiveGroups = mockActiveGroups.concat(mockActiveGroups);
+  const allActiveGroups: ActiveGroup[] = mockActiveGroups.concat(mockActiveGroups);
   const [searchText, setSearchText] = useState("");
+  const [filterState, setFilterState] = useState<FilterState>({
+    categories: [],
+    locations: [],
+    popularities: [],
+    priceRange: [0, 10_000]
+  });
 
-  // Filter active groups based on search text
+  // Apply all filters (text + categories + price + future filters)
   const filteredActiveGroups = useMemo(() => {
-    return filterByText(allActiveGroups, searchText);
-  }, [allActiveGroups, searchText]);
+    return applyFilters(allActiveGroups, searchText, filterState);
+  }, [allActiveGroups, searchText, filterState]);
 
   // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
   // useEffect(() => {
@@ -83,7 +91,7 @@ export default function Page() {
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" group="active" />
+          <GroupFilters mode="trigger" group="active" filterState={filterState} onFilterChange={setFilterState} />
         </Box>
       </Box>
 
@@ -100,7 +108,7 @@ export default function Page() {
       >
         {/* Desktop sidebar filters */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <GroupFilters mode="sidebar" group="active" />
+          <GroupFilters mode="sidebar" group="active" filterState={filterState} onFilterChange={setFilterState} />
         </Box>
 
         {/* Cards grid */}
