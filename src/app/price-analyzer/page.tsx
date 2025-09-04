@@ -99,7 +99,7 @@ export default function PriceAnalyzerPage() {
 
     return (
         <>
-            <DefaultPageBanner header={headerText} description={descriptionText}/>
+            <DefaultPageBanner header={headerText} description={descriptionText} />
             <Container
                 sx={{
                     px: { xs: "17px", md: "0px" },
