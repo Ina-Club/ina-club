@@ -24,11 +24,13 @@ export function filterByProperties<T extends ActiveGroup | RequestGroup>(
   }
 
   // Apply price filter (only for ActiveGroup)
+  // TODO: Maybe a better filter mecha than this one :(
   if (filtered.length && "price" in filtered[0]) {
     const activeGroups = filtered as ActiveGroup[];
+    const [minPrice, maxPrice] = filterState.priceRange!
     filtered = activeGroups.filter(item => {
       const price = item.price;
-      return price >= filterState.priceRange![0] && price <= filterState.priceRange![1];
+      return price >= minPrice && price <= maxPrice;
     }) as T[];
   }
 

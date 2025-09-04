@@ -9,11 +9,12 @@ import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
+import { ActiveGroup } from "lib/dal";
 
 export default function Page() {
   const headerText: string = "קבוצות הרכישה הפעילות";
   const descriptionText: string = "בעמוד זה חברות מציגות את ההצעות והבקשות שלהן, כדי לאפשר ללקוחות להצטרף לרכישות קבוצתיות וליהנות ממחירים משתלמים.";
-  const allActiveGroups = mockActiveGroups.concat(mockActiveGroups);
+  const allActiveGroups: ActiveGroup[] = mockActiveGroups.concat(mockActiveGroups);
   const [searchText, setSearchText] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],

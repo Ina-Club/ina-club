@@ -9,11 +9,12 @@ import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
+import { RequestGroup } from "lib/dal";
 
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
-  const allRequestGroups = mockRequestGroups.concat(mockRequestGroups);
+  const allRequestGroups: RequestGroup[] = mockRequestGroups.concat(mockRequestGroups);
   const [searchText, setSearchText] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
