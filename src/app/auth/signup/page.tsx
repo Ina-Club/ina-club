@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import {
   Box,
   Button,
@@ -17,38 +17,58 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const router = useRouter();
+  const handleUpload = async (file: File) => {
+    if (!file) return;
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET;
+    if (!cloudName || !preset) return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", preset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.secure_url) setImageUrl(data.secure_url as string);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
+    setStatus("loading");
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setStatus("idle");
+      setError("הסיסמאות אינן תואמות");
       return;
     }
-
-    setLoading(true);
     try {
-      const res = await fetch("/api/auth/signup", {
+      // save pending
+      const save = await fetch("/api/auth/signup-init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email, name, password, imageUrl }),
       });
-
-      if (res.ok) {
-        router.push("/auth/signin");
-      } else {
-        const data = await res.json();
-        setError(data.message || "Sign up failed");
+      if (!save.ok) {
+        const j = await save.json().catch(() => ({}));
+        throw new Error(j.error || "שמירת פרטי הרשמה נכשלה");
+      }
+      const res = await signIn("email", { email, redirect: false, callbackUrl: "/" });
+      if (res?.ok) setStatus("sent");
+      else {
+        setStatus("error");
+        setError("Could not send magic link. Try again.");
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+      setStatus("error");
+      setError((err as Error).message || "Something went wrong. Please try again.");
     }
   };
 
@@ -65,7 +85,7 @@ export default function SignUpPage() {
       }}
     >
       <Typography variant="h5" mb={3} textAlign="center">
-        Create an Account
+        יצירת חשבון
       </Typography>
 
       {error && (
@@ -75,49 +95,32 @@ export default function SignUpPage() {
       )}
 
       <Stack spacing={2} component="form" onSubmit={handleSignUp}>
-        <TextField
-          label="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          fullWidth
-        />
-        <TextField
-          label="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          fullWidth
-        />
-        <TextField
-          label="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          fullWidth
-        />
-        <TextField
-          label="Confirm Password"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          fullWidth
-        />
+        <TextField label="שם" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
+        <TextField label="אימייל" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required fullWidth />
+        <TextField label="סיסמה" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required fullWidth />
+        <TextField label="אימות סיסמה" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required fullWidth />
+        <Button component="label" variant="outlined" disabled={uploading}>
+          {uploading ? "מעלה..." : imageUrl ? "החלפת תמונה" : "העלה תמונה"}
+          <input hidden type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
+        </Button>
 
         <Button
           type="submit"
           variant="contained"
           color="primary"
           fullWidth
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={18} /> : null}
+          disabled={status === "loading"}
+          startIcon={status === "loading" ? <CircularProgress size={18} /> : null}
         >
-          {loading ? "Signing Up..." : "Sign Up"}
+          {status === "loading" ? "שולחים קישור..." : "שליחת קישור אימות"}
         </Button>
       </Stack>
+
+      {status === "sent" && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          שלחנו לך קישור כניסה. בדוק/י את המייל שלך.
+        </Alert>
+      )}
     </Box>
   );
 }

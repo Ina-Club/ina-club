@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.1",
@@ -22,9 +23,11 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-number-format": "^5.4.4",
+    "resend": "^6.0.2",
     "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
