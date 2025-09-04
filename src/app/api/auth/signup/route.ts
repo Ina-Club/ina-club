@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "lib/prisma";
 
+// TODO: Add logger
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
       data: { name, email, password: hashedPassword },
     });
 
-    return NextResponse.json({ message: "User created successfully" }, { status: 200 });
+    return NextResponse.json({ message: "User created successfully" }, { status: 201 });
   } catch (error) {
     console.error("Signup error:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
