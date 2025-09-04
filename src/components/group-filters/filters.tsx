@@ -67,18 +67,67 @@ export function toggleVariable<T>(
   setVariable(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
 }
 
-interface FiltersProps {
-  group: GroupType // There is no default
+export interface FilterState {
+  categories: string[];
+  locations: string[];
+  popularities: string[];
+  priceRange: [number, number]; // Required in active-groups only
 }
 
-export const Filters: React.FC<FiltersProps> = ({ group }) => {
+interface FiltersProps {
+  group: GroupType // There is no default
+  filterState?: FilterState;
+  onFilterChange?: (filterState: FilterState) => void;
+}
+
+export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterChange }) => {
   const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
   const locationList: string[] = ["צפון", "מרכז", "דרום"];
   const popularityList: string[] = ["פופולרי", "חדש"];
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [selectedPopularities, setSelectedPopularities] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10_000]);
+  
+  const [internalFilterState, setInternalFilterState] = useState<FilterState>({
+    categories: [],
+    locations: [],
+    popularities: [],
+    priceRange: [0, 10_000]
+  });
+
+  const effectiveFilterState = filterState ?? internalFilterState;
+
+  const updateFilter = (updates: Partial<FilterState>) => {
+    const newState = { ...effectiveFilterState, ...updates };
+    // If a set function was transferred via props, use it. If not, use the setInternalFilterState function. This ensures code safety.
+    if (onFilterChange) {
+      onFilterChange(newState);
+    } else {
+      setInternalFilterState(newState);
+    }
+  };
+
+  const handleCategoryClick = (opt: string) => {
+    const newCategories = effectiveFilterState.categories.includes(opt)
+      ? effectiveFilterState.categories.filter(c => c !== opt)
+      : [...effectiveFilterState.categories, opt];
+    updateFilter({ categories: newCategories });
+  };
+
+  const handleLocationClick = (opt: string) => {
+    const newLocations = effectiveFilterState.locations.includes(opt)
+      ? effectiveFilterState.locations.filter(l => l !== opt)
+      : [...effectiveFilterState.locations, opt];
+    updateFilter({ locations: newLocations });
+  };
+
+  const handlePopularityClick = (opt: string) => {
+    const newPopularities = effectiveFilterState.popularities.includes(opt)
+      ? effectiveFilterState.popularities.filter(p => p !== opt)
+      : [...effectiveFilterState.popularities, opt];
+    updateFilter({ popularities: newPopularities });
+  };
+
+  const handlePriceRangeChange = (newPriceRange: [number, number]) => {
+    updateFilter({ priceRange: newPriceRange });
+  };
 
   return (
     <Box
@@ -97,15 +146,15 @@ export const Filters: React.FC<FiltersProps> = ({ group }) => {
             component="span"
             sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
           >
-            {selectedCategories.length > 0 ? '(' + selectedCategories.length + ')' : "הכל"}
+            {effectiveFilterState.categories.length > 0 ? '(' + effectiveFilterState.categories.length + ')' : "הכל"}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {categoryList.map((opt) => (
             <OptionItem
               key={opt}
-              onClick={() => toggleVariable(setSelectedCategories, opt)}
-              selected={selectedCategories.includes(opt)}
+              onClick={() => handleCategoryClick(opt)}
+              selected={effectiveFilterState.categories.includes(opt)}
             >
               {opt}
             </OptionItem>
@@ -122,15 +171,15 @@ export const Filters: React.FC<FiltersProps> = ({ group }) => {
             component="span"
             sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
           >
-            {selectedLocations.length > 0 ? '(' + selectedLocations.length + ')' : "הכל"}
+            {effectiveFilterState.locations.length > 0 ? '(' + effectiveFilterState.locations.length + ')' : "הכל"}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {locationList.map((opt) => (
             <OptionItem
               key={opt}
-              onClick={() => toggleVariable(setSelectedLocations, opt)}
-              selected={selectedLocations.includes(opt)}
+              onClick={() => handleLocationClick(opt)}
+              selected={effectiveFilterState.locations.includes(opt)}
             >
               {opt}
             </OptionItem>
@@ -147,15 +196,15 @@ export const Filters: React.FC<FiltersProps> = ({ group }) => {
             component="span"
             sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
           >
-            {selectedPopularities.length > 0 ? '(' + selectedPopularities.length + ')' : "הכל"}
+            {effectiveFilterState.popularities.length > 0 ? '(' + effectiveFilterState.popularities.length + ')' : "הכל"}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {popularityList.map((opt) => (
             <OptionItem
               key={opt}
-              onClick={() => toggleVariable(setSelectedPopularities, opt)}
-              selected={selectedPopularities.includes(opt)}
+              onClick={() => handlePopularityClick(opt)}
+              selected={effectiveFilterState.popularities.includes(opt)}
             >
               {opt}
             </OptionItem>
@@ -170,19 +219,19 @@ export const Filters: React.FC<FiltersProps> = ({ group }) => {
           <Accordion defaultExpanded>
             <AccordionSummary>
               <Typography component="span">מחיר</Typography>
-              {priceRange && (
+              {effectiveFilterState.priceRange && (
                 <Typography
                   component="span"
                   sx={{ color: "text.secondary", ml: 1, fontSize: "12px" }}
                 >
-                  {priceRange[0]}₪ - {priceRange[1]}₪
+                  {effectiveFilterState.priceRange[0]}₪ - {effectiveFilterState.priceRange[1]}₪
                 </Typography>
               )}
             </AccordionSummary>
             <AccordionDetails>
               <PriceRangeFilter
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
+                priceRange={effectiveFilterState.priceRange}
+                setPriceRange={handlePriceRangeChange}
               />
             </AccordionDetails>
           </Accordion>

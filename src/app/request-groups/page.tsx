@@ -7,18 +7,25 @@ import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
-import { filterByText } from "lib/text-filter";
+import { applyFilters } from "lib/filter-utils";
+import { FilterState } from "@/components/group-filters/filters";
 
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
   const allRequestGroups = mockRequestGroups.concat(mockRequestGroups);
   const [searchText, setSearchText] = useState("");
+  const [filterState, setFilterState] = useState<FilterState>({
+    categories: [],
+    locations: [],
+    popularities: [],
+    priceRange: [0, 10_000]
+  });
 
-  // Filter request groups based on search text
+  // Apply all filters (text + categories + future filters)
   const filteredRequestGroups = useMemo(() => {
-    return filterByText(allRequestGroups, searchText);
-  }, [allRequestGroups, searchText]);
+    return applyFilters(allRequestGroups, searchText, filterState);
+  }, [allRequestGroups, searchText, filterState]);
 
   // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
   // useEffect(() => {
@@ -83,7 +90,7 @@ export default function Page() {
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" group="request" />
+          <GroupFilters mode="trigger" group="request" filterState={filterState} onFilterChange={setFilterState} />
         </Box>
       </Box>
 
@@ -100,7 +107,7 @@ export default function Page() {
       >
         {/* Desktop sidebar filters */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <GroupFilters mode="sidebar" group="request" />
+          <GroupFilters mode="sidebar" group="request" filterState={filterState} onFilterChange={setFilterState} />
         </Box>
 
         {/* Cards grid */}

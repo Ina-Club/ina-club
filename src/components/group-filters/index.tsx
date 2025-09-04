@@ -4,17 +4,19 @@ import {
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useState } from "react";
-import { Filters } from "@/components/group-filters/filters";
+import { Filters, FilterState } from "@/components/group-filters/filters";
 
 type Mode = "sidebar" | "trigger";
 export type GroupType = "request" | "active";
 
 interface GroupFiltersProps {
   mode?: Mode; // default: "sidebar"
-  group: GroupType // There is no default
+  group: GroupType
+  filterState?: FilterState;
+  onFilterChange?: (filterState: FilterState) => void;
 }
 
-export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar", group }) => {
+export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar", group, filterState, onFilterChange }) => {
   const [open, setOpen] = useState(false);
 
   if (mode === "trigger") {
@@ -27,7 +29,7 @@ export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar", gr
         <Dialog open={open} onClose={() => setOpen(false)} fullWidth keepMounted>
           <DialogTitle>מסננים</DialogTitle>
           <DialogContent>
-            <Filters group={group}/>
+            <Filters group={group} filterState={filterState} onFilterChange={onFilterChange}/>
           </DialogContent>
           <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
             <Button onClick={() => setOpen(false)}>סגור</Button>
@@ -54,7 +56,7 @@ export const GroupFilters: React.FC<GroupFiltersProps> = ({ mode = "sidebar", gr
     >
       <Box>
         <Typography variant="h6" component="span">מסננים</Typography>
-        <Filters group={group}/>
+        <Filters group={group} filterState={filterState} onFilterChange={onFilterChange}/>
       </Box>
     </Box>
   );
