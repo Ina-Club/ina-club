@@ -10,6 +10,7 @@ import bcrypt from "bcrypt";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
+    // Email + Resend
     EmailProvider({
       from: process.env.EMAIL_FROM!,
       maxAge: 24 * 60 * 60,
@@ -25,6 +26,8 @@ export const authOptions: NextAuthOptions = {
         if (error) throw new Error(error.message);
       },
     }),
+
+    // Credentials (Email/Password)
     Credentials({
       name: "Credentials",
       credentials: {
@@ -40,19 +43,84 @@ export const authOptions: NextAuthOptions = {
         return { id: user.id, name: user.name, email: user.email, image: undefined };
       },
     }),
+
+    // Google OAuth
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin",
     verifyRequest: "/auth/signin",
   },
+
   session: { strategy: "jwt" },
+
   secret: process.env.NEXTAUTH_SECRET,
+
+  callbacks: {
+    // עדיפות לחשבון Google על פני חשבון רגיל
+    async signIn({ user, account }) {
+      if (!account) return true;
+
+      const existingUser = await prisma.user.findUnique({ where: { email: user.email! } });
+
+      if (account.provider === "google") {
+        if (existingUser) {
+          // קישור חשבון Google למשתמש קיים
+          await prisma.account.upsert({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+            create: {
+              userId: existingUser.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+              token_type: account.token_type,
+              scope: account.scope,
+              id_token: account.id_token,
+            },
+            update: {
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+              id_token: account.id_token,
+            },
+          });
+
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              name: user.name ?? existingUser.name,
+              emailVerified: new Date(),
+            },
+          });
+        }
+      }
+
+      return true;
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub!;
+      }
+      return session;
+    },
+  },
+
   events: {
+    // PendingProfile merge
     async signIn(message) {
       if (message.user?.email) {
         const email = message.user.email;
@@ -82,5 +150,4 @@ export const authOptions: NextAuthOptions = {
 
 const handler = NextAuth(authOptions);
 
-// App Router requires GET and POST exports
 export { handler as GET, handler as POST };
