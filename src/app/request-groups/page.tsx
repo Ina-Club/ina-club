@@ -7,7 +7,7 @@ import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
-import { applyFilters } from "lib/filter-utils";
+import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
 
 export default function Page() {
