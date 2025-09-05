@@ -1,5 +1,6 @@
 "use client";
 
+// import * as React from 'react';
 import { useState } from "react";
 import {
     Box,
@@ -12,19 +13,23 @@ import {
     Button,
     Grid,
     Paper,
-    IconButton,
     Divider,
+    Accordion,
+    AccordionActions,
+    AccordionSummary,
+    AccordionDetails
 } from "@mui/material";
 import {
     Search as SearchIcon,
     ExpandMore as ExpandMoreIcon,
-    AutoAwesome as AutoAwesomeIcon,
     Psychology as PsychologyIcon,
     Category as CategoryIcon,
-    TrendingUp as TrendingUpIcon,
     AttachMoney as AttachMoneyIcon,
 } from "@mui/icons-material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
+import PriceAnalyzerCard from '@/components/card/price-analyzer-card';
+import { RequestGroup } from 'lib/dal';
+import { mockRequestGroups } from "lib/mock";
 
 // Mock data for demonstration
 const mockProduct = {
@@ -78,13 +83,13 @@ const aiSteps = [
     }
 ];
 
-const handleAISearch = async () => {
+const handleAISearch = async (requestGroup: RequestGroup) => {
     try {
         // save pending
         const response = await fetch("/api/ai/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ product: "iPhone 15 Pro Max 256GB" }),
+            body: JSON.stringify({ product: requestGroup.title }),
         });
         console.log(response);
     }
@@ -101,7 +106,7 @@ export default function PriceAnalyzerPage() {
 
     const smartDiscount = 8.2;
     const smartPrice = mockProduct.price * (1 - smartDiscount / 100);
-    const savings = mockProduct.price - smartPrice;
+    const requestGroups: RequestGroup[] = mockRequestGroups.concat(mockRequestGroups);
 
     return (
         <>
@@ -158,107 +163,12 @@ export default function PriceAnalyzerPage() {
                     </Box>
                 </Box>
 
-                {/* Product Card */}
-                <Card sx={{ mb: 3, p: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Box
-                            sx={{
-                                width: 120,
-                                height: 90,
-                                backgroundColor: "#f5f7fa",
-                                borderRadius: "8px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <Typography variant="body2" color="text.secondary">
-                                Product Image
-                            </Typography>
-                        </Box>
-
-                        <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                                {mockProduct.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                {mockProduct.description}
-                            </Typography>
-
-                            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                                <Chip
-                                    label="AI Analyzed"
-                                    size="small"
-                                    sx={{ backgroundColor: "primary.main", color: "white" }}
-                                />
-                                <Chip
-                                    label={mockProduct.category.toLowerCase()}
-                                    size="small"
-                                    sx={{ backgroundColor: "#ff9800", color: "white" }}
-                                />
-                                <Chip
-                                    label={`$${mockProduct.price}`}
-                                    size="small"
-                                    sx={{ backgroundColor: "#4caf50", color: "white" }}
-                                />
-                            </Box>
-                        </Box>
-
-                        <IconButton onClick={handleAISearch}>
-                        {/* <IconButton> */}
-                            <ExpandMoreIcon />
-                        </IconButton>
-                    </Box>
-                </Card>
-
-
+                <PriceAnalyzerCard requestGroup={requestGroups[0]} handleExpansion={handleAISearch} />
                 {/* Main Analysis Grid */}
                 <Grid container spacing={3} sx={{ mb: 4 }}>
                     {/* Market Price Analysis */}
                     <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 2, height: "100%" }}>
-                            <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                                Market Price Analysis
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Current market price ranges and competitive positioning
-                            </Typography>
 
-                            <Grid container spacing={1}>
-                                <Grid item xs={6}>
-                                    <Paper sx={{ p: 1.5, textAlign: "center", backgroundColor: "#e8f5e8" }}>
-                                        <Typography variant="body2" color="text.secondary">Minimum</Typography>
-                                        <Typography variant="h6" color="#4caf50" fontWeight={600}>
-                                            ${marketPrices.minimum}
-                                        </Typography>
-                                    </Paper>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Paper sx={{ p: 1.5, textAlign: "center", backgroundColor: "#ffebee" }}>
-                                        <Typography variant="body2" color="text.secondary">Maximum</Typography>
-                                        <Typography variant="h6" color="#f44336" fontWeight={600}>
-                                            ${marketPrices.maximum}
-                                        </Typography>
-                                    </Paper>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Paper sx={{ p: 1.5, textAlign: "center", backgroundColor: "#e3f2fd" }}>
-                                        <Typography variant="body2" color="text.secondary">Average</Typography>
-                                        <Typography variant="h6" color="primary.main" fontWeight={600}>
-                                            ${marketPrices.average}
-                                        </Typography>
-                                    </Paper>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Paper sx={{ p: 1.5, textAlign: "center", backgroundColor: "#f3e5f5" }}>
-                                        <Typography variant="body2" color="text.secondary">Median</Typography>
-                                        <Typography variant="h6" color="#9c27b0" fontWeight={600}>
-                                            ${marketPrices.median}
-                                        </Typography>
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-                        </Card>
                     </Grid>
 
                     {/* AI Discount Engine */}
