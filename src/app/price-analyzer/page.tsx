@@ -1,6 +1,5 @@
 "use client";
 
-// import * as React from 'react';
 import { useState } from "react";
 import {
     Box,
@@ -10,14 +9,9 @@ import {
     InputAdornment,
     Chip,
     Card,
-    Button,
     Grid,
     Paper,
     Divider,
-    Accordion,
-    AccordionActions,
-    AccordionSummary,
-    AccordionDetails
 } from "@mui/material";
 import {
     Search as SearchIcon,
@@ -165,14 +159,20 @@ export default function PriceAnalyzerPage() {
 
                 <PriceAnalyzerCard requestGroup={requestGroups[0]} handleExpansion={handleAISearch} />
                 {/* Main Analysis Grid */}
-                <Grid container spacing={3} sx={{ mb: 4 }}>
-                    {/* Market Price Analysis */}
-                    <Grid item xs={12} md={6}>
-
-                    </Grid>
-
-                    {/* AI Discount Engine */}
-                    <Grid item xs={12} md={6}>
+                <Box
+                    sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, // mobile - 1 column, desktop - 3 columns
+                        width: "100%",
+                        px: { xs: 2, md: 2 },
+                        position: "inherit",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: { xs: 3, md: 2 },
+                    }}
+                >
+                    <Grid container spacing={3} sx={{ mb: 4 }}>
+                        {/* AI Discount Engine */}
                         <Card sx={{ p: 2, height: "100%" }}>
                             <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
                                 AI Discount Engine
@@ -200,164 +200,161 @@ export default function PriceAnalyzerPage() {
                             </Typography>
                         </Card>
                     </Grid>
-                </Grid>
 
-                {/* Price Comparison and Savings */}
-                <Grid container spacing={3} sx={{ mb: 4 }}>
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 2 }}>
-                            <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                                Price Comparison
+
+                    {/* Price Comparison and Savings */}
+
+                    <Card sx={{ p: 2 }}>
+                        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                            Price Comparison
+                        </Typography>
+
+                        <Paper sx={{ p: 1.5, textAlign: "center" }}>
+                            <Typography variant="body2" color="text.secondary">Average</Typography>
+                            <Typography variant="h6" color="primary.main" fontWeight={600}>
+                                ${marketPrices.average}
                             </Typography>
-
-                            <Grid container spacing={1} sx={{ mb: 2 }}>
-                                <Grid item xs={6}>
-                                    <Paper sx={{ p: 1.5, textAlign: "center" }}>
-                                        <Typography variant="body2" color="text.secondary">Average</Typography>
-                                        <Typography variant="h6" color="primary.main" fontWeight={600}>
-                                            ${marketPrices.average}
-                                        </Typography>
-                                    </Paper>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Paper sx={{ p: 1.5, textAlign: "center" }}>
-                                        <Typography variant="body2" color="text.secondary">Median</Typography>
-                                        <Typography variant="h6" color="#9c27b0" fontWeight={600}>
-                                            ${marketPrices.median}
-                                        </Typography>
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-
-                            {/* Price Bar Chart */}
-                            <Box sx={{ mb: 2 }}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                                    <Typography variant="caption" sx={{ minWidth: 60 }}>Min:</Typography>
-                                    <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
-                                        <Box sx={{ width: "20%", height: "100%", backgroundColor: "#4caf50", borderRadius: 1 }} />
-                                    </Box>
-                                    <Typography variant="caption">${marketPrices.minimum}</Typography>
-                                </Box>
-
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                                    <Typography variant="caption" sx={{ minWidth: 60 }}>Your Price:</Typography>
-                                    <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
-                                        <Box sx={{ width: "35%", height: "100%", backgroundColor: "#ff9800", borderRadius: 1 }} />
-                                    </Box>
-                                    <Typography variant="caption">${smartPrice.toFixed(2)}</Typography>
-                                </Box>
-
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                                    <Typography variant="caption" sx={{ minWidth: 60 }}>Average:</Typography>
-                                    <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
-                                        <Box sx={{ width: "50%", height: "100%", backgroundColor: "primary.main", borderRadius: 1 }} />
-                                    </Box>
-                                    <Typography variant="caption">${marketPrices.average}</Typography>
-                                </Box>
-
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                    <Typography variant="caption" sx={{ minWidth: 60 }}>Max:</Typography>
-                                    <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
-                                        <Box sx={{ width: "100%", height: "100%", backgroundColor: "#f44336", borderRadius: 1 }} />
-                                    </Box>
-                                    <Typography variant="caption">${marketPrices.maximum}</Typography>
-                                </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
-
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 2 }}>
-                            <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                                Smart Discount Applied
+                        </Paper>
+                        <Paper sx={{ p: 1.5, textAlign: "center" }}>
+                            <Typography variant="body2" color="text.secondary">Median</Typography>
+                            <Typography variant="h6" color="#9c27b0" fontWeight={600}>
+                                ${marketPrices.median}
                             </Typography>
+                        </Paper>
 
-                            <Box sx={{ mb: 2 }}>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                                    <Typography variant="body2">Original Price:</Typography>
-                                    <Typography variant="body2">${mockProduct.price}</Typography>
+                        {/* Price Bar Chart */}
+                        <Box sx={{ mb: 2 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                                <Typography variant="caption" sx={{ minWidth: 60 }}>Min:</Typography>
+                                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
+                                    <Box sx={{ width: "20%", height: "100%", backgroundColor: "#4caf50", borderRadius: 1 }} />
                                 </Box>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                                    <Typography variant="body2" color="#4caf50" fontWeight={600}>Smart Price:</Typography>
-                                    <Typography variant="body2" color="#4caf50" fontWeight={600}>${smartPrice.toFixed(2)}</Typography>
-                                </Box>
-                            </Box>
-                        </Card>
-                    </Grid>
-                </Grid>
-
-                {/* AI Analysis Insights */}
-                <Grid container spacing={3} sx={{ mb: 4 }}>
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 2 }}>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                                <PsychologyIcon sx={{ color: "secondary.main" }} />
-                                <Typography variant="h6" fontWeight={600}>
-                                    AI Analysis Insights
-                                </Typography>
+                                <Typography variant="caption">${marketPrices.minimum}</Typography>
                             </Box>
 
-                            <Box sx={{ pl: 4 }}>
-                                {aiInsights.map((insight, index) => (
-                                    <Typography key={index} variant="body2" sx={{ mb: 1, position: "relative" }}>
-                                        <Box
-                                            component="span"
-                                            sx={{
-                                                position: "absolute",
-                                                left: -20,
-                                                top: 0,
-                                                width: 6,
-                                                height: 6,
-                                                backgroundColor: "secondary.main",
-                                                borderRadius: "50%",
-                                            }}
-                                        />
-                                        {insight}
-                                    </Typography>
-                                ))}
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                                <Typography variant="caption" sx={{ minWidth: 60 }}>Your Price:</Typography>
+                                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
+                                    <Box sx={{ width: "35%", height: "100%", backgroundColor: "#ff9800", borderRadius: 1 }} />
+                                </Box>
+                                <Typography variant="caption">${smartPrice.toFixed(2)}</Typography>
                             </Box>
-                        </Card>
-                    </Grid>
 
-                    <Grid item xs={12} md={6}>
-                        <Card sx={{ p: 2 }}>
-                            <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                                How AI Pricing Works
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Our 3-step process for intelligent discount prediction and price optimization.
-                            </Typography>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                                <Typography variant="caption" sx={{ minWidth: 60 }}>Average:</Typography>
+                                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
+                                    <Box sx={{ width: "50%", height: "100%", backgroundColor: "primary.main", borderRadius: 1 }} />
+                                </Box>
+                                <Typography variant="caption">${marketPrices.average}</Typography>
+                            </Box>
 
-                            {aiSteps.map((step, index) => (
-                                <Box key={index} sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                <Typography variant="caption" sx={{ minWidth: 60 }}>Max:</Typography>
+                                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
+                                    <Box sx={{ width: "100%", height: "100%", backgroundColor: "#f44336", borderRadius: 1 }} />
+                                </Box>
+                                <Typography variant="caption">${marketPrices.maximum}</Typography>
+                            </Box>
+                        </Box>
+                    </Card>
+
+                    <Card sx={{ p: 2 }}>
+                        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+                            Smart Discount Applied
+                        </Typography>
+
+                        <Box sx={{ mb: 2 }}>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                                <Typography variant="body2">Original Price:</Typography>
+                                <Typography variant="body2">${mockProduct.price}</Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                                <Typography variant="body2" color="#4caf50" fontWeight={600}>Smart Price:</Typography>
+                                <Typography variant="body2" color="#4caf50" fontWeight={600}>${smartPrice.toFixed(2)}</Typography>
+                            </Box>
+                        </Box>
+                    </Card>
+                </Box>
+
+                <Box
+                    sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, // mobile - 1 column, desktop - 3 columns
+                        width: "100%",
+                        px: { xs: 2, md: 2 },
+                        position: "inherit",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: { xs: 3, md: 2 },
+                    }}
+                >
+                    {/* AI Analysis Insights */}
+                    <Card sx={{ p: 2 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                            <PsychologyIcon sx={{ color: "secondary.main" }} />
+                            <Typography variant="h6" fontWeight={600}>
+                                AI Analysis Insights
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ pl: 4 }}>
+                            {aiInsights.map((insight, index) => (
+                                <Typography key={index} variant="body2" sx={{ mb: 1, position: "relative" }}>
                                     <Box
+                                        component="span"
                                         sx={{
-                                            width: 40,
-                                            height: 40,
+                                            position: "absolute",
+                                            left: -20,
+                                            top: 0,
+                                            width: 6,
+                                            height: 6,
+                                            backgroundColor: "secondary.main",
                                             borderRadius: "50%",
-                                            backgroundColor: index === 0 ? "primary.main" : index === 1 ? "#ff9800" : "#4caf50",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            color: "white",
-                                            flexShrink: 0,
                                         }}
-                                    >
-                                        {step.icon}
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-                                            {step.title}:
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            {step.description}
-                                        </Typography>
-                                    </Box>
-                                </Box>
+                                    />
+                                    {insight}
+                                </Typography>
                             ))}
-                        </Card>
-                    </Grid>
-                </Grid>
+                        </Box>
+                    </Card>
+
+                    <Card sx={{ p: 2 }}>
+                        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+                            How AI Pricing Works
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            Our 3-step process for intelligent discount prediction and price optimization.
+                        </Typography>
+
+                        {aiSteps.map((step, index) => (
+                            <Box key={index} sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}>
+                                <Box
+                                    sx={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: "50%",
+                                        backgroundColor: index === 0 ? "primary.main" : index === 1 ? "#ff9800" : "#4caf50",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    {step.icon}
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                                        {step.title}:
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {step.description}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        ))}
+                    </Card>
+                </Box>
             </Container>
         </>
     );
