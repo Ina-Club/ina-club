@@ -9,11 +9,9 @@ import {
     InputAdornment,
     Chip,
     Card,
-    CardContent,
     Button,
     Grid,
     Paper,
-    LinearProgress,
     IconButton,
     Divider,
 } from "@mui/material";
@@ -49,12 +47,6 @@ const categories = [
     "Technology"
 ];
 
-const quantityOptions = [
-    { value: 1, label: "1 item" },
-    { value: 5, label: "5 items" },
-    { value: 10, label: "10 items" }
-];
-
 const marketPrices = {
     minimum: 195.99,
     maximum: 321.99,
@@ -86,11 +78,25 @@ const aiSteps = [
     }
 ];
 
+const handleAISearch = async () => {
+    try {
+        // save pending
+        const response = await fetch("/api/ai/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product: "iPhone 15 Pro Max 256GB" }),
+        });
+        console.log(response);
+    }
+    catch {
+        console.log("Failed Sending the request to AI!")
+    }
+}
+
 export default function PriceAnalyzerPage() {
     const headerText: string = "מנתח מחירים חכם"
     const descriptionText: string = "גלה תובנות על השוק באמצעות מנתח מחירים מבוסס AI כדי לבצע רכישות חכמות יותר."
     const [selectedCategory, setSelectedCategory] = useState("Electronics");
-    const [selectedQuantity, setSelectedQuantity] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
 
     const smartDiscount = 8.2;
@@ -198,49 +204,13 @@ export default function PriceAnalyzerPage() {
                             </Box>
                         </Box>
 
-                        <IconButton>
+                        <IconButton onClick={handleAISearch}>
+                        {/* <IconButton> */}
                             <ExpandMoreIcon />
                         </IconButton>
                     </Box>
                 </Card>
 
-                {/* Quantity Selection */}
-                <Card sx={{ mb: 3, p: 2 }}>
-                    <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                        Quantity Selection
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Adjust quantity to unlock better bulk pricing discounts
-                    </Typography>
-
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-                        {quantityOptions.map((option) => (
-                            <Button
-                                key={option.value}
-                                variant={selectedQuantity === option.value ? "contained" : "outlined"}
-                                onClick={() => setSelectedQuantity(option.value)}
-                                sx={{
-                                    minWidth: "auto",
-                                    px: 2,
-                                    py: 1,
-                                    borderRadius: "20px",
-                                    backgroundColor: selectedQuantity === option.value ? "primary.main" : "transparent",
-                                    color: selectedQuantity === option.value ? "white" : "primary.main",
-                                    borderColor: "primary.main",
-                                }}
-                            >
-                                {option.label}
-                            </Button>
-                        ))}
-                    </Box>
-
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <AutoAwesomeIcon sx={{ color: "primary.main", fontSize: 16 }} />
-                        <Typography variant="caption" color="text.secondary">
-                            AI calculates optimal bulk discounts based on quantity and category
-                        </Typography>
-                    </Box>
-                </Card>
 
                 {/* Main Analysis Grid */}
                 <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -307,9 +277,6 @@ export default function PriceAnalyzerPage() {
                                 </Typography>
                                 <Typography variant="body1" fontWeight={500}>
                                     Smart Discount Applied
-                                </Typography>
-                                <Typography variant="body2" color="primary.main">
-                                    {selectedCategory} • {selectedQuantity} Item{selectedQuantity > 1 ? 's' : ''}
                                 </Typography>
                             </Box>
 
@@ -394,9 +361,6 @@ export default function PriceAnalyzerPage() {
                             <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
                                 Smart Discount Applied
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                {selectedCategory} • {selectedQuantity} Item{selectedQuantity > 1 ? 's' : ''}
-                            </Typography>
 
                             <Box sx={{ mb: 2 }}>
                                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
@@ -406,15 +370,6 @@ export default function PriceAnalyzerPage() {
                                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                                     <Typography variant="body2" color="#4caf50" fontWeight={600}>Smart Price:</Typography>
                                     <Typography variant="body2" color="#4caf50" fontWeight={600}>${smartPrice.toFixed(2)}</Typography>
-                                </Box>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                                    <Typography variant="body2" color="#ff9800" fontWeight={600}>Total ({selectedQuantity} items):</Typography>
-                                    <Typography variant="body2" color="#ff9800" fontWeight={600}>${(smartPrice * selectedQuantity).toFixed(2)}</Typography>
-                                </Box>
-                                <Divider sx={{ my: 1 }} />
-                                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                    <Typography variant="body2" color="#4caf50" fontWeight={600}>You Save:</Typography>
-                                    <Typography variant="body2" color="#4caf50" fontWeight={600}>${(savings * selectedQuantity).toFixed(2)}</Typography>
                                 </Box>
                             </Box>
                         </Card>
