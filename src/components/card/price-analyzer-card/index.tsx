@@ -41,13 +41,19 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
     const smartDiscount = 8.2;
     const smartPrice = mockProduct.price * (1 - smartDiscount / 100);
 
+    const handleAccordionToggle = (_event: React.SyntheticEvent, expanded: boolean) => {
+        if (expanded) {
+            handleExpansion(requestGroup);
+        }
+    };
+
     return (
         <>
             <Card sx={{ mb: 3, p: 2 }}>
                 <Box>
-                    <Accordion>
+                    <Accordion onChange={handleAccordionToggle}>
                         <AccordionSummary
-                            expandIcon={<ExpandMoreIcon onClick={() => handleExpansion(requestGroup)} />}
+                            expandIcon={<ExpandMoreIcon />}
                             aria-controls="panel2-content"
                             id="panel2-header"
                         >
