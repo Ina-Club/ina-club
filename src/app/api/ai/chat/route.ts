@@ -8,20 +8,13 @@ const ai = new GoogleGenAI({
 });
 
 export async function POST(req: Request) {
-  const { prompt } = await req.json();
+  const { prompt, schema } = await req.json();
   const resp = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
     config: {
       responseMimeType: "application/json",   // force JSON
-      responseSchema: {                       // describe shape you want
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          price: { type: "number" },
-        },
-        required: ["name", "price"],
-      },
+      responseSchema: { schema },
       safetySettings: [
         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
         { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },

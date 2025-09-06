@@ -59,12 +59,24 @@ const aiSteps = [
 ];
 
 const handleAISearch = async (requestGroup: RequestGroup) => {
+    const responseSchema = {
+        type: "object",
+        properties: {
+            name: { type: "string" },
+            model: { type: "string" },
+            price_range: { type: "string" },
+            average_price: { type: "number" },
+            notes: { type: "string" },
+        },
+        required: ["name", "model", "price_range", "average_price", "notes"],
+    }
+
     try {
         const price_analyzer_prompt: string = PRICE_ANALYZER_PROMPT.replace('{product_name}', requestGroup.title);
         const response: Response = await fetch("/api/ai/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: price_analyzer_prompt }),
+            body: JSON.stringify({ prompt: price_analyzer_prompt, schema: responseSchema }),
         });
         console.log(response);
     }
