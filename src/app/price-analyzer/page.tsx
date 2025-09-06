@@ -20,6 +20,7 @@ import { DefaultPageBanner } from "@/components/default-page-banner";
 import PriceAnalyzerCard from '@/components/card/price-analyzer-card';
 import { RequestGroup } from 'lib/dal';
 import { mockRequestGroups } from "lib/mock";
+import { PRICE_ANALYZER_PROMPT } from "ai/prompts";
 
 const categories = [
     "Electronics",
@@ -59,11 +60,11 @@ const aiSteps = [
 
 const handleAISearch = async (requestGroup: RequestGroup) => {
     try {
-        // save pending
-        const response = await fetch("/api/ai/chat", {
+        const price_analyzer_prompt: string = PRICE_ANALYZER_PROMPT.replace('{product_name}', requestGroup.title);
+        const response: Response = await fetch("/api/ai/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ product: requestGroup.title }),
+            body: JSON.stringify({ prompt: price_analyzer_prompt }),
         });
         console.log(response);
     }

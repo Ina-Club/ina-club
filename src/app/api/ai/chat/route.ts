@@ -8,10 +8,10 @@ const ai = new GoogleGenAI({
 });
 
 export async function POST(req: Request) {
-  const { product } = await req.json();
+  const { prompt } = await req.json();
   const resp = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: `Return a product object for ${product} with a sample price.`,
+    contents: prompt,
     config: {
       responseMimeType: "application/json",   // force JSON
       responseSchema: {                       // describe shape you want
