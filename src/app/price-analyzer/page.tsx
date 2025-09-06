@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
     Box,
     Container,
@@ -21,6 +21,7 @@ import PriceAnalyzerCard from '@/components/card/price-analyzer-card';
 import { RequestGroup } from 'lib/dal';
 import { mockRequestGroups } from "lib/mock";
 import { PRICE_ANALYZER_PROMPT } from "ai/prompts";
+import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton"
 
 const categories = [
     "Electronics",
@@ -146,8 +147,11 @@ export default function PriceAnalyzerPage() {
                         ))}
                     </Box>
                 </Box>
-
-                <PriceAnalyzerCard requestGroup={requestGroups[0]} handleExpansion={handleAISearch} />
+                <Suspense fallback={<GroupSectionSkeleton />}>
+                    {requestGroups.map((requestGroup, index) => (
+                        <PriceAnalyzerCard key={index} requestGroup={requestGroup} handleExpansion={handleAISearch} />
+                    ))}
+                </Suspense>
 
                 <Box
                     sx={{
