@@ -17,38 +17,52 @@ import {
 import { RequestGroup } from "lib/dal";
 import { useState } from "react";
 import { LoadingCircle } from "@/components/loading-circle";
+import { AIProductData } from "app/price-analyzer/page";
 
 interface PriceAnalyzerCardProps {
     requestGroup: RequestGroup;
-    handleExpansion: (requestGroup: RequestGroup) => Promise<void>;
+    handleExpansion: (requestGroup: RequestGroup) => Promise<AIProductData | null>;
 }
 
 // Mock data for demonstration
-const mockProduct = {
-    name: "Sony WH-1000XM4 Wireless Headphones",
-    image: "/api/placeholder/200/150",
-    price: 279.99,
-    category: "Electronics",
-    description: "Click for detailed product information",
-};
+// const mockProduct = {
+//     name: "Sony WH-1000XM4 Wireless Headphones",
+//     image: "/api/placeholder/200/150",
+//     price: 279.99,
+//     category: "Electronics",
+//     description: "Click for detailed product information",
+// };
 
 const marketPrices = {
     minimum: 195.99,
     maximum: 321.99,
     average: 279.99,
-    median: 265.99
 };
 
 const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, handleExpansion }) => {
-    const loadingText: string = "טוען מידע..."
-    const smartDiscount = 8.2;
-    const smartPrice = mockProduct.price * (1 - smartDiscount / 100);
+    const loadingText: string = "טוען מידע...";
+    const baseData: AIProductData = {
+        name: "",
+        model: "",
+        price_range: "",
+        average_price: 0,
+        notes_in_hebrew: ""
+    }
+    const smartDiscountPercentage: number = 8;
     const [loading, setLoading] = useState(false);
+    const [produtData, setProductData] = useState<AIProductData>(baseData);
+    const smartPrice = produtData.average_price * (1 - smartDiscountPercentage / 100);
 
     const handleAccordionToggle = async (_event: React.SyntheticEvent, expanded: boolean) => {
         if (expanded) {
             setLoading(true);
-            await handleExpansion(requestGroup);
+            const AIFetchedData: AIProductData | null = await handleExpansion(requestGroup);
+            if (AIFetchedData !== null) {
+                setProductData(AIFetchedData);
+            }
+            else {
+                // TODO: Render some error shit.
+            }
             setLoading(false);
         }
     };
@@ -113,101 +127,94 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                     {/* AI Discount Engine */}
                                     <Card sx={{ p: 2, height: "100%" }}>
                                         <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                                            AI Discount Engine
+                                            הנחת AI צפויה
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                            Smart discounts calculated using AI market analysis
+                                            הנחה חכמה המחושבת באמצעות ניתוח AI מתקדם.
                                         </Typography>
 
                                         <Box sx={{ textAlign: "center", mb: 2 }}>
                                             <Typography variant="h2" color="primary.main" fontWeight={700}>
-                                                {smartDiscount}%
+                                                {smartDiscountPercentage}%
                                             </Typography>
                                             <Typography variant="body1" fontWeight={500}>
-                                                Smart Discount Applied
+                                                הנחה עבור קניה בקבוצת רכישה
                                             </Typography>
                                         </Box>
 
                                         <Divider sx={{ my: 2 }} />
 
-                                        <Typography variant="body2" color="text.secondary">
-                                            Original Price
-                                        </Typography>
-                                        <Typography variant="h6" color="text.secondary">
-                                            ${mockProduct.price}
-                                        </Typography>
+                                        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                                            <Box sx={{ justifyContent: "space-between", alignContent: "center" }}>
+                                                <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                                                    מחיר מקורי
+                                                </Typography>
+                                                <Typography variant="h6" color="text.secondary">
+                                                    ₪{produtData.average_price}
+                                                </Typography>
+                                            </Box>
+                                            <Box sx={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+                                                <Typography variant="body2" color="#4caf50" fontWeight={600}>
+                                                    מחיר לאחר הנחה צפויה
+                                                </Typography>
+                                                <Typography variant="h6" color="#4caf50">
+                                                    ₪{smartPrice}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
                                     </Card>
 
                                     {/* Price Comparison and Savings */}
                                     <Card sx={{ p: 2 }}>
                                         <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                                            Price Comparison
+                                            השוואת מחירים
                                         </Typography>
 
                                         <Paper sx={{ p: 1.5, textAlign: "center" }}>
-                                            <Typography variant="body2" color="text.secondary">Average</Typography>
+                                            <Typography variant="body2" color="text.secondary">מחיר ממוצע</Typography>
                                             <Typography variant="h6" color="primary.main" fontWeight={600}>
-                                                ${marketPrices.average}
-                                            </Typography>
-                                        </Paper>
-                                        <Paper sx={{ p: 1.5, textAlign: "center" }}>
-                                            <Typography variant="body2" color="text.secondary">Median</Typography>
-                                            <Typography variant="h6" color="#9c27b0" fontWeight={600}>
-                                                ${marketPrices.median}
+                                                ₪{marketPrices.average}
                                             </Typography>
                                         </Paper>
 
                                         {/* Price Bar Chart */}
-                                        <Box sx={{ mb: 2 }}>
+                                        <Box sx={{ mb: 2, mt: 2 }}>
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                                                <Typography variant="caption" sx={{ minWidth: 60 }}>Min:</Typography>
+                                                <Typography variant="caption" sx={{ minWidth: 60 }}>המחיר הנמוך ביותר:</Typography>
                                                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
                                                     <Box sx={{ width: "20%", height: "100%", backgroundColor: "#4caf50", borderRadius: 1 }} />
                                                 </Box>
-                                                <Typography variant="caption">${marketPrices.minimum}</Typography>
+                                                <Typography variant="caption">₪{marketPrices.minimum}</Typography>
                                             </Box>
 
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                                                <Typography variant="caption" sx={{ minWidth: 60 }}>Your Price:</Typography>
-                                                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
-                                                    <Box sx={{ width: "35%", height: "100%", backgroundColor: "#ff9800", borderRadius: 1 }} />
-                                                </Box>
-                                                <Typography variant="caption">${smartPrice.toFixed(2)}</Typography>
-                                            </Box>
-
-                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                                                <Typography variant="caption" sx={{ minWidth: 60 }}>Average:</Typography>
+                                                <Typography variant="caption" sx={{ minWidth: 60 }}>מחיר ממוצע:</Typography>
                                                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
                                                     <Box sx={{ width: "50%", height: "100%", backgroundColor: "primary.main", borderRadius: 1 }} />
                                                 </Box>
-                                                <Typography variant="caption">${marketPrices.average}</Typography>
+                                                <Typography variant="caption">₪{marketPrices.average}</Typography>
                                             </Box>
 
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                <Typography variant="caption" sx={{ minWidth: 60 }}>Max:</Typography>
+                                                <Typography variant="caption" sx={{ minWidth: 60 }}>המחיר הגבוה ביותר:</Typography>
                                                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
                                                     <Box sx={{ width: "100%", height: "100%", backgroundColor: "#f44336", borderRadius: 1 }} />
                                                 </Box>
-                                                <Typography variant="caption">${marketPrices.maximum}</Typography>
+                                                <Typography variant="caption">₪{marketPrices.maximum}</Typography>
                                             </Box>
                                         </Box>
                                     </Card>
 
-                                    <Card sx={{ p: 2 }}>
+                                    <Card sx={{ p: 2, height: "100%" }}>
                                         <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                                            Smart Discount Applied
+                                            נקודות שחשוב לדעת
                                         </Typography>
+                                        
+                                        <Divider sx={{ my: 2 }} />
 
-                                        <Box sx={{ mb: 2 }}>
-                                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                                                <Typography variant="body2">Original Price:</Typography>
-                                                <Typography variant="body2">${mockProduct.price}</Typography>
-                                            </Box>
-                                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                                                <Typography variant="body2" color="#4caf50" fontWeight={600}>Smart Price:</Typography>
-                                                <Typography variant="body2" color="#4caf50" fontWeight={600}>${smartPrice.toFixed(2)}</Typography>
-                                            </Box>
-                                        </Box>
+                                        <Typography variant="body1" fontWeight={500}>
+                                            {produtData.notes_in_hebrew}
+                                        </Typography>
                                     </Card>
                                 </Box>
                             </AccordionDetails>

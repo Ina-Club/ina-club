@@ -22,6 +22,7 @@ import { RequestGroup } from 'lib/dal';
 import { mockRequestGroups } from "lib/mock";
 import { PRICE_ANALYZER_PROMPT } from "ai/prompts";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton"
+import { implementsInterface } from "lib/utils";
 
 const categories = [
     "Electronics",
@@ -59,7 +60,30 @@ const aiSteps = [
     }
 ];
 
-const handleAISearch = async (requestGroup: RequestGroup) => {
+export interface AIProductData {
+    name: string,
+    model: string,
+    price_range: string,
+    average_price: number,
+    notes_in_hebrew: string
+}
+
+const isAIProductData = (obj: unknown): obj is AIProductData => {
+    if (typeof obj !== "object" || obj === null) return false;
+    const o = obj as Record<string, unknown>;
+
+    return (
+        typeof o.name === "string" &&
+        typeof o.model === "string" &&
+        typeof o.price_range === "string" &&
+        typeof o.average_price === "number" &&
+        Number.isFinite(o.average_price) &&
+        typeof o.notes_in_hebrew === "string"
+    );
+}
+
+const handleAISearch = async (requestGroup: RequestGroup): Promise<AIProductData | null> => {
+    const propertyList: string[] = ["name", "model", "price_range", "average_price", "notes_in_hebrew"];
     const responseSchema = {
         type: "object",
         properties: {
@@ -67,22 +91,30 @@ const handleAISearch = async (requestGroup: RequestGroup) => {
             model: { type: "string" },
             price_range: { type: "string" },
             average_price: { type: "number" },
-            notes: { type: "string" },
+            notes_in_hebrew: { type: "string" },
         },
-        required: ["name", "model", "price_range", "average_price", "notes"],
+        required: propertyList,
     }
 
     try {
-        const price_analyzer_prompt: string = PRICE_ANALYZER_PROMPT.replace('{product_name}', requestGroup.title);
+        const price_analyzer_prompt: string =
+            PRICE_ANALYZER_PROMPT.replace('{productName}', requestGroup.title).replace('{propertyList}', propertyList.toString());
         const response: Response = await fetch("/api/ai/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt: price_analyzer_prompt, schema: responseSchema }),
         });
         console.log(response);
+        const data = await response.json();
+        if (!response.ok || !isAIProductData(data)) {
+            console.log("Failed to fetch AI data: ", response.statusText);
+            return null;
+        }
+        return data;
     }
-    catch {
-        console.log("Failed Sending the request to AI!")
+    catch (err) {
+        console.log("Failed Sending the request to AI!", err);
+        return null;
     }
 }
 
