@@ -40,6 +40,7 @@ const marketPrices = {
 };
 
 const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, handleExpansion }) => {
+    const loadingText: string = "טוען מידע..."
     const smartDiscount = 8.2;
     const smartPrice = mockProduct.price * (1 - smartDiscount / 100);
     const [loading, setLoading] = useState(false);
@@ -94,7 +95,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                             </Box >
                         </AccordionSummary >
                         {/* TODO: cache the AI answer until a page refresh happens! */}
-                        {loading ? <LoadingCircle loadingText="Loading Product Data..." /> :
+                        {loading ? <LoadingCircle loadingText={loadingText} /> :
                             <AccordionDetails>
                                 {/* Main Analysis Grid */}
                                 <Box

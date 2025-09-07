@@ -9,7 +9,7 @@ interface LoadingCircleProps {
 
 export const LoadingCircle: React.FC<LoadingCircleProps> = ({ loadingText }) => {
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center", pb: { xs: 2, md: 4 } }}>
             {loadingText &&
                 <Typography>{loadingText}</Typography>
             }
