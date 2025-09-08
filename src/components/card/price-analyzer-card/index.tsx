@@ -3,6 +3,7 @@
 import {
     Box,
     Card,
+    CardMedia,
     Chip,
     Typography,
     Divider,
@@ -73,7 +74,10 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                             aria-controls="panel2-content"
                             id="panel2-header"
                         >
-                            <Box
+                            <CardMedia
+                                component="img"
+                                image={requestGroup.images[0]}
+                                alt={requestGroup.title}
                                 sx={{
                                     width: 120,
                                     height: 90,
@@ -82,9 +86,11 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
+                                    objectFit: "cover",
                                     mr: 2
                                 }}
                             />
+
                             <Box sx={{ flexGrow: 1 }}>
                                 <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
                                     {requestGroup.title}
@@ -205,7 +211,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                         <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
                                             נקודות שחשוב לדעת
                                         </Typography>
-                                        
+
                                         <Divider sx={{ my: 2 }} />
 
                                         <Typography variant="body1" fontWeight={500}>
