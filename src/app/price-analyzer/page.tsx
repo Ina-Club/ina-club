@@ -63,9 +63,10 @@ const aiSteps = [
 export interface AIProductData {
     name: string,
     model: string,
-    price_range: string,
-    average_price: number,
-    notes_in_hebrew: string
+    minPrice: number,
+    maxPrice: number
+    averagePrice: number,
+    notesInHebrew: string
 }
 
 const isAIProductData = (obj: unknown): obj is AIProductData => {
@@ -75,23 +76,25 @@ const isAIProductData = (obj: unknown): obj is AIProductData => {
     return (
         typeof o.name === "string" &&
         typeof o.model === "string" &&
-        typeof o.price_range === "string" &&
-        typeof o.average_price === "number" &&
-        Number.isFinite(o.average_price) &&
-        typeof o.notes_in_hebrew === "string"
+        typeof o.minPrice === "number" &&
+        typeof o.maxPrice === "number" &&
+        typeof o.averagePrice === "number" &&
+        Number.isFinite(o.averagePrice) &&
+        typeof o.notesInHebrew === "string"
     );
 }
 
 const handleAISearch = async (requestGroup: RequestGroup): Promise<AIProductData | null> => {
-    const propertyList: string[] = ["name", "model", "price_range", "average_price", "notes_in_hebrew"];
+    const propertyList: string[] = ["name", "model", "minPrice", "maxPrice", "averagePrice", "notesInHebrew"];
     const responseSchema = {
         type: "object",
         properties: {
             name: { type: "string" },
             model: { type: "string" },
-            price_range: { type: "string" },
-            average_price: { type: "number" },
-            notes_in_hebrew: { type: "string" },
+            minPrice: { type: "number" },
+            maxPrice: { type: "number" },
+            averagePrice: { type: "number" },
+            notesInHebrew: { type: "string" },
         },
         required: propertyList,
     }

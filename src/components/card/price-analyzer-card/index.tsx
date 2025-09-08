@@ -33,25 +33,21 @@ interface PriceAnalyzerCardProps {
 //     description: "Click for detailed product information",
 // };
 
-const marketPrices = {
-    minimum: 195.99,
-    maximum: 321.99,
-    average: 279.99,
-};
-
 const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, handleExpansion }) => {
     const loadingText: string = "טוען מידע...";
     const baseData: AIProductData = {
+        // TODO: use name, model somewhere
         name: "",
         model: "",
-        price_range: "",
-        average_price: 0,
-        notes_in_hebrew: ""
+        minPrice: 0,
+        maxPrice: 0,
+        averagePrice: 0,
+        notesInHebrew: ""
     }
     const smartDiscountPercentage: number = 8;
     const [loading, setLoading] = useState(false);
-    const [produtData, setProductData] = useState<AIProductData>(baseData);
-    const smartPrice = produtData.average_price * (1 - smartDiscountPercentage / 100);
+    const [productData, setProductData] = useState<AIProductData>(baseData);
+    const smartPrice = productData.averagePrice * (1 - smartDiscountPercentage / 100);
 
     const handleAccordionToggle = async (_event: React.SyntheticEvent, expanded: boolean) => {
         if (expanded) {
@@ -150,7 +146,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                                     מחיר מקורי
                                                 </Typography>
                                                 <Typography variant="h6" color="text.secondary">
-                                                    ₪{produtData.average_price}
+                                                    ₪{productData.averagePrice}
                                                 </Typography>
                                             </Box>
                                             <Box sx={{ justifyContent: "space-between", alignItems: "flex-end" }}>
@@ -165,7 +161,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                     </Card>
 
                                     {/* Price Comparison and Savings */}
-                                    <Card sx={{ p: 2 }}>
+                                    <Card sx={{ p: 2, height: "100%" }}>
                                         <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
                                             השוואת מחירים
                                         </Typography>
@@ -173,7 +169,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                         <Paper sx={{ p: 1.5, textAlign: "center" }}>
                                             <Typography variant="body2" color="text.secondary">מחיר ממוצע</Typography>
                                             <Typography variant="h6" color="primary.main" fontWeight={600}>
-                                                ₪{marketPrices.average}
+                                                ₪{productData.averagePrice}
                                             </Typography>
                                         </Paper>
 
@@ -184,7 +180,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
                                                     <Box sx={{ width: "20%", height: "100%", backgroundColor: "#4caf50", borderRadius: 1 }} />
                                                 </Box>
-                                                <Typography variant="caption">₪{marketPrices.minimum}</Typography>
+                                                <Typography variant="caption">₪{productData.minPrice}</Typography>
                                             </Box>
 
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
@@ -192,7 +188,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
                                                     <Box sx={{ width: "50%", height: "100%", backgroundColor: "primary.main", borderRadius: 1 }} />
                                                 </Box>
-                                                <Typography variant="caption">₪{marketPrices.average}</Typography>
+                                                <Typography variant="caption">₪{productData.averagePrice}</Typography>
                                             </Box>
 
                                             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -200,7 +196,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "#e8f5e8", borderRadius: 1, position: "relative" }}>
                                                     <Box sx={{ width: "100%", height: "100%", backgroundColor: "#f44336", borderRadius: 1 }} />
                                                 </Box>
-                                                <Typography variant="caption">₪{marketPrices.maximum}</Typography>
+                                                <Typography variant="caption">₪{productData.maxPrice}</Typography>
                                             </Box>
                                         </Box>
                                     </Card>
@@ -213,7 +209,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                         <Divider sx={{ my: 2 }} />
 
                                         <Typography variant="body1" fontWeight={500}>
-                                            {produtData.notes_in_hebrew}
+                                            {productData.notesInHebrew}
                                         </Typography>
                                     </Card>
                                 </Box>
