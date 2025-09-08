@@ -68,7 +68,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
         <>
             <Card sx={{ mb: 3, p: 2 }}>
                 <Box>
-                    <Accordion onChange={handleAccordionToggle}>
+                    <Accordion sx={{ boxShadow: "none" }} onChange={handleAccordionToggle}>
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
                             aria-controls="panel2-content"
@@ -76,7 +76,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                         >
                             <CardMedia
                                 component="img"
-                                image={requestGroup.images[0]}
+                                image={requestGroup.images[0]} //TODO: you can do better
                                 alt={requestGroup.title}
                                 sx={{
                                     width: 120,
