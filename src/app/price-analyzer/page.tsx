@@ -22,7 +22,6 @@ import { RequestGroup } from 'lib/dal';
 import { mockRequestGroups } from "lib/mock";
 import { PRICE_ANALYZER_PROMPT } from "ai/prompts";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton"
-import { implementsInterface } from "lib/utils";
 
 const categories = [
     "Electronics",
@@ -45,18 +44,18 @@ const aiInsights = [
 const aiSteps = [
     {
         icon: <CategoryIcon />,
-        title: "Category Detection",
-        description: "AI identifies product category and brand positioning for targeted analysis"
+        title: "זיהוי קטגוריה",
+        description: "AI מזהה קטגוריית מוצר עבור ניתוח מלא ומדויק."
     },
     {
         icon: <PsychologyIcon />,
-        title: "Smart Analysis",
-        description: "Analyzes market patterns, seasonality, and competitive landscape dynamics"
+        title: "ניתוח חכם",
+        description: "מנתח תבניות בשוק, עונתיות ותחרויות בתחומים שונים."
     },
     {
         icon: <AttachMoneyIcon />,
-        title: "Dynamic Pricing",
-        description: "Calculates optimal discounts based on quantity, trends, and market conditions"
+        title: "תמחור",
+        description: "מחשב הנחות אופטימליות על בסיס כמויות, טרנדים ומצב השוק."
     }
 ];
 
@@ -201,23 +200,23 @@ export default function PriceAnalyzerPage() {
                     }}
                 >
                     {/* AI Analysis Insights */}
-                    <Card sx={{ p: 2 }}>
+                    <Card sx={{ p: 2, height: "100%" }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                             <PsychologyIcon sx={{ color: "secondary.main" }} />
                             <Typography variant="h6" fontWeight={600}>
-                                AI Analysis Insights
+                                תובנות ניתוח AI
                             </Typography>
                         </Box>
 
                         <Box sx={{ pl: 4 }}>
                             {aiInsights.map((insight, index) => (
-                                <Typography key={index} variant="body2" sx={{ mb: 1, position: "relative" }}>
+                                <Typography key={index} variant="body2" sx={{ mb: 2, position: "relative" }}>
                                     <Box
                                         component="span"
                                         sx={{
                                             position: "absolute",
                                             left: -20,
-                                            top: 0,
+                                            top: 6,
                                             width: 6,
                                             height: 6,
                                             backgroundColor: "secondary.main",
@@ -232,10 +231,10 @@ export default function PriceAnalyzerPage() {
 
                     <Card sx={{ p: 2 }}>
                         <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                            How AI Pricing Works
+                            איך עובד תמחור באמצעות AI?
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            Our 3-step process for intelligent discount prediction and price optimization.
+                            התהליך שלנו בן 3 שלבים קריטיים לצורך חיזוי הנחה ושמירה על מחיר אופטימלי.
                         </Typography>
 
                         {aiSteps.map((step, index) => (
