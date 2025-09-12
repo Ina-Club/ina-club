@@ -5,13 +5,10 @@ import {
     Box,
     Container,
     Typography,
-    TextField,
-    InputAdornment,
     Chip,
     Card,
 } from "@mui/material";
 import {
-    Search as SearchIcon,
     Psychology as PsychologyIcon,
     Category as CategoryIcon,
     AttachMoney as AttachMoneyIcon,
@@ -22,6 +19,7 @@ import { RequestGroup } from 'lib/dal';
 import { mockRequestGroups } from "lib/mock";
 import { PRICE_ANALYZER_PROMPT } from "ai/prompts";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton"
+import { SearchBar } from "@/components/search-bar";
 
 const categories = [
     "Electronics",
@@ -124,7 +122,7 @@ export default function PriceAnalyzerPage() {
     const headerText: string = "מנתח מחירים חכם"
     const descriptionText: string = "גלה תובנות על השוק באמצעות מנתח מחירים מבוסס AI כדי לבצע רכישות חכמות יותר."
     const [selectedCategory, setSelectedCategory] = useState("Electronics");
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchText, setSearchText] = useState("");
     const requestGroups: RequestGroup[] = mockRequestGroups.concat(mockRequestGroups);
 
     return (
@@ -138,48 +136,47 @@ export default function PriceAnalyzerPage() {
                 }}
             >
                 {/* Search Section */}
-                <Box sx={{ mb: 4 }}>
-                    <TextField
-                        fullWidth
-                        placeholder="Search for any product..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon sx={{ color: "primary.main" }} />
-                                </InputAdornment>
-                            ),
-                        }}
-                        sx={{
-                            mb: 2,
-                            "& .MuiOutlinedInput-root": {
-                                borderRadius: "12px",
-                                backgroundColor: "#f8fafc",
-                            },
-                        }}
-                    />
-
-                    {/* Category Filters */}
-                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                        {categories.map((category) => (
-                            <Chip
-                                key={category}
-                                label={category}
-                                onClick={() => setSelectedCategory(category)}
-                                variant={selectedCategory === category ? "filled" : "outlined"}
-                                sx={{
-                                    backgroundColor: selectedCategory === category ? "primary.main" : "transparent",
-                                    color: selectedCategory === category ? "white" : "primary.main",
-                                    borderColor: "primary.main",
-                                    "&:hover": {
-                                        backgroundColor: selectedCategory === category ? "primary.dark" : "primary.light",
-                                        color: "white",
-                                    },
-                                }}
-                            />
-                        ))}
-                    </Box>
+                <Box
+                    sx={{
+                        maxWidth: 800,
+                        mx: "auto",
+                        position: "relative",
+                        mt: { xs: -8, md: -7 }, // מרים את הסרגל חיפוש שיהיה קצת מעל הגרדיאנט
+                        mb: {xs: 2, md: 2},
+                        bgcolor: "white",
+                        boxShadow: 3,
+                        borderRadius: "12px",
+                        py: { xs: 2, md: 1 },
+                        px: { xs: 2, md: 2 },
+                        display: "flex",
+                        alignItems: "center",
+                        border: "2px solid transparent",
+                        "&:hover": {
+                            borderColor: "#1a2a5a"
+                        }
+                    }}
+                >
+                    <SearchBar searchText={searchText} placeholderText="חיפוש מוצרים..." handleSearchTextChange={setSearchText} />
+                </Box>
+                {/* Category Filters */}
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, flexWrap: "wrap", mb: 2 }}>
+                    {categories.map((category) => (
+                        <Chip
+                            key={category}
+                            label={category}
+                            onClick={() => setSelectedCategory(category)}
+                            variant={selectedCategory === category ? "filled" : "outlined"}
+                            sx={{
+                                backgroundColor: selectedCategory === category ? "primary.main" : "transparent",
+                                color: selectedCategory === category ? "white" : "primary.main",
+                                borderColor: "primary.main",
+                                "&:hover": {
+                                    backgroundColor: selectedCategory === category ? "primary.dark" : "primary.light",
+                                    color: "white",
+                                },
+                            }}
+                        />
+                    ))}
                 </Box>
                 <Suspense fallback={<GroupSectionSkeleton />}>
                     {requestGroups.map((requestGroup, index) => (

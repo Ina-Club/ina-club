@@ -1,7 +1,7 @@
 'use client';
 import { Suspense, useState, useEffect, useMemo } from "react";
 import { mockActiveGroups } from "lib/mock";
-import { Box, InputBase } from "@mui/material";
+import { Box } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
@@ -10,6 +10,7 @@ import ActiveGroupCard from "@/components/card/active-group-card";
 import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
 import { ActiveGroup } from "lib/dal";
+import { SearchBar } from "@/components/search-bar";
 
 export default function Page() {
   const headerText: string = "קבוצות הרכישה הפעילות";
@@ -56,38 +57,15 @@ export default function Page() {
           py: { xs: 2, md: 1 },
           px: { xs: 2, md: 2 },
           display: "flex",
-          alignItems: "center"
+          alignItems: "center",
+          border: "2px solid transparent",
+          "&:hover": {
+            borderColor: "#1a2a5a"
+          }
         }}
       >
         {/* Search box */}
-        <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, gap: 1 }}>
-          <SearchIcon sx={{ color: "action.active", ml: 1 }} />
-          <InputBase
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            placeholder={searchText === "" ? "חיפוש קבוצות רכישה..." : ""}
-            inputProps={{ "aria-label": "search" }}
-            sx={{ width: "100%" }}
-          />
-          {searchText && (
-            <Box
-              onClick={() => setSearchText("")}
-              sx={{
-                cursor: "pointer",
-                color: "text.secondary",
-                fontSize: "0.9rem",
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                "&:hover": {
-                  bgcolor: "grey.100"
-                }
-              }}
-            >
-              נקה
-            </Box>
-          )}
-        </Box>
+        <SearchBar searchText={searchText} placeholderText="חיפוש קבוצות רכישה..." handleSearchTextChange={setSearchText} />
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
