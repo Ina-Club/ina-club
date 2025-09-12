@@ -35,7 +35,7 @@ interface PriceAnalyzerCardProps {
 // };
 
 const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, handleExpansion }) => {
-    const loadingText: string = "טוען מידע...";
+    const loadingText: string = "מחשב מידע...";
     const baseData: AIProductData = {
         // TODO: use name, model somewhere
         name: "",
