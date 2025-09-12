@@ -99,11 +99,6 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
 
                                 <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                                     <Chip
-                                        label="AI Analyzed"
-                                        size="small"
-                                        sx={{ backgroundColor: "primary.main", color: "white" }}
-                                    />
-                                    <Chip
                                         label={requestGroup.category.toLowerCase()}
                                         size="small"
                                         sx={{ backgroundColor: "#ff9800", color: "white" }}
@@ -119,7 +114,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                         {"שגיאה בשליפת נתוני הAI"}
                                     </Typography>
                                     <Typography variant="body1" fontWeight={500} sx={{ display: "flex", justifyContent: "center" }}>
-                                        {"אנא נסו שוב מאוחר יותר"}
+                                        {"אנא נסו שנית מאוחר יותר"}
                                     </Typography>
                                 </>) :
                                 <AccordionDetails>
