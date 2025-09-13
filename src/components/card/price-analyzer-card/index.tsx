@@ -49,7 +49,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
     const [loading, setLoading] = useState(false);
     const [displayError, setDisplayError] = useState(false);
     const [productData, setProductData] = useState<AIProductData>(baseData);
-    const smartPrice = productData.averagePrice * (1 - smartDiscountPercentage / 100);
+    const smartPrice = Math.round(productData.averagePrice * (1 - smartDiscountPercentage / 100));
 
     const handleAccordionToggle = async (_event: React.SyntheticEvent, expanded: boolean) => {
         if (expanded) {

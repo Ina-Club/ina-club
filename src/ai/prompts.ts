@@ -9,5 +9,7 @@ export const PRICE_ANALYZER_PROMPT: string =
     Couple of things to keep in mide: if a specific model is provided, search for its price online and present an average price range.
     If no specific model is provided, select the highest-rated product in that category, perform a full price analysis for it, and present the information in JSON format.
     All string-type details should be written in Hebrew and related to Israel (For example, 'average price' property is based on different websites in Israel and in ILS).
-    For prices, don't include the unit or the sign of ILS, just make sure the number is in the right ILS amount. Also, the should be rounded to the nearest integer.
+    For prices, don't include the unit or the sign of ILS, just make sure the number is in the right ILS amount.
+    Also, prices should be rounded to the nearest integer.
+    If any of the specified fields are invalid/not found/not available for some reason and you think that you might provide false information, return an empty Dict.
     `
