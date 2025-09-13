@@ -4,9 +4,10 @@ import { Box, Typography } from "@mui/material";
 interface DefaultPageBannerProps {
   header: string;
   description: string;
+  mainSx?: object;
 }
 
-export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({ header, description }) => {
+export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({ header, description, mainSx }) => {
   return (
     <Box
       component="section"
@@ -19,7 +20,8 @@ export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({ header, de
           "linear-gradient(140deg,rgba(255, 255, 255, 1) 0%, rgba(211, 224, 235, 1) 100%)",
         pt: { xs: 2, md: 4 }, // רק padding-top, כדי שהפילטרים יישבו על החצי התחתון
         pb: { xs: 2, md: 0 }, // מוסיפים מקום לפילטרים
-        px: { xs: 2, md: 4 }
+        px: { xs: 2, md: 4 },
+        ...mainSx
       }}
     >
       {/* רקעים מטושטשים */}
