@@ -47,10 +47,8 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         "&:hover": {
           transform: "translateY(-6px)",
           boxShadow: 8,
-          cursor: "pointer"
         },
       }}
-      onClick={handleRequestGroupClick}
     >
       {/* Image Section */}
       <Box sx={{ position: "relative" }}>
@@ -136,7 +134,13 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       </Box>
 
       {/* Content */}
-      <CardContent sx={{ p: 2 }}>
+      <CardContent sx={{
+        p: 2,
+        "&:hover": {
+          cursor: "pointer"
+        },
+
+      }} onClick={handleRequestGroupClick}>
         {/* Title */}
         <Typography variant="h6" fontWeight={600} gutterBottom>
           {requestGroup.title}
