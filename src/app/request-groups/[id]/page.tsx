@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { RequestGroup } from "lib/dal";
 import { mockRequestGroups } from "lib/mock";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CardMedia } from "@mui/material";
 
 async function getRequestGroup(id: string): Promise<RequestGroup | null> {
     const url = `${"http://localhost:3000"}/api/users/${id}`;
@@ -15,9 +15,9 @@ export default async function Page({ params }: { params: { id: string } }) {
     // const requestGroup = await getRequestGroup(params.id);
     const allRequestGroups: RequestGroup[] = mockRequestGroups.concat(mockRequestGroups);
     const filteredRequestGroups: RequestGroup[] = allRequestGroups.filter((rg) => rg.id === params.id); //TODO: Change to DB fetch
-    if (!filteredRequestGroups)
+    if (!filteredRequestGroups.length)
         return notFound();
-    const requestGroup = filteredRequestGroups[0];
+    const requestGroup: RequestGroup = filteredRequestGroups[0];
 
     return (
         <Box sx={{
@@ -60,15 +60,17 @@ export default async function Page({ params }: { params: { id: string } }) {
                         mb: { xs: 2, md: 0 },
                         display: "flex",
                         flexDirection: "column",
-                        justifyContent: "center",
                     }}
                 >
                     {/* Example text content */}
                     <Typography variant="h6" mb={2}>
-                        כאן יופיעו פרטי הבקשה, תיאור, מידע נוסף, וכו'.
+                        קטגוריה: {requestGroup.category}
                     </Typography>
-                    <Typography>
-                        ניתן להוסיף כאן מידע נוסף, טבלאות, כפתורים, או כל תוכן טקסטואלי אחר.
+                    <Typography variant="h6" mb={2}>
+                        משתתפים: {requestGroup.participants.length}
+                    </Typography>
+                    <Typography variant="h6" mb={2}>
+                        מידע נוסף:
                     </Typography>
                 </Box>
                 {/* Pictures Section - 1/2 width on desktop */}
@@ -85,24 +87,12 @@ export default async function Page({ params }: { params: { id: string } }) {
                         minHeight: 200,
                     }}
                 >
-                    {/* Example placeholder for images */}
-                    <Typography variant="subtitle1" color="text.secondary" mb={1}>
-                        תמונות/גלריה
-                    </Typography>
-                    {/* Replace with actual images */}
-                    <Box
-                        sx={{
-                            width: 120,
-                            height: 120,
-                            bgcolor: "#e0e0e0",
-                            borderRadius: 2,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                        }}
-                    >
-                        <Typography color="text.disabled">Image</Typography>
-                    </Box>
+                    <CardMedia
+                        component="img"
+                        image={requestGroup.images[0]}
+                        alt={requestGroup.title}
+                        sx={{ height: { xs: 300, md: 600 } }}
+                    />
                 </Box>
             </Box>
         </Box>
