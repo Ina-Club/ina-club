@@ -2,6 +2,7 @@ import { ActiveGroup, Company, RequestGroup } from "./dal";
 
 export const mockRequestGroups: RequestGroup[] = [
   {
+    id: "1",
     images: ["/BravoMateo.png", "https://picsum.photos/seed/laptop2/400/300"],
     category: "אלקטרוניקה",
     title: "MacBook Pro M3",
@@ -66,6 +67,7 @@ export const mockRequestGroups: RequestGroup[] = [
     ],
   },
   {
+    id: "2",
     images: ["/BravoMateo.png", "https://picsum.photos/seed/phone2/400/300"],
     category: "סמארטפונים",
     title: "iPhone 16 Pro Max",
@@ -104,6 +106,7 @@ export const mockRequestGroups: RequestGroup[] = [
     ],
   },
   {
+    id: "3",
     images: [
       "/BravoMateo.png",
       "https://picsum.photos/seed/headphones2/400/300",

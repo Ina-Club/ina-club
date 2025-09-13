@@ -1,4 +1,5 @@
 export interface RequestGroup {
+  id: string;
   images: string[];
   category: string;
   title: string;
