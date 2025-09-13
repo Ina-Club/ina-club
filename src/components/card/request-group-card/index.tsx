@@ -47,6 +47,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         "&:hover": {
           transform: "translateY(-6px)",
           boxShadow: 8,
+          cursor: "pointer"
         },
       }}
       onClick={handleRequestGroupClick}
