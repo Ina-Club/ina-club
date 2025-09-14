@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { RequestGroup } from "lib/dal";
 import { mockRequestGroups } from "lib/mock";
-import { Box, Typography, CardMedia } from "@mui/material";
+import { Box, Typography, CardMedia, Button } from "@mui/material";
 
 async function getRequestGroup(id: string): Promise<RequestGroup | null> {
     const url = `${"http://localhost:3000"}/api/users/${id}`;
@@ -39,7 +39,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                         justifyContent: "start"
                     }}
                 >
-                    {`${requestGroup.title}sssss`}
+                    {`${requestGroup.title}`}
                 </Typography>
             </Box>
             <Box
@@ -69,9 +69,14 @@ export default async function Page({ params }: { params: { id: string } }) {
                     <Typography variant="h6" mb={2}>
                         משתתפים: {requestGroup.participants.length}
                     </Typography>
-                    <Typography variant="h6" mb={2}>
-                        מידע נוסף:
-                    </Typography>
+                    {requestGroup.description &&
+                        <Typography variant="h6" mb={2}>
+                            פירוט: {requestGroup.description}
+                        </Typography>
+                    }
+                    <Button type="submit" variant="contained" color="primary" fullWidth>
+                        הרשמה לקבוצה
+                    </Button>
                 </Box>
                 {/* Pictures Section - 1/2 width on desktop */}
                 <Box

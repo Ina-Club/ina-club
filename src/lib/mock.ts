@@ -71,6 +71,7 @@ export const mockRequestGroups: RequestGroup[] = [
     images: ["/BravoMateo.png", "https://picsum.photos/seed/phone2/400/300"],
     category: "סמארטפונים",
     title: "iPhone 16 Pro Max",
+    description: "aught adfasdfasdfasdf asdf asdfasd fasdfasdfasdfas dfas dfasfasdfasd fasdf asdfasasdf asdfasdf asfasdf asdf asfasdfasdfasdf asdfasdfa sdfasdf asdfasdfasdfasd fasfasdfasdfas fas fas fasdf ",
     participants: [
       {
         image: "https://i.pravatar.cc/150?img=4",

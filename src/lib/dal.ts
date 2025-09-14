@@ -5,6 +5,7 @@ export interface RequestGroup {
   title: string;
   participants: User[];
   openedGroups: ActiveGroup[];
+  description?: string;
 }
 
 export interface User {
