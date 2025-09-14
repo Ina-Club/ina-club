@@ -224,6 +224,14 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                             </Typography>
                                         </Card>
                                     </Box>
+                                    <Box sx={{ mt: 2 }}>
+                                        <Typography sx={{ display: "flex", justifyContent: "center" }}>
+                                            AI עלול לטעות, אנא בדקו מידע חשוב.
+                                        </Typography>
+                                        <Typography sx={{ display: "flex", justifyContent: "center" }}>
+                                            המידע מתעדכן פעם ביום - ט.ל.ח
+                                        </Typography>
+                                    </Box>
                                 </AccordionDetails>
                         }
                     </Accordion >
