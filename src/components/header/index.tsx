@@ -101,7 +101,7 @@ export default function Header() {
         Sign Up
       </MenuItem>,
     ];
-  
+
   // Request Group Creation Dialog
   const [image, setImage] = useState<string | null>(null);
   const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
@@ -116,9 +116,14 @@ export default function Header() {
     }
   };
 
-  const handleRemove = () => {
+  const handleImageRemove = () => {
     setImage(null);
   };
+
+  const handleRequestGroupDialogClose = () => {
+    handleImageRemove();
+    setOpenRequestGroupDialog(false);
+  }
 
   return (
     <>
@@ -311,7 +316,7 @@ export default function Header() {
         </Box>
       </Drawer>
 
-      <Dialog open={openRequestGroupDialog} onClose={() => setOpenRequestGroupDialog(false)} fullWidth keepMounted>
+      <Dialog open={openRequestGroupDialog} onClose={handleRequestGroupDialogClose} fullWidth>
         <DialogTitle sx={{ display: "flex", justifyContent: "center", mt: 2 }} variant="h5"> בקשה לקבוצת רכישה חדשה</DialogTitle>
         <DialogContent>
           <Box sx={{
@@ -360,7 +365,7 @@ export default function Header() {
                       border: "1px solid #ccc",
                     }}>
                     <IconButton
-                      onClick={handleRemove}
+                      onClick={handleImageRemove}
                       size="small"
                       sx={{
                         position: "absolute",
@@ -405,7 +410,7 @@ export default function Header() {
           </Box>
         </DialogContent>
         <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => setOpenRequestGroupDialog(false)}>סגור</Button>
+          <Button onClick={handleRequestGroupDialogClose}>סגור</Button>
         </Box>
       </Dialog>
     </>
