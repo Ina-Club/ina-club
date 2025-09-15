@@ -16,6 +16,12 @@ import {
   Divider,
   Menu,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Typography,
+  Stack,
+  TextField
 } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
@@ -59,6 +65,7 @@ export default function Header() {
 
   // Profile Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
   const openMenu = Boolean(anchorEl);
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(event.currentTarget);
@@ -66,36 +73,36 @@ export default function Header() {
 
   const profileMenuItems = loggedIn
     ? [
-        <MenuItem
-          key="signout"
-          onClick={() => {
-            handleMenuClose();
-            signOut();
-          }}
-        >
-          Sign Out
-        </MenuItem>,
-      ]
+      <MenuItem
+        key="signout"
+        onClick={() => {
+          handleMenuClose();
+          signOut();
+        }}
+      >
+        Sign Out
+      </MenuItem>,
+    ]
     : [
-        <MenuItem
-          key="signin"
-          onClick={() => {
-            handleMenuClose();
-            window.location.href = "/auth/signin";
-          }}
-        >
-          Sign In
-        </MenuItem>,
-        <MenuItem
-          key="signup"
-          onClick={() => {
-            handleMenuClose();
-            window.location.href = "/auth/signup";
-          }}
-        >
-          Sign Up
-        </MenuItem>,
-      ];
+      <MenuItem
+        key="signin"
+        onClick={() => {
+          handleMenuClose();
+          window.location.href = "/auth/signin";
+        }}
+      >
+        Sign In
+      </MenuItem>,
+      <MenuItem
+        key="signup"
+        onClick={() => {
+          handleMenuClose();
+          window.location.href = "/auth/signup";
+        }}
+      >
+        Sign Up
+      </MenuItem>,
+    ];
 
   return (
     <>
@@ -152,8 +159,6 @@ export default function Header() {
             }}
           >
             <Button
-              component={Link}
-              href="/create"
               variant="outlined"
               sx={{
                 minWidth: 32,
@@ -166,6 +171,7 @@ export default function Header() {
                 backgroundColor: "#fff",
                 borderColor: "#1a2a5a",
               }}
+              onClick={() => setOpenRequestGroupDialog(true)}
             >
               <AddIcon sx={{ ml: 1 }} /> צור בקשה
             </Button>
@@ -245,8 +251,6 @@ export default function Header() {
           <Divider>
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <Button
-                component={Link}
-                href="/create"
                 variant="outlined"
                 fullWidth
                 sx={{
@@ -256,7 +260,7 @@ export default function Header() {
                   borderRadius: "24px",
                   borderColor: "#1a2a5a",
                 }}
-                onClick={() => setDrawerOpen(false)}
+                onClick={() => setOpenRequestGroupDialog(true)}
               >
                 <AddIcon sx={{ ml: 1 }} /> צור בקשה
               </Button>
@@ -290,6 +294,34 @@ export default function Header() {
           </List>
         </Box>
       </Drawer>
+
+      <Dialog open={openRequestGroupDialog} onClose={() => setOpenRequestGroupDialog(false)} fullWidth keepMounted>
+        <DialogTitle sx={{ display: "flex", justifyContent: "center", mt: 2 }} variant="h5"> בקשה לקבוצת רכישה חדשה</DialogTitle>
+        <DialogContent>
+          <Box sx={{
+            mx: "auto",
+            mt: { xs: 2, md: 2 },
+            p: 4,
+            border: "1px solid #ddd",
+            borderRadius: 2
+          }}>
+            <Stack spacing={2} component="form">
+              <TextField label="כותרת" required fullWidth />
+              <TextField label="קטגוריה" required fullWidth />
+              <TextField label="תיאור" required fullWidth />
+              <Button variant="outlined" color="secondary" fullWidth onClick={() => signIn("google", { callbackUrl: "/" })}>
+                העלאת תמונה
+              </Button>
+              <Button type="submit" variant="contained" color="primary" fullWidth>
+                הגש בקשה
+              </Button>
+            </Stack>
+          </Box>
+        </DialogContent>
+        <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() => setOpenRequestGroupDialog(false)}>סגור</Button>
+        </Box>
+      </Dialog>
     </>
   );
 }
