@@ -19,10 +19,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  Typography,
   Stack,
-  TextField
+  TextField,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -65,10 +65,8 @@ export default function Header() {
 
   // Profile Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
   const openMenu = Boolean(anchorEl);
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
-    setAnchorEl(event.currentTarget);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
   const profileMenuItems = loggedIn
@@ -103,6 +101,24 @@ export default function Header() {
         Sign Up
       </MenuItem>,
     ];
+  
+  // Request Group Creation Dialog
+  const [image, setImage] = useState<string | null>(null);
+  const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
+  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemove = () => {
+    setImage(null);
+  };
 
   return (
     <>
@@ -309,9 +325,79 @@ export default function Header() {
               <TextField label="כותרת" required fullWidth />
               <TextField label="קטגוריה" required fullWidth />
               <TextField label="תיאור" required fullWidth />
-              <Button variant="outlined" color="secondary" fullWidth onClick={() => signIn("google", { callbackUrl: "/" })}>
-                העלאת תמונה
-              </Button>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                {!image ? (
+                  <>
+                    <input
+                      accept="image/*"
+                      id="upload-input"
+                      type="file"
+                      style={{ display: "none" }}
+                      onChange={handleUpload}
+                    />
+                    <Box sx={{ width: "100%" }}>
+                      <label htmlFor="upload-input" style={{ width: "100%", display: "block" }}>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          component="span"
+                          fullWidth
+                          sx={{ textTransform: "none", width: "100%" }}
+                        >
+                          העלאת תמונה
+                        </Button>
+                      </label>
+                    </Box>
+                  </>
+                ) : (
+                  <Box
+                    sx={{
+                      position: "relative",
+                      width: 80,
+                      height: 80,
+                      borderRadius: 2,
+                      overflow: "visible", // allow button to overflow
+                      border: "1px solid #ccc",
+                    }}>
+                    <IconButton
+                      onClick={handleRemove}
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: -12,
+                        left: -12,
+                        zIndex: 2,
+                        bgcolor: "white",
+                        boxShadow: 1,
+                        "&:hover": { bgcolor: "grey.200" },
+                        p: "2px"
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                    <Box
+                      sx={{
+                        position: "relative",
+                        width: 80,
+                        height: 80,
+                        borderRadius: 2,
+                        overflow: "hidden",
+                        border: "1px solid #ccc",
+                      }}
+                    >
+                      <img
+                        src={image}
+                        alt="preview"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                )}
+              </Box>
               <Button type="submit" variant="contained" color="primary" fullWidth>
                 הגש בקשה
               </Button>
@@ -325,3 +411,4 @@ export default function Header() {
     </>
   );
 }
+
