@@ -10,6 +10,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useState, useRef } from "react";
+import FileValidationError from "errors/FileValidationError";
 
 interface UploadDropzoneProps {
   handleFileUpload: (file: File[]) => void;
@@ -39,25 +40,31 @@ export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ handleFileUpload
   const validateFiles = (newFiles: File[], newFilesSizeInBytes: number) => {
     // Validate files total size and validate they are supported file types!
     if (multiple && filesSizeInBytes + newFilesSizeInBytes > maxBytes)
-      return false;
+      throw new FileValidationError(`Total size of files exceeds ${maxSizeMB}MB`);
     if (!multiple && newFilesSizeInBytes > maxBytes)
-      return false;
-    const validFiles: File[] = Array.from(newFiles).filter(validateFile);
-    return validFiles.length === newFiles.length;
+      throw new FileValidationError(`File size of exceeds ${maxSizeMB}MB`);
+    Array.from(newFiles).filter(validateFile);
   }
 
   const validateFile = (file: File) => {
-    return accept.includes(file.type)
+    if (!accept.includes(file.type))
+      throw new FileValidationError(`File type ${file.type} is not supported`);
   }
 
   const addFiles = (newFiles: File[]) => {
     const newFilesSizeInBytes: number = Array.from(newFiles).reduce((sizeSum, file) => sizeSum + file.size, 0); // Calculate the size of the new files.
-    if (!validateFiles(newFiles, newFilesSizeInBytes))
-      alert("Files are not valid!");
-    else {
+    try {
+      validateFiles(newFiles, newFilesSizeInBytes);
       const newFilesList: File[] = multiple ? [...files, ...newFiles] : [newFiles[0]];
       const newFilesSize: number = multiple ? filesSizeInBytes + newFilesSizeInBytes : newFilesSizeInBytes;
       handleFileChange(newFilesList, newFilesSize);
+    }
+    catch (err) {
+      if (err instanceof FileValidationError) {
+        alert(err.message);
+      } else {
+        console.error("Unexpected error while validating files:", err);
+      }
     }
   };
 
