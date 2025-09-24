@@ -22,7 +22,6 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -38,6 +37,7 @@ import {
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { UploadDropzone } from '@/components/upload-dropzone';
 
 const navigationItems = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
@@ -53,6 +53,7 @@ const mobileNavigationItems = [
 
 export default function Header() {
   const pathname = usePathname();
+  const dropzoneTitle: string = "הוסף תמונה (אופציונלי)";
   const currentTab = navigationItems.findIndex(
     (item) => item.href === pathname
   );
@@ -103,25 +104,11 @@ export default function Header() {
     ];
 
   // Request Group Creation Dialog
-  const [image, setImage] = useState<string | null>(null);
+  const [productImage, setProductImage] = useState("");
   const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
-  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageRemove = () => {
-    setImage(null);
-  };
 
   const handleRequestGroupDialogClose = () => {
-    handleImageRemove();
+    setProductImage("");
     setOpenRequestGroupDialog(false);
   }
 
@@ -316,6 +303,7 @@ export default function Header() {
         </Box>
       </Drawer>
 
+      {/* Request group creation dialog */}
       <Dialog open={openRequestGroupDialog} onClose={handleRequestGroupDialogClose} fullWidth>
         <DialogTitle sx={{ display: "flex", justifyContent: "center", mt: 2 }} variant="h5"> בקשה לקבוצת רכישה חדשה</DialogTitle>
         <DialogContent>
@@ -330,79 +318,7 @@ export default function Header() {
               <TextField label="כותרת" required fullWidth />
               <TextField label="קטגוריה" required fullWidth />
               <TextField label="תיאור" required fullWidth />
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                {!image ? (
-                  <>
-                    <input
-                      accept="image/*"
-                      id="upload-input"
-                      type="file"
-                      style={{ display: "none" }}
-                      onChange={handleUpload}
-                    />
-                    <Box sx={{ width: "100%" }}>
-                      <label htmlFor="upload-input" style={{ width: "100%", display: "block" }}>
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          component="span"
-                          fullWidth
-                          sx={{ textTransform: "none", width: "100%" }}
-                        >
-                          העלאת תמונה
-                        </Button>
-                      </label>
-                    </Box>
-                  </>
-                ) : (
-                  <Box
-                    sx={{
-                      position: "relative",
-                      width: 80,
-                      height: 80,
-                      borderRadius: 2,
-                      overflow: "visible", // allow button to overflow
-                      border: "1px solid #ccc",
-                    }}>
-                    <IconButton
-                      onClick={handleImageRemove}
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: -12,
-                        left: -12,
-                        zIndex: 2,
-                        bgcolor: "white",
-                        boxShadow: 1,
-                        "&:hover": { bgcolor: "grey.200" },
-                        p: "2px"
-                      }}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                    <Box
-                      sx={{
-                        position: "relative",
-                        width: 80,
-                        height: 80,
-                        borderRadius: 2,
-                        overflow: "hidden",
-                        border: "1px solid #ccc",
-                      }}
-                    >
-                      <img
-                        src={image}
-                        alt="preview"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                )}
-              </Box>
+              <UploadDropzone multiple={false} title={dropzoneTitle} fileList={[productImage]} handleFileUpload={setProductImage} />
               <Button type="submit" variant="contained" color="primary" fullWidth>
                 הגש בקשה
               </Button>
