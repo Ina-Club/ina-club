@@ -8,6 +8,7 @@ import {
   Button,
   Tabs,
   Tab,
+  Typography,
   Drawer,
   List,
   ListItemButton,
@@ -53,7 +54,6 @@ const mobileNavigationItems = [
 
 export default function Header() {
   const pathname = usePathname();
-  const dropzoneTitle: string = "הוסף תמונה (אופציונלי)";
   const currentTab = navigationItems.findIndex(
     (item) => item.href === pathname
   );
@@ -104,11 +104,13 @@ export default function Header() {
     ];
 
   // Request Group Creation Dialog
-  const [productImage, setProductImage] = useState("");
+  const dropzoneTitle: string = "גרור תמונה לכאן או לחץ לבחירה";
+  const [productImage, setProductImage] = useState<File[]>([]);
   const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
 
   const handleRequestGroupDialogClose = () => {
-    setProductImage("");
+    console.log(productImage);
+    setProductImage([]);
     setOpenRequestGroupDialog(false);
   }
 
@@ -318,7 +320,8 @@ export default function Header() {
               <TextField label="כותרת" required fullWidth />
               <TextField label="קטגוריה" required fullWidth />
               <TextField label="תיאור" required fullWidth />
-              <UploadDropzone multiple={false} title={dropzoneTitle} fileList={[productImage]} handleFileUpload={setProductImage} />
+              <Typography>הוסף תמונה (אופציונלי):</Typography>
+              <UploadDropzone multiple={true} title={dropzoneTitle} handleFileUpload={setProductImage} />
               <Button type="submit" variant="contained" color="primary" fullWidth>
                 הגש בקשה
               </Button>

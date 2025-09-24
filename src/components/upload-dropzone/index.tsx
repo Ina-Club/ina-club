@@ -11,43 +11,60 @@ import {
 } from "@mui/material";
 import { useState, useRef } from "react";
 
-type UploadDropzoneProps = {
-  onFilesChange?: (files: File[]) => void;
+interface UploadDropzoneProps {
+  handleFileUpload: (file: File[]) => void;
   accept?: string[];          // ["image/png","image/jpeg","image/gif"]
   maxSizeMB?: number;         // 10
   multiple?: boolean;         // true
   title?: string;             // "הוסף תמונות"
-  fileList?: string[];
-  handleFileUpload?: (file: string) => void;
 };
 
 const acceptedFileTypes: string[] = ["image/png", "image/jpeg", "image/gif"];
-const inputTitle: string = "גרור תמונה לכאן או לחץ לבחירה";
 
-export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onFilesChange, accept = acceptedFileTypes, maxSizeMB = 10, multiple, title, fileList, handleFileUpload }) => {
+export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ handleFileUpload, accept = acceptedFileTypes, maxSizeMB = 10, multiple, title }) => {
   const theme = useTheme();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useState<File[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   const maxBytes = maxSizeMB * 1024 * 1024;
+  const inputRef = useRef<HTMLInputElement>(null);
   const openPicker = () => inputRef.current?.click();
+  const [files, setFiles] = useState<File[]>([]);
+  const [filesSizeInBytes, setFilesSizeInBytes] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const validate = (f: File) =>
-    accept.includes(f.type) && f.size <= maxBytes;
+  const handleFileChange = (files: File[], filesSize: number) => {
+    handleFileUpload(files);
+    setFiles(files);
+    setFilesSizeInBytes(filesSize);
+  }
 
-  const addFiles = (list: FileList | null) => {
-    if (!list) return;
-    const next = Array.from(list).filter(validate);
-    if (next.length === 0) return;
-    const merged = multiple ? [...files, ...next] : [next[0]];
-    setFiles(merged);
-    onFilesChange?.(merged);
+  const validateFiles = (newFiles: File[], newFilesSizeInBytes: number) => {
+    // Validate files total size and validate they are supported file types!
+    if (multiple && filesSizeInBytes + newFilesSizeInBytes > maxBytes)
+      return false;
+    if (!multiple && newFilesSizeInBytes > maxBytes)
+      return false;
+    const validFiles: File[] = Array.from(newFiles).filter(validateFile);
+    return validFiles.length === newFiles.length;
+  }
+
+  const validateFile = (file: File) => {
+    return accept.includes(file.type)
+  }
+
+  const addFiles = (newFiles: File[]) => {
+    const newFilesSizeInBytes: number = Array.from(newFiles).reduce((sizeSum, file) => sizeSum + file.size, 0); // Calculate the size of the new files.
+    if (!validateFiles(newFiles, newFilesSizeInBytes))
+      alert("Files are not valid!");
+    else {
+      const newFilesList: File[] = multiple ? [...files, ...newFiles] : [newFiles[0]];
+      const newFilesSize: number = multiple ? filesSizeInBytes + newFilesSizeInBytes : newFilesSizeInBytes;
+      handleFileChange(newFilesList, newFilesSize);
+    }
   };
 
-  const removeFile = (idx: number) => {
-    const next = files.filter((_, i) => i !== idx);
-    setFiles(next);
-    onFilesChange?.(next);
+  const removeFile = (index: number) => {
+    const toBeRemoved: File = files.filter((_, i) => i === index)[0]!;
+    const filteredFiles: File[] = files.filter((_, i) => i !== index);
+    handleFileChange(filteredFiles, filesSizeInBytes - toBeRemoved.size)
   };
 
   // Drag handlers
@@ -59,12 +76,11 @@ export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onFilesChange, a
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    addFiles(e.dataTransfer.files);
+    addFiles([...e.dataTransfer.files]);
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      <Typography>{title}</Typography>
       <Box
         onClick={openPicker}
         onDragOver={onDragOver}
@@ -87,9 +103,7 @@ export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onFilesChange, a
       >
         <Stack alignItems="center" spacing={1}>
           <UploadIcon fontSize="large" />
-          <Typography>
-            {inputTitle}
-          </Typography>
+          <Typography>{title}</Typography>
           <Typography variant="body2" color="text.secondary">
             PNG, JPG, GIF עד {maxSizeMB}MB
           </Typography>
@@ -102,7 +116,7 @@ export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ onFilesChange, a
           accept={accept.join(",")}
           multiple={multiple}
           style={{ display: "none" }}
-          onChange={(e) => addFiles(e.target.files)}
+          onChange={(e) => addFiles(Array.from(e.target.files ?? []))} // if no files are picked, return an empty array
         />
       </Box>
 
