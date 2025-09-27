@@ -107,6 +107,7 @@ export default function Header() {
   const dropzoneTitle: string = "גרור תמונה לכאן או לחץ לבחירה";
   const [productImage, setProductImage] = useState<File[]>([]);
   const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
+  const [descriptionText, setDescriptionText] = useState("");
 
   const handleRequestGroupDialogClose = () => {
     console.log(productImage);
@@ -319,7 +320,18 @@ export default function Header() {
             <Stack spacing={2} component="form">
               <TextField label="כותרת" required fullWidth />
               <TextField label="קטגוריה" required fullWidth />
-              <TextField label="תיאור" required fullWidth />
+              <TextField
+                label="תיאור"
+                required
+                fullWidth
+                multiline
+                rows={4}
+                onChange={(e) => setDescriptionText(e.target.value)}
+                slotProps={{
+                  htmlInput: { maxLength: 200 }
+                }}
+                helperText={`${descriptionText.length}/200 תווים`}
+              />
               <Typography>הוסף תמונה (אופציונלי):</Typography>
               <UploadDropzone multiple={true} title={dropzoneTitle} handleFileUpload={setProductImage} />
               <Button type="submit" variant="contained" color="primary" fullWidth>
