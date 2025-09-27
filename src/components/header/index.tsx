@@ -122,10 +122,15 @@ export default function Header() {
     }
   }
 
-  const handleRequestGroupDialogClose = () => {
-    console.log(productImage);
+  const handleInputsReset = () => {
     setProductImage([]);
     setCategory("");
+    setDescriptionLength(0);
+  }
+
+  const handleRequestGroupDialogClose = () => {
+    console.log(productImage);
+    handleInputsReset();
     setOpenRequestGroupDialog(false);
   }
 
