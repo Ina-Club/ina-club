@@ -24,7 +24,7 @@ const acceptedFileTypes: string[] = ["image/png", "image/jpeg", "image/gif"];
 
 export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ handleFileUpload, accept = acceptedFileTypes, maxSizeMB = 10, multiple, title }) => {
   const theme = useTheme();
-  const maxBytes = maxSizeMB * 1024 * 1024;
+  const maxBytes: number = maxSizeMB * 1024 * 1024;
   const inputRef = useRef<HTMLInputElement>(null);
   const openPicker = () => inputRef.current?.click();
   const [files, setFiles] = useState<File[]>([]);
