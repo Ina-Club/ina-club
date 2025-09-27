@@ -104,10 +104,18 @@ export default function Header() {
     ];
 
   // Request Group Creation Dialog
+  const maxCharacters: number = 250;
   const dropzoneTitle: string = "גרור תמונה לכאן או לחץ לבחירה";
   const [productImage, setProductImage] = useState<File[]>([]);
   const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
-  const [descriptionText, setDescriptionText] = useState("");
+  const [descriptionLength, setDescriptionLength] = useState(0);
+
+  const handleDescriptionChange = (newText: string) => {
+    const desiredNewLength: number = newText.length;
+    if (desiredNewLength <= maxCharacters) {
+      setDescriptionLength(desiredNewLength);
+    }
+  }
 
   const handleRequestGroupDialogClose = () => {
     console.log(productImage);
@@ -326,11 +334,11 @@ export default function Header() {
                 fullWidth
                 multiline
                 rows={4}
-                onChange={(e) => setDescriptionText(e.target.value)}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
                 slotProps={{
-                  htmlInput: { maxLength: 200 }
+                  htmlInput: { maxLength: maxCharacters }
                 }}
-                helperText={`${descriptionText.length}/200 תווים`}
+                helperText={`${descriptionLength}/${maxCharacters} תווים`}
               />
               <Typography>הוסף תמונה (אופציונלי):</Typography>
               <UploadDropzone multiple={true} title={dropzoneTitle} handleFileUpload={setProductImage} />
