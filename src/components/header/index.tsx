@@ -22,6 +22,9 @@ import {
   DialogContent,
   Stack,
   TextField,
+  Select,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
@@ -109,6 +112,8 @@ export default function Header() {
   const [productImage, setProductImage] = useState<File[]>([]);
   const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
   const [descriptionLength, setDescriptionLength] = useState(0);
+  const [category, setCategory] = useState("");
+  const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
 
   const handleDescriptionChange = (newText: string) => {
     const desiredNewLength: number = newText.length;
@@ -120,6 +125,7 @@ export default function Header() {
   const handleRequestGroupDialogClose = () => {
     console.log(productImage);
     setProductImage([]);
+    setCategory("");
     setOpenRequestGroupDialog(false);
   }
 
@@ -327,7 +333,19 @@ export default function Header() {
           }}>
             <Stack spacing={2} component="form">
               <TextField label="כותרת" required fullWidth />
-              <TextField label="קטגוריה" required fullWidth />
+              <FormControl required fullWidth>
+                <InputLabel required>קטגוריה</InputLabel>
+                <Select
+                  required
+                  value={category}
+                  label="קטגוריה"
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  {categoryList.map((opt, i) => (
+                    <MenuItem key={i} value={opt}>{opt}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <TextField
                 label="תיאור"
                 required
