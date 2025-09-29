@@ -124,7 +124,6 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                             display: "grid",
                                             gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, // mobile - 1 column, desktop - 3 columns
                                             width: "100%",
-                                            px: { xs: 2, md: 2 },
                                             position: "inherit",
                                             justifyContent: "center",
                                             alignItems: "center",
@@ -152,7 +151,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                             <Divider sx={{ my: 2 }} />
 
                                             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                                <Box sx={{ justifyContent: "space-between", alignContent: "center" }}>
+                                                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", }}>
                                                     <Typography variant="body2" color="text.secondary" fontWeight={600}>
                                                         מחיר מקורי
                                                     </Typography>
@@ -160,7 +159,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                                                         ₪{productData.averagePrice}
                                                     </Typography>
                                                 </Box>
-                                                <Box sx={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+                                                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", }}>
                                                     <Typography variant="body2" color="#4caf50" fontWeight={600}>
                                                         מחיר לאחר הנחה צפויה
                                                     </Typography>
