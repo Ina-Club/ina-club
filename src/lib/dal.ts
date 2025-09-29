@@ -1,9 +1,11 @@
 export interface RequestGroup {
+  id: string;
   images: string[];
   category: string;
   title: string;
   participants: User[];
   openedGroups: ActiveGroup[];
+  description?: string;
 }
 
 export interface User {
