@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { RequestGroup } from "lib/dal";
 import {
   Card,
@@ -22,11 +23,15 @@ interface RequestGroupCardProps {
   requestGroup: RequestGroup;
 }
 
-const RequestGroupCard: React.FC<RequestGroupCardProps> = ({
-  requestGroup,
-}) => {
+const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => {
+  const router = useRouter();
+  const goToRequestGroup = () => router.push(`/request-groups/${requestGroup.id}`);
   const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
+
+  const handleRequestGroupClick = () => {
+    goToRequestGroup();
+  }
 
   return (
     <Card
@@ -105,7 +110,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({
               gap: 0.5,
             }}
           >
-       
+
             {requestGroup.images.map((_, idx) => (
               <Box
                 key={idx}
@@ -129,7 +134,13 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({
       </Box>
 
       {/* Content */}
-      <CardContent sx={{ p: 2 }}>
+      <CardContent sx={{
+        p: 2,
+        "&:hover": {
+          cursor: "pointer"
+        },
+
+      }} onClick={handleRequestGroupClick}>
         {/* Title */}
         <Typography variant="h6" fontWeight={600} gutterBottom>
           {requestGroup.title}
