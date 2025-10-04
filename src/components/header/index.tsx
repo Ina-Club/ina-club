@@ -93,7 +93,7 @@ export default function Header() {
           window.location.href = "/auth/signin";
         }}
       >
-        Sign In
+        התחברות
       </MenuItem>,
       <MenuItem
         key="signup"
@@ -102,7 +102,7 @@ export default function Header() {
           window.location.href = "/auth/signup";
         }}
       >
-        Sign Up
+        הרשמה
       </MenuItem>,
     ];
 
