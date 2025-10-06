@@ -86,21 +86,6 @@ interface UserProfile {
     createdAt: string;
     images: string[];
   }>;
-  ownedActiveGroups: Array<{
-    id: string;
-    title: string;
-    description?: string;
-    category?: string;
-    company?: string;
-    basePrice: number;
-    groupPrice: number;
-    minParticipants?: number;
-    maxParticipants?: number;
-    deadline: string;
-    status: string;
-    createdAt: string;
-    images: string[];
-  }>;
 }
 
 interface TabPanelProps {
@@ -145,9 +130,8 @@ export default function Profile() {
     enrolledRequestGroups: [],
     enrolledActiveGroups: [],
     ownedRequestGroups: [],
-    ownedActiveGroups: [],
   };
-  
+
   // TODO: Replace this with API integration that fetches the profile
   useEffect(() => {
     setProfile(mockedUser);
@@ -204,7 +188,6 @@ export default function Profile() {
     setUpdateLoading(true);
     try {
       let profilePictureUrl = profile?.profilePicture;
-      
       // If new profile picture uploaded, handle it here
       if (editProfilePicture.length > 0) {
         // For now, we'll use the first image URL from the uploaded file
@@ -394,11 +377,6 @@ export default function Profile() {
               label="בקשות"
               iconPosition="start"
             />
-            <Tab
-              icon={<TrendingUpIcon />}
-              label="קבוצות בבעלותי"
-              iconPosition="start"
-            />
           </Tabs>
         </Box>
 
@@ -484,94 +462,6 @@ export default function Profile() {
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       הצטרף ב-{formatDate(group.joinedAt)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          )}
-        </TabPanel>
-
-        {/* Owned Groups Tab */}
-        <TabPanel value={tabValue} index={2}>
-          <Typography variant="h6" gutterBottom>
-            קבוצות שבבעלותי ({profile.ownedRequestGroups.length + profile.ownedActiveGroups.length})
-          </Typography>
-          
-          <Typography variant="subtitle1" sx={{ mt: 3, mb: 2 }}>
-            בקשות ({profile.ownedRequestGroups.length})
-          </Typography>
-          {profile.ownedRequestGroups.length === 0 ? (
-            <Alert severity="info">אין בקשות בבעלותך</Alert>
-          ) : (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2, mb: 3 }}>
-              {profile.ownedRequestGroups.map((group) => (
-                <Card key={group.id} sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                      <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
-                        {group.title}
-                      </Typography>
-                      <Chip
-                        label={getStatusText(group.status)}
-                        color={getStatusColor(group.status) as any}
-                        size="small"
-                      />
-                    </Box>
-                    {group.category && (
-                      <Chip
-                        label={group.category}
-                        size="small"
-                        sx={{ mb: 1 }}
-                      />
-                    )}
-                    <Typography variant="body2" color="text.secondary">
-                      נוצר ב-{formatDate(group.createdAt)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          )}
-
-          <Typography variant="subtitle1" sx={{ mt: 3, mb: 2 }}>
-            קבוצות פעילות ({profile.ownedActiveGroups.length})
-          </Typography>
-          {profile.ownedActiveGroups.length === 0 ? (
-            <Alert severity="info">אין קבוצות פעילות בבעלותך</Alert>
-          ) : (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-              {profile.ownedActiveGroups.map((group) => (
-                <Card key={group.id} sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                      <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
-                        {group.title}
-                      </Typography>
-                      <Chip
-                        label={getStatusText(group.status)}
-                        color={getStatusColor(group.status) as any}
-                        size="small"
-                      />
-                    </Box>
-                    {group.category && (
-                      <Chip
-                        label={group.category}
-                        size="small"
-                        sx={{ mb: 1 }}
-                      />
-                    )}
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {group.company}
-                    </Typography>
-                    <Typography variant="h6" color="primary.main" gutterBottom>
-                      ₪{group.groupPrice.toLocaleString()}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      נוצר ב-{formatDate(group.createdAt)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      תאריך יעד: {formatDate(group.deadline)}
                     </Typography>
                   </CardContent>
                 </Card>
