@@ -52,6 +52,7 @@ const navigationItems = [
 
 const mobileNavigationItems = [
   ...navigationItems,
+  { title: "פרופיל", href: "/profile", icon: AccountCircleIcon },
   { title: "מועדפים", href: "/favorites", icon: FavoriteIcon },
 ];
 
@@ -76,16 +77,35 @@ export default function Header() {
   const profileMenuItems = loggedIn
     ? [
       <MenuItem
+        key="profile"
+        onClick={() => {
+          handleMenuClose();
+          window.location.href = "/profile";
+        }}
+      >
+        פרופיל
+      </MenuItem>,
+      <MenuItem
         key="signout"
         onClick={() => {
           handleMenuClose();
           signOut();
         }}
       >
-        Sign Out
+        התנתק
       </MenuItem>,
     ]
     : [
+      // TODO: Remove this - this is for development purposes
+      <MenuItem
+        key="profile"
+        onClick={() => {
+          handleMenuClose();
+          window.location.href = "/profile";
+        }}
+      >
+        פרופיל
+      </MenuItem>,
       <MenuItem
         key="signin"
         onClick={() => {
