@@ -9,23 +9,13 @@ import {
   Button,
   TextField,
   Chip,
-  Divider,
   Tabs,
   Tab,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Alert,
-  CircularProgress,
-  Stack,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  ListItemSecondaryAction,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -36,13 +26,11 @@ import {
   CalendarToday as CalendarIcon,
   Group as GroupIcon,
   ShoppingBag as ShoppingBagIcon,
-  TrendingUp as TrendingUpIcon,
-  Add as AddIcon,
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import { UploadDropzone } from '@/components/upload-dropzone';
+import { LoadingCircle } from "../loading-circle";
 
 interface UserProfile {
   id: string;
@@ -253,7 +241,7 @@ export default function Profile() {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress />
+        <LoadingCircle loadingText={"טוען את הפרופיל שלך"} />
       </Box>
     );
   }
@@ -309,13 +297,10 @@ export default function Profile() {
             </Button>
           </Box>
 
-          {/* Edit Mode */}
-          {editing && (
-            <Paper sx={{ p: 3, mt: 2, bgcolor: 'grey.50' }}>
-              <Typography variant="h6" gutterBottom>
-                עריכת פרטים אישיים
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+          <Dialog open={editing} onClose={handleCancel} fullWidth>
+            <DialogTitle>עריכת פרטים אישיים</DialogTitle>
+            <DialogContent>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
                 <Box sx={{ flex: 1 }}>
                   <TextField
                     fullWidth
@@ -336,26 +321,24 @@ export default function Profile() {
                   />
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  onClick={handleSave}
-                  disabled={updateLoading}
-                >
-                  {updateLoading ? <CircularProgress size={20} /> : 'שמור'}
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<CancelIcon />}
-                  onClick={handleCancel}
-                  disabled={updateLoading}
-                >
-                  ביטול
-                </Button>
-              </Box>
-            </Paper>
-          )}
+            </DialogContent>
+            <DialogActions>
+              <Button
+                variant="outlined"
+                onClick={handleCancel}
+                disabled={updateLoading}
+              >
+                ביטול
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={updateLoading}
+              >
+                {updateLoading ? <LoadingCircle loadingText={""} /> : 'שמור'}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </CardContent>
       </Card>
 
