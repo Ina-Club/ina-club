@@ -271,18 +271,24 @@ export default function Profile() {
       {/* Header */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 1, md: 3 } }}>
             <Avatar
-              sx={{ width: 80, height: 80 }}
+              sx={{ width: { xs: 60, md: 80 }, height: { xs: 60, md: 80 } }}
               src={profile.profilePicture}
             >
               <PersonIcon sx={{ fontSize: 40 }} />
             </Avatar>
             <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h4" gutterBottom>
-                {profile.name || 'משתמש ללא שם'}
+              <Typography
+                variant='h6'
+                gutterBottom
+                sx={{
+                  textAlign: { xs: 'center', md: 'inherit' }
+                }}
+              >
+                {profile.name}
               </Typography>
-              <Typography variant="body1" color="text.secondary" gutterBottom>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
                 <EmailIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
                 {profile.email}
               </Typography>
@@ -296,6 +302,7 @@ export default function Profile() {
               startIcon={<EditIcon />}
               onClick={handleEdit}
               disabled={editing}
+              sx={{ marginTop: { xs: 2 } }}
             >
               ערוך פרופיל
             </Button>
