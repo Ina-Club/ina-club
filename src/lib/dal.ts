@@ -1,3 +1,5 @@
+import { GroupStatus } from "./types/status";
+
 export interface RequestGroup {
   id: string;
   images: string[];
@@ -33,11 +35,4 @@ export interface Company {
   subTitle: string;
   categories: string[];
   url: string;
-}
-
-export enum GroupStatus {
-  OPEN = "OPEN",
-  CLOSED = "CLOSED",
-  CANCELED = "CANCELED",
-  EXPIRED = "EXPIRED",
 }
