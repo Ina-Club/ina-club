@@ -25,9 +25,11 @@ import {
   Email as EmailIcon,
   CalendarToday as CalendarIcon,
   Group as GroupIcon,
+  Foundation as FoundationIcon,
   ShoppingBag as ShoppingBagIcon,
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
+import { useTheme, useMediaQuery } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "../loading-circle";
@@ -100,6 +102,8 @@ function TabPanel(props: TabPanelProps) {
 
 export default function Profile() {
   // const { data: session } = useSession();
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -344,114 +348,173 @@ export default function Profile() {
 
       {/* Tabs */}
       <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            borderColor: 'divider',
+          }}
+        >
+          {/* Tabs rail */}
           <Tabs
             value={tabValue}
             onChange={(e, newValue) => setTabValue(newValue)}
             aria-label="profile tabs"
+            orientation={isMdUp ? 'vertical' : 'horizontal'}
+            variant='scrollable'
+            sx={{
+              borderRight: isMdUp ? 1 : 0,
+              borderBottom: !isMdUp ? 1 : 0,
+              borderColor: 'divider',
+              alignSelf: isMdUp ? 'stretch' : 'auto',
+              minWidth: isMdUp ? 220 : 'auto',
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontSize: { xs: '0.8rem', md: '0.95rem' },
+                justifyContent: 'flex-start',
+              },
+            }}
           >
-            <Tab
-              icon={<GroupIcon />}
-              label="קבוצות פעילות"
-              iconPosition="start"
-            />
-            <Tab
-              icon={<ShoppingBagIcon />}
-              label="בקשות"
-              iconPosition="start"
-            />
+            <Tab icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
+            <Tab icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
+            <Tab icon={<FoundationIcon />} label="סטטוס בקשות" iconPosition="start" />
           </Tabs>
+
+          {/* Panels */}
+          <Box sx={{ flex: 1 }}>
+            {/* Active Groups Tab */}
+            <TabPanel value={tabValue} index={0}>
+              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
+                קבוצות פעילות שאתה משתתף בהן ({profile.enrolledActiveGroups.length})
+              </Typography>
+              {profile.enrolledActiveGroups.length === 0 ? (
+                <Alert severity="info">לא הצטרפת לקבוצות רכישה</Alert>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                  {profile.enrolledActiveGroups.map((group) => (
+                    <Card key={group.id} sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
+                            {group.title}
+                          </Typography>
+                          <Chip
+                            label={getStatusText(group.status)}
+                            color={getStatusColor(group.status) as any}
+                            size="small"
+                          />
+                        </Box>
+                        {group.category && (
+                          <Chip
+                            label={group.category}
+                            size="small"
+                            sx={{ mb: 1 }}
+                          />
+                        )}
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          {group.company}
+                        </Typography>
+                        <Typography variant="h6" color="primary.main" gutterBottom>
+                          ₪{group.groupPrice.toLocaleString()}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          הצטרף ב-{formatDate(group.joinedAt)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          תאריך יעד: {formatDate(group.deadline)}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </TabPanel>
+
+            {/* Request Groups Tab */}
+            <TabPanel value={tabValue} index={1}>
+              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
+                בקשות שאתה משתתף בהן ({profile.enrolledRequestGroups.length})
+              </Typography>
+              {profile.enrolledRequestGroups.length === 0 ? (
+                <Alert severity="info">לא הצטרפת לבקשות</Alert>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                  {profile.enrolledRequestGroups.map((group) => (
+                    <Card key={group.id} sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
+                            {group.title}
+                          </Typography>
+                          <Chip
+                            label={getStatusText(group.status)}
+                            color={getStatusColor(group.status) as any}
+                            size="small"
+                          />
+                        </Box>
+                        {group.category && (
+                          <Chip
+                            label={group.category}
+                            size="small"
+                            sx={{ mb: 1 }}
+                          />
+                        )}
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          {group.description}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          הצטרף ב-{formatDate(group.joinedAt)}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </TabPanel>
+
+            {/* Owned Request Groups Tab */}
+            <TabPanel value={tabValue} index={2}>
+              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
+                בקשות שאתה פתחת ({profile.enrolledRequestGroups.length})
+              </Typography>
+              {profile.enrolledRequestGroups.length === 0 ? (
+                <Alert severity="info">עדיין לא יצרת בקשות</Alert>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                  {profile.enrolledRequestGroups.map((group) => (
+                    <Card key={group.id} sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
+                            {group.title}
+                          </Typography>
+                          <Chip
+                            label={getStatusText(group.status)}
+                            color={getStatusColor(group.status) as any}
+                            size="small"
+                          />
+                        </Box>
+                        {group.category && (
+                          <Chip
+                            label={group.category}
+                            size="small"
+                            sx={{ mb: 1 }}
+                          />
+                        )}
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          {group.description}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          הצטרף ב-{formatDate(group.joinedAt)}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </TabPanel>
+          </Box>
         </Box>
-
-        {/* Active Groups Tab */}
-        <TabPanel value={tabValue} index={0}>
-          <Typography variant="h6" gutterBottom>
-            קבוצות פעילות שאתה משתתף בהן ({profile.enrolledActiveGroups.length})
-          </Typography>
-          {profile.enrolledActiveGroups.length === 0 ? (
-            <Alert severity="info">אין קבוצות פעילות</Alert>
-          ) : (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-              {profile.enrolledActiveGroups.map((group) => (
-                <Card key={group.id} sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                      <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
-                        {group.title}
-                      </Typography>
-                      <Chip
-                        label={getStatusText(group.status)}
-                        color={getStatusColor(group.status) as any}
-                        size="small"
-                      />
-                    </Box>
-                    {group.category && (
-                      <Chip
-                        label={group.category}
-                        size="small"
-                        sx={{ mb: 1 }}
-                      />
-                    )}
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {group.company}
-                    </Typography>
-                    <Typography variant="h6" color="primary.main" gutterBottom>
-                      ₪{group.groupPrice.toLocaleString()}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      הצטרף ב-{formatDate(group.joinedAt)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      תאריך יעד: {formatDate(group.deadline)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          )}
-        </TabPanel>
-
-        {/* Request Groups Tab */}
-        <TabPanel value={tabValue} index={1}>
-          <Typography variant="h6" gutterBottom>
-            בקשות שאתה משתתף בהן ({profile.enrolledRequestGroups.length})
-          </Typography>
-          {profile.enrolledRequestGroups.length === 0 ? (
-            <Alert severity="info">אין בקשות</Alert>
-          ) : (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-              {profile.enrolledRequestGroups.map((group) => (
-                <Card key={group.id} sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                      <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
-                        {group.title}
-                      </Typography>
-                      <Chip
-                        label={getStatusText(group.status)}
-                        color={getStatusColor(group.status) as any}
-                        size="small"
-                      />
-                    </Box>
-                    {group.category && (
-                      <Chip
-                        label={group.category}
-                        size="small"
-                        sx={{ mb: 1 }}
-                      />
-                    )}
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {group.description}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      הצטרף ב-{formatDate(group.joinedAt)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          )}
-        </TabPanel>
       </Card>
     </Box>
   );
