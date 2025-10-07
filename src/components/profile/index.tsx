@@ -8,7 +8,6 @@ import {
   Avatar,
   Button,
   TextField,
-  Chip,
   Tabs,
   Tab,
   Dialog,
@@ -19,8 +18,6 @@ import {
 } from "@mui/material";
 import {
   Edit as EditIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon,
   Person as PersonIcon,
   Email as EmailIcon,
   CalendarToday as CalendarIcon,
@@ -33,6 +30,10 @@ import { useTheme, useMediaQuery } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "../loading-circle";
+import RequestGroupCard from "../card/request-group-card";
+import { ActiveGroup, RequestGroup } from "lib/dal";
+import ActiveGroupCard from "../card/active-group-card";
+import { mockActiveGroups, mockRequestGroups } from "lib/mock";
 
 interface UserProfile {
   id: string;
@@ -41,41 +42,9 @@ interface UserProfile {
   profilePicture?: string;
   createdAt: string;
   emailVerified?: string;
-  enrolledRequestGroups: Array<{
-    id: string;
-    title: string;
-    description?: string;
-    category?: string;
-    status: string;
-    createdAt: string;
-    joinedAt: string;
-    images: string[];
-  }>;
-  enrolledActiveGroups: Array<{
-    id: string;
-    title: string;
-    description?: string;
-    category?: string;
-    company?: string;
-    basePrice: number;
-    groupPrice: number;
-    minParticipants?: number;
-    maxParticipants?: number;
-    deadline: string;
-    status: string;
-    createdAt: string;
-    joinedAt: string;
-    images: string[];
-  }>;
-  ownedRequestGroups: Array<{
-    id: string;
-    title: string;
-    description?: string;
-    category?: string;
-    status: string;
-    createdAt: string;
-    images: string[];
-  }>;
+  enrolledRequestGroups: Array<RequestGroup>;
+  enrolledActiveGroups: Array<ActiveGroup>;
+  ownedRequestGroups: Array<RequestGroup>;
 }
 
 interface TabPanelProps {
@@ -119,9 +88,10 @@ export default function Profile() {
     profilePicture: "https://via.placeholder.com/150",
     createdAt: "2021-01-01",
     emailVerified: "2021-01-01",
-    enrolledRequestGroups: [],
-    enrolledActiveGroups: [],
-    ownedRequestGroups: [],
+    // TODO: Add pagintaion when displaying data
+    enrolledRequestGroups: mockRequestGroups.concat(mockRequestGroups),
+    enrolledActiveGroups: mockActiveGroups.concat(mockActiveGroups),
+    ownedRequestGroups: mockRequestGroups.concat(mockRequestGroups),
   };
 
   // TODO: Replace this with API integration that fetches the profile
@@ -398,40 +368,8 @@ export default function Profile() {
                 <Alert severity="info">לא הצטרפת לקבוצות רכישה</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.enrolledActiveGroups.map((group) => (
-                    <Card key={group.id} sx={{ height: '100%' }}>
-                      <CardContent>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                          <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
-                            {group.title}
-                          </Typography>
-                          <Chip
-                            label={getStatusText(group.status)}
-                            color={getStatusColor(group.status) as any}
-                            size="small"
-                          />
-                        </Box>
-                        {group.category && (
-                          <Chip
-                            label={group.category}
-                            size="small"
-                            sx={{ mb: 1 }}
-                          />
-                        )}
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {group.company}
-                        </Typography>
-                        <Typography variant="h6" color="primary.main" gutterBottom>
-                          ₪{group.groupPrice.toLocaleString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          הצטרף ב-{formatDate(group.joinedAt)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          תאריך יעד: {formatDate(group.deadline)}
-                        </Typography>
-                      </CardContent>
-                    </Card>
+                  {profile.enrolledActiveGroups.map((activeGroup, index) => (
+                    <ActiveGroupCard key={index} activeGroup={activeGroup} />
                   ))}
                 </Box>
               )}
@@ -446,34 +384,8 @@ export default function Profile() {
                 <Alert severity="info">לא הצטרפת לבקשות</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.enrolledRequestGroups.map((group) => (
-                    <Card key={group.id} sx={{ height: '100%' }}>
-                      <CardContent>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                          <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
-                            {group.title}
-                          </Typography>
-                          <Chip
-                            label={getStatusText(group.status)}
-                            color={getStatusColor(group.status) as any}
-                            size="small"
-                          />
-                        </Box>
-                        {group.category && (
-                          <Chip
-                            label={group.category}
-                            size="small"
-                            sx={{ mb: 1 }}
-                          />
-                        )}
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {group.description}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          הצטרף ב-{formatDate(group.joinedAt)}
-                        </Typography>
-                      </CardContent>
-                    </Card>
+                  {profile.enrolledRequestGroups.map((requestGroup, index) => (
+                    <RequestGroupCard key={index} requestGroup={requestGroup} />
                   ))}
                 </Box>
               )}
@@ -482,40 +394,14 @@ export default function Profile() {
             {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שאתה פתחת ({profile.enrolledRequestGroups.length})
+                בקשות שאתה פתחת ({profile.ownedRequestGroups.length})
               </Typography>
-              {profile.enrolledRequestGroups.length === 0 ? (
+              {profile.ownedRequestGroups.length === 0 ? (
                 <Alert severity="info">עדיין לא יצרת בקשות</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.enrolledRequestGroups.map((group) => (
-                    <Card key={group.id} sx={{ height: '100%' }}>
-                      <CardContent>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                          <Typography variant="h6" noWrap sx={{ flexGrow: 1, mr: 1 }}>
-                            {group.title}
-                          </Typography>
-                          <Chip
-                            label={getStatusText(group.status)}
-                            color={getStatusColor(group.status) as any}
-                            size="small"
-                          />
-                        </Box>
-                        {group.category && (
-                          <Chip
-                            label={group.category}
-                            size="small"
-                            sx={{ mb: 1 }}
-                          />
-                        )}
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {group.description}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          הצטרף ב-{formatDate(group.joinedAt)}
-                        </Typography>
-                      </CardContent>
-                    </Card>
+                  {profile.ownedRequestGroups.map((requestGroup, index) => (
+                    <RequestGroupCard key={index} requestGroup={requestGroup} />
                   ))}
                 </Box>
               )}
