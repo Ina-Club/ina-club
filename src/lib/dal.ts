@@ -5,6 +5,7 @@ export interface RequestGroup {
   title: string;
   participants: User[];
   openedGroups: ActiveGroup[];
+  status: GroupStatus;
   description?: string;
 }
 
@@ -32,4 +33,11 @@ export interface Company {
   subTitle: string;
   categories: string[];
   url: string;
+}
+
+export enum GroupStatus {
+  OPEN = "OPEN",
+  CLOSED = "CLOSED",
+  CANCELED = "CANCELED",
+  EXPIRED = "EXPIRED",
 }
