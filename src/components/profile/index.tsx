@@ -302,7 +302,7 @@ export default function Profile() {
               startIcon={<EditIcon />}
               onClick={handleEdit}
               disabled={editing}
-              sx={{ marginTop: { xs: 2 } }}
+              sx={{ marginTop: 2 }}
             >
               ערוך פרופיל
             </Button>
@@ -382,9 +382,9 @@ export default function Profile() {
               },
             }}
           >
-            <Tab icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
-            <Tab icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
-            <Tab icon={<FoundationIcon />} label="סטטוס בקשות" iconPosition="start" />
+            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
+            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
+            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FoundationIcon />} label="סטטוס בקשות" iconPosition="start" />
           </Tabs>
 
           {/* Panels */}
