@@ -36,16 +36,14 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const isCanceled: boolean = requestGroup.status === GroupStatus.CANCELED;
   const isExpired: boolean = requestGroup.status === GroupStatus.EXPIRED;
 
-  let statusDescription: string = "";
-  if (isClosed) {
-    statusDescription = "הרכישה בוצעה.";
-  }
-  else if (isCanceled) {
-    statusDescription = "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה.";
-  }
-  else if (isExpired) {
-    statusDescription = "תוקף הבקשה הסתיים.";
-  }
+  const getStatusDescription = (status: GroupStatus) => {
+    switch (status) {
+      case 'CLOSED': return "בוצעה עסקה דרך קבוצת רכישה.";
+      case 'CANCELED': return "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה.";
+      case 'EXPIRED': return "תוקף הבקשה הסתיים.";
+      default: return ""; // For opened groups.
+    }
+  };
 
   const handleRequestGroupClick = () => {
     if (isOpen) {
@@ -111,7 +109,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         {/* Status Chip (only for canceled/expired/closed) */}
         {(!isOpen) && (
           <Tooltip
-            title={statusDescription}
+            title={getStatusDescription(requestGroup.status)}
             placement="top"
             arrow
             slotProps={{

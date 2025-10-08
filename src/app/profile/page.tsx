@@ -192,26 +192,6 @@ export default function Profile() {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'OPEN': return 'success';
-      case 'CLOSED': return 'default';
-      case 'CANCELED': return 'error';
-      case 'EXPIRED': return 'warning';
-      default: return 'default';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'OPEN': return 'פתוח';
-      case 'CLOSED': return 'סגור';
-      case 'CANCELED': return 'מבוטל';
-      case 'EXPIRED': return 'פג תוקף';
-      default: return status;
-    }
-  };
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
