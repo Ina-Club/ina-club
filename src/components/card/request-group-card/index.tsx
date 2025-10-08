@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { RequestGroup } from "lib/dal";
+import { GroupStatus } from "lib/types/status";
 import {
   Card,
   CardContent,
@@ -12,6 +13,7 @@ import {
   IconButton,
   Alert,
   AlertTitle,
+  Tooltip,
 } from "@mui/material";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -29,25 +31,46 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
 
+  const isOpen: boolean = requestGroup.status === GroupStatus.OPEN;
+  const isClosed: boolean = requestGroup.status === GroupStatus.CLOSED;
+  const isCanceled: boolean = requestGroup.status === GroupStatus.CANCELED;
+  const isExpired: boolean = requestGroup.status === GroupStatus.EXPIRED;
+
+  const getStatusDescription = (status: GroupStatus) => {
+    switch (status) {
+      case 'CLOSED': return "בוצעה עסקה דרך קבוצת רכישה.";
+      case 'CANCELED': return "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה.";
+      case 'EXPIRED': return "תוקף הבקשה הסתיים.";
+      default: return ""; // For opened groups.
+    }
+  };
+
   const handleRequestGroupClick = () => {
-    goToRequestGroup();
+    if (isOpen) {
+      goToRequestGroup();
+    }
   }
 
   return (
     <Card
       sx={{
         borderRadius: 4,
-        boxShadow: 3,
+        boxShadow: !isOpen ? 1 : 3,
         width: "100%",
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
-        "&:hover": {
-          transform: "translateY(-6px)",
-          boxShadow: 8,
-        },
+        border: isExpired ? 1 : 0,
+        borderStyle: isExpired ? "dashed" : "solid",
+        borderColor: isExpired ? "warning.light" : "transparent",
+        "&:hover": isOpen
+          ? {
+            transform: "translateY(-6px)",
+            boxShadow: 8,
+          }
+          : undefined,
       }}
     >
       {/* Image Section */}
@@ -60,6 +83,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             height: 150,
             width: "100%",
             objectFit: "cover",
+            opacity: !isOpen ? 0.6 : 1,
           }}
         />
 
@@ -81,6 +105,46 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             <FavoriteBorderIcon sx={{ color: "grey.600" }} />
           )}
         </IconButton>
+
+        {/* Status Chip (only for canceled/expired/closed) */}
+        {(!isOpen) && (
+          <Tooltip
+            title={getStatusDescription(requestGroup.status)}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: "#1a2a5a",
+                  color: "#fff",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  borderRadius: 4,
+                  boxShadow: 3,
+                },
+              },
+              arrow: {
+                sx: { color: "#1a2a5a" },
+              },
+            }}
+          >
+            <Chip
+              label={
+                isCanceled ? "מבוטל" : isExpired ? "פג תוקף" : "סגור"
+              }
+              color={isCanceled ? "error" : isExpired ? "warning" : "default"}
+              size="small"
+              sx={{
+                position: "absolute",
+                top: 12,
+                left: 12,
+                fontWeight: 600,
+                bgcolor: isClosed ? "grey.200" : undefined,
+                userSelect: "none",
+              }}
+            />
+          </Tooltip>
+        )}
 
         {/* Category Chip */}
         <Chip
@@ -134,13 +198,17 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       </Box>
 
       {/* Content */}
-      <CardContent sx={{
-        p: 2,
-        "&:hover": {
-          cursor: "pointer"
-        },
-
-      }} onClick={handleRequestGroupClick}>
+      <CardContent
+        sx={{
+          p: 2,
+          "&:hover": {
+            cursor: isOpen ? "pointer" : "default",
+          },
+          pointerEvents: isOpen ? "auto" : "none",
+          opacity: !isOpen ? 0.6 : 1,
+        }}
+        onClick={handleRequestGroupClick}
+      >
         {/* Title */}
         <Typography variant="h6" fontWeight={600} gutterBottom>
           {requestGroup.title}

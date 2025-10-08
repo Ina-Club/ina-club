@@ -1,3 +1,5 @@
+import { GroupStatus } from "./types/status";
+
 export interface RequestGroup {
   id: string;
   images: string[];
@@ -5,6 +7,7 @@ export interface RequestGroup {
   title: string;
   participants: User[];
   openedGroups: ActiveGroup[];
+  status: GroupStatus;
   description?: string;
 }
 
