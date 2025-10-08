@@ -31,10 +31,21 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
 
-  const isOpen = requestGroup.status === GroupStatus.OPEN;
-  const isClosed = requestGroup.status === GroupStatus.CLOSED;
-  const isCanceled = requestGroup.status === GroupStatus.CANCELED;
-  const isExpired = requestGroup.status === GroupStatus.EXPIRED;
+  const isOpen: boolean = requestGroup.status === GroupStatus.OPEN;
+  const isClosed: boolean = requestGroup.status === GroupStatus.CLOSED;
+  const isCanceled: boolean = requestGroup.status === GroupStatus.CANCELED;
+  const isExpired: boolean = requestGroup.status === GroupStatus.EXPIRED;
+
+  let statusDescription: string = "";
+  if (isClosed) {
+    statusDescription = "הבקשה נסגרה על ידי היוצר או שבוצעה רכישה."
+  }
+  else if (isCanceled) {
+    statusDescription = "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה."
+  }
+  else if (isExpired) {
+    statusDescription = "תוקף הבקשה הסתיים."
+  }
 
   const handleRequestGroupClick = () => {
     if (isOpen) {
@@ -53,7 +64,6 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
-        opacity: !isOpen ? 0.5 : 1,
         border: isExpired ? 1 : 0,
         borderStyle: isExpired ? "dashed" : "solid",
         borderColor: isExpired ? "warning.light" : "transparent",
@@ -75,6 +85,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             height: 150,
             width: "100%",
             objectFit: "cover",
+            opacity: !isOpen ? 0.6 : 1,
           }}
         />
 
@@ -99,7 +110,26 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
 
         {/* Status Chip (only for canceled/expired/closed) */}
         {(!isOpen) && (
-          <Tooltip title="אהלן" arrow>
+          <Tooltip
+            title={statusDescription}
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: "#1a2a5a",
+                  color: "#fff",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  borderRadius: 4,
+                  boxShadow: 3,
+                },
+              },
+              arrow: {
+                sx: { color: "#1a2a5a" },
+              },
+            }}
+          >
             <Chip
               label={
                 isCanceled ? "מבוטל" : isExpired ? "פג תוקף" : "סגור"
@@ -177,6 +207,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             cursor: isOpen ? "pointer" : "default",
           },
           pointerEvents: isOpen ? "auto" : "none",
+          opacity: !isOpen ? 0.6 : 1,
         }}
         onClick={handleRequestGroupClick}
       >
