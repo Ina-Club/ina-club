@@ -1,4 +1,5 @@
 import { ActiveGroup, Company, RequestGroup } from "./dal";
+import { GroupStatus } from "./types/status";
 
 export const mockRequestGroups: RequestGroup[] = [
   {
@@ -6,6 +7,7 @@ export const mockRequestGroups: RequestGroup[] = [
     images: ["/BravoMateo.png", "https://picsum.photos/seed/laptop2/400/300"],
     category: "אלקטרוניקה",
     title: "MacBook Pro M3",
+    status: GroupStatus.OPEN,
     participants: [
       {
         image: "https://i.pravatar.cc/150?img=1",
@@ -71,6 +73,7 @@ export const mockRequestGroups: RequestGroup[] = [
     images: ["/BravoMateo.png", "https://picsum.photos/seed/phone2/400/300"],
     category: "סמארטפונים",
     title: "iPhone 16 Pro Max",
+    status: GroupStatus.CLOSED,
     description: "aught adfasdfasdfasdf asdf asdfasd fasdfasdfasdfas dfas dfasfasdfasd fasdf asdfasasdf asdfasdf asfasdf asdf asfasdfasdfasdf asdfasdfa sdfasdf asdfasdfasdfasd fasfasdfasdfas fas fas fasdf ",
     participants: [
       {
@@ -114,6 +117,7 @@ export const mockRequestGroups: RequestGroup[] = [
     ],
     category: "אודיו",
     title: "Sony WH-1000XM5",
+    status: GroupStatus.EXPIRED,
     participants: [
       {
         image: "https://i.pravatar.cc/150?img=6",
