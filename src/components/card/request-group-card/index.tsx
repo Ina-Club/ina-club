@@ -38,13 +38,13 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
 
   let statusDescription: string = "";
   if (isClosed) {
-    statusDescription = "הבקשה נסגרה על ידי היוצר או שבוצעה רכישה."
+    statusDescription = "הרכישה בוצעה.";
   }
   else if (isCanceled) {
-    statusDescription = "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה."
+    statusDescription = "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה.";
   }
   else if (isExpired) {
-    statusDescription = "תוקף הבקשה הסתיים."
+    statusDescription = "תוקף הבקשה הסתיים.";
   }
 
   const handleRequestGroupClick = () => {
