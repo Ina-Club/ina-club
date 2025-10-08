@@ -1,4 +1,5 @@
 import { ActiveGroup, Company, RequestGroup } from "./dal";
+import { GroupStatus } from "./types/status";
 
 export const mockRequestGroups: RequestGroup[] = [
   {
@@ -6,6 +7,7 @@ export const mockRequestGroups: RequestGroup[] = [
     images: ["/BravoMateo.png", "https://picsum.photos/seed/laptop2/400/300"],
     category: "אלקטרוניקה",
     title: "MacBook Pro M3",
+    status: GroupStatus.OPEN,
     participants: [
       {
         image: "https://i.pravatar.cc/150?img=1",
@@ -71,6 +73,7 @@ export const mockRequestGroups: RequestGroup[] = [
     images: ["/BravoMateo.png", "https://picsum.photos/seed/phone2/400/300"],
     category: "סמארטפונים",
     title: "iPhone 16 Pro Max",
+    status: GroupStatus.CANCELED,
     description: "aught adfasdfasdfasdf asdf asdfasd fasdfasdfasdfas dfas dfasfasdfasd fasdf asdfasasdf asdfasdf asfasdf asdf asfasdfasdfasdf asdfasdfa sdfasdf asdfasdfasdfasd fasfasdfasdfas fas fas fasdf ",
     participants: [
       {
@@ -114,6 +117,65 @@ export const mockRequestGroups: RequestGroup[] = [
     ],
     category: "אודיו",
     title: "Sony WH-1000XM5",
+    status: GroupStatus.EXPIRED,
+    participants: [
+      {
+        image: "https://i.pravatar.cc/150?img=6",
+        name: "יעל פרידמן",
+        mail: "yael@example.com",
+      },
+      {
+        image: "https://i.pravatar.cc/150?img=7",
+        name: "דניאל לוין",
+        mail: "daniel@example.com",
+      },
+      {
+        image: "https://i.pravatar.cc/150?img=8",
+        name: "אלכס חיון",
+        mail: "alex@example.com",
+      },
+      {
+        image: "https://i.pravatar.cc/150?img=9",
+        name: "תמר עזרא",
+        mail: "tamar@example.com",
+      },
+    ],
+    openedGroups: [
+      {
+        id: "sony-group-1",
+        images: [
+          "/BravoMateo.png",
+          "https://picsum.photos/seed/headphones2/400/300",
+        ],
+        category: "אודיו",
+        title: "Sony Group 1",
+        participants: [
+          {
+            image: "https://i.pravatar.cc/150?img=6",
+            name: "יעל פרידמן",
+            mail: "yael@example.com",
+          },
+          {
+            image: "https://i.pravatar.cc/150?img=7",
+            name: "דניאל לוין",
+            mail: "daniel@example.com",
+          },
+        ],
+        price: 1290,
+        numberOfParticipants: 2,
+        deadline: new Date("2025-09-05T18:00:00Z"),
+      },
+    ],
+  },
+  {
+    id: "4",
+    images: [
+      "/BravoMateo.png",
+      "https://picsum.photos/seed/headphones2/400/300",
+    ],
+    category: "אודיו",
+    title: "NICE",
+    status: GroupStatus.CLOSED,
     participants: [
       {
         image: "https://i.pravatar.cc/150?img=6",
