@@ -209,6 +209,8 @@ export default function Header() {
             }}
           >
             <Button
+              component={Link}
+              href="/create"
               variant="outlined"
               sx={{
                 minWidth: 32,
@@ -221,7 +223,6 @@ export default function Header() {
                 backgroundColor: "#fff",
                 borderColor: "#1a2a5a",
               }}
-              onClick={() => setOpenRequestGroupDialog(true)}
             >
               <AddIcon sx={{ ml: 1 }} /> צור בקשה
             </Button>
@@ -310,7 +311,8 @@ export default function Header() {
                   borderRadius: "24px",
                   borderColor: "#1a2a5a",
                 }}
-                onClick={() => setOpenRequestGroupDialog(true)}
+                component={Link}
+                href="/create"
               >
                 <AddIcon sx={{ ml: 1 }} /> צור בקשה
               </Button>

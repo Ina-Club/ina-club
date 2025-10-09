@@ -1,7 +1,8 @@
 import Footer from "@/components/footer";
-import Header from "@/components/header";
+import HeaderWrapper from "@/components/wrapper/header-wrapper"; // ✅ חדש
 import ThemeRegistry from "@/components/theme-registry/theme-registry";
 import SessionProviderWrapper from "@/components/wrapper/session-provider-wrapper";
+import { Box } from "@mui/material";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,13 +11,24 @@ export const metadata: Metadata = {
   icons: { icon: "/InaAppLogo.png" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <ThemeRegistry>
       <html lang="he" dir="rtl">
-        <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh", margin: 0 }}>
+        <body
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
+            margin: 0,
+          }}
+        >
           <SessionProviderWrapper>
-            <Header />
+            <HeaderWrapper /> {/* ✅ עכשיו ה-header מתנהג לפי הדף */}
             <main style={{ flex: 1 }}>{children}</main>
             <Footer />
           </SessionProviderWrapper>

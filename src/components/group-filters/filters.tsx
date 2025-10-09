@@ -13,7 +13,7 @@ import MuiAccordionSummary, {
   accordionSummaryClasses,
 } from "@mui/material/AccordionSummary";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PriceRangeFilter from "./price-range-filter";
 import { GroupType } from "./index";
 
@@ -81,9 +81,22 @@ interface FiltersProps {
 }
 
 export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterChange }) => {
-  const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
+  const [categoryList, setCategoryList] = useState<string[]>([]);
   const locationList: string[] = ["צפון", "מרכז", "דרום"];
   const popularityList: string[] = ["פופולרי", "חדש"];
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/categories")
+      .then(r => r.json())
+      .then((data) => {
+        if (!active) return;
+        const names = (data.categories ?? []).map((c: { name: string }) => c.name);
+        setCategoryList(names);
+      })
+      .catch(() => setCategoryList([]));
+    return () => { active = false; };
+  }, []);
   
   const [internalFilterState, setInternalFilterState] = useState<FilterState>({
     categories: [],
@@ -150,7 +163,7 @@ export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterCh
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {categoryList.map((opt) => (
+          {(categoryList.length ? categoryList : ["..."]).map((opt) => (
             <OptionItem
               key={opt}
               onClick={() => handleCategoryClick(opt)}
@@ -200,7 +213,7 @@ export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterCh
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {popularityList.map((opt) => (
+          {(["פופולרי", "חדש"]).map((opt) => (
             <OptionItem
               key={opt}
               onClick={() => handlePopularityClick(opt)}

@@ -32,6 +32,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const [currentImage, setCurrentImage] = useState(0);
 
   const isOpen: boolean = requestGroup.status === GroupStatus.OPEN;
+  const isPreview: boolean = requestGroup.status === GroupStatus.PREVIEW;
   const isClosed: boolean = requestGroup.status === GroupStatus.CLOSED;
   const isCanceled: boolean = requestGroup.status === GroupStatus.CANCELED;
   const isExpired: boolean = requestGroup.status === GroupStatus.EXPIRED;
@@ -46,7 +47,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   };
 
   const handleRequestGroupClick = () => {
-    if (isOpen) {
+    if (isOpen || isPreview) {
       goToRequestGroup();
     }
   }
@@ -55,7 +56,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
     <Card
       sx={{
         borderRadius: 4,
-        boxShadow: !isOpen ? 1 : 3,
+        boxShadow: !isOpen && !isPreview ? 1 : 3,
         width: "100%",
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
@@ -65,7 +66,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         border: isExpired ? 1 : 0,
         borderStyle: isExpired ? "dashed" : "solid",
         borderColor: isExpired ? "warning.light" : "transparent",
-        "&:hover": isOpen
+        "&:hover": isOpen || isPreview
           ? {
             transform: "translateY(-6px)",
             boxShadow: 8,
@@ -83,7 +84,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             height: 150,
             width: "100%",
             objectFit: "cover",
-            opacity: !isOpen ? 0.6 : 1,
+            opacity: !isOpen && !isPreview ? 0.6 : 1,
           }}
         />
 
@@ -107,7 +108,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         </IconButton>
 
         {/* Status Chip (only for canceled/expired/closed) */}
-        {(!isOpen) && (
+        {(!isOpen && !isPreview) && (
           <Tooltip
             title={getStatusDescription(requestGroup.status)}
             placement="top"
@@ -205,7 +206,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             cursor: isOpen ? "pointer" : "default",
           },
           pointerEvents: isOpen ? "auto" : "none",
-          opacity: !isOpen ? 0.6 : 1,
+          opacity: !isOpen && !isPreview ? 0.6 : 1,
         }}
         onClick={handleRequestGroupClick}
       >
