@@ -1,6 +1,5 @@
 'use client';
 import { Suspense, useState, useEffect, useMemo } from "react";
-import { mockRequestGroups } from "lib/mock";
 import { Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
@@ -10,17 +9,30 @@ import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
 import { RequestGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
+import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-skeleton";
 
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
-  const allRequestGroups: RequestGroup[] = mockRequestGroups.concat(mockRequestGroups);
+  const [allRequestGroups, setAllRequestGroups] = useState<RequestGroup[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
     locations: [],
     popularities: []
   });
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch('/api/request-groups')
+      .then(r => r.json())
+      .then(data => { if (active) setAllRequestGroups(data.requestGroups ?? []); })
+      .catch(() => setAllRequestGroups([]))
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   // Apply all filters (text + categories + future filters)
   const filteredRequestGroups = useMemo(() => {
@@ -100,7 +112,9 @@ export default function Page() {
           }}
         >
           <Suspense fallback={<GroupSectionSkeleton />}>
-            {filteredRequestGroups.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => <RequestGroupCardSkeleton key={i} />)
+            ) : filteredRequestGroups.length > 0 ? (
               filteredRequestGroups.map((requestGroup, index) => (
                 <RequestGroupCard key={index} requestGroup={requestGroup} />
               ))

@@ -3,4 +3,6 @@ export enum GroupStatus {
   CLOSED = "CLOSED",
   CANCELED = "CANCELED",
   EXPIRED = "EXPIRED",
+  PENDING = "PENDING",
+  PREVIEW = "PREVIEW",
 }
