@@ -36,12 +36,14 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const isClosed: boolean = requestGroup.status === GroupStatus.CLOSED;
   const isCanceled: boolean = requestGroup.status === GroupStatus.CANCELED;
   const isExpired: boolean = requestGroup.status === GroupStatus.EXPIRED;
+  const isPending: boolean = requestGroup.status === GroupStatus.PENDING;
 
   const getStatusDescription = (status: GroupStatus) => {
     switch (status) {
       case 'CLOSED': return "בוצעה עסקה דרך קבוצת רכישה.";
       case 'CANCELED': return "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה.";
       case 'EXPIRED': return "תוקף הבקשה הסתיים.";
+      case 'PENDING': return "הבקשה ממתינה לאישור."
       default: return ""; // For opened groups.
     }
   };
@@ -63,9 +65,9 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
-        border: isExpired ? 1 : 0,
-        borderStyle: isExpired ? "dashed" : "solid",
-        borderColor: isExpired ? "warning.light" : "transparent",
+        border: isPending ? 1 : 0,
+        borderStyle: isPending ? "dashed" : "solid",
+        borderColor: isPending ? "#ff9800" : "transparent",
         "&:hover": isOpen || isPreview
           ? {
             transform: "translateY(-6px)",
@@ -131,16 +133,16 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
           >
             <Chip
               label={
-                isCanceled ? "מבוטל" : isExpired ? "פג תוקף" : "סגור"
+                isCanceled ? "מבוטל" : isExpired ? "פג תוקף" : isPending ? "בתהליך" : "סגור"
               }
-              color={isCanceled ? "error" : isExpired ? "warning" : "default"}
               size="small"
               sx={{
                 position: "absolute",
                 top: 12,
                 left: 12,
                 fontWeight: 600,
-                bgcolor: isClosed ? "grey.200" : undefined,
+                color: (isExpired || isPending) ? "black" : "white",
+                bgcolor: isClosed ? "primary.dark" : isExpired ? "#eeeeee" : isCanceled ? "#d32f2f" : isPending ? "#ff9800" : undefined,
                 userSelect: "none",
               }}
             />
