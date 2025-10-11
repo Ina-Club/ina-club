@@ -45,21 +45,21 @@ export default function CreateRequestGroupPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const q = title.trim();
-    if (!q) {
-      setDuplicateTitle(null);
-      return;
-    }
-    fetch(`/api/request-groups?title=${encodeURIComponent(q)}`, {
-      signal: controller.signal,
-    })
-      .then((r) => r.json())
-      .then((d) => setDuplicateTitle(!!d.exists))
-      .catch(() => setDuplicateTitle(null));
-    return () => controller.abort();
-  }, [title]);
+  // useEffect(() => {
+  //   const controller = new AbortController();
+  //   const q = title.trim();
+  //   if (!q) {
+  //     setDuplicateTitle(null);
+  //     return;
+  //   }
+  //   fetch(`/api/request-groups?title=${encodeURIComponent(q)}`, {
+  //     signal: controller.signal,
+  //   })
+  //     .then((r) => r.json())
+  //     .then((d) => setDuplicateTitle(!!d.exists))
+  //     .catch(() => setDuplicateTitle(null));
+  //   return () => controller.abort();
+  // }, [title]);
 
   const handleUpload = async (files: FileList | null) => {
     if (!files || !files.length) return;
@@ -90,11 +90,19 @@ export default function CreateRequestGroupPage() {
     }
   };
 
-  const canProceedStep1 = () =>
-    title.trim() &&
-    description.trim() &&
-    categoryId &&
-    duplicateTitle === false;
+  const verifyUniqueTitle = async () => {
+    const res = await fetch(`/api/request-groups?title=${title}`);
+    const data = await res.json();
+    return !data.exists;
+  }
+
+  const canProceedStep1 = async () => {
+    if (!title.trim() || !description.trim() || !categoryId) {
+      return false;
+    }
+    return await verifyUniqueTitle();
+  }
+
   const canProceedStep2 = () => imageUrls.length > 0;
 
   const handleSubmitFinal = async () => {
@@ -122,6 +130,13 @@ export default function CreateRequestGroupPage() {
       setSaving(false);
     }
   };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    if (duplicateTitle) {
+      setDuplicateTitle(false);
+    }
+  }
 
   return (
     <Box sx={{ width: "100%", mt: 0 }}>
@@ -169,7 +184,7 @@ export default function CreateRequestGroupPage() {
                     label="כותרת"
                     placeholder="לדוגמה: אוזניות גיימינג איכותיות"
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => handleTitleChange(e.target.value)}
                     required
                     fullWidth
                   />
@@ -206,8 +221,14 @@ export default function CreateRequestGroupPage() {
                   <Box sx={{ display: "flex", gap: 1 }}>
                     <Button
                       variant="contained"
-                      disabled={!canProceedStep1()}
-                      onClick={() => setActiveStep(1)}
+                      onClick={async () => {
+                        if (await canProceedStep1()) {
+                          setActiveStep(1);
+                          setDuplicateTitle(false);
+                        } else {
+                          setDuplicateTitle(true);
+                        }
+                      }}
                     >
                       הבא
                     </Button>
