@@ -249,7 +249,7 @@ export default function CreateRequestGroupPage() {
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={(e) => handleUpload(e.target.files)}
+                    onChange={async (e) => await handleUpload(e.target.files)}
                   />
                 </Button>
                 {/* Reorder by simple move up/down */}
