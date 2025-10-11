@@ -21,18 +21,18 @@ import { useRouter } from "next/navigation";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupPreview from "@/components/request-group/request-group-preview";
+import { LoadingCircle } from "@/components/loading-circle";
 
 export default function CreateRequestGroupPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [activeStep, setActiveStep] = useState(0);
   const [duplicateTitle, setDuplicateTitle] = useState<boolean | null>(null);
@@ -41,7 +41,8 @@ export default function CreateRequestGroupPage() {
     fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => setCategories(data.categories ?? []))
-      .catch(() => setCategories([]));
+      .catch(() => setCategories([]))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -161,57 +162,58 @@ export default function CreateRequestGroupPage() {
           }}
         >
           <Box>
-            {activeStep === 0 && (
-              <Stack spacing={2}>
-                <TextField
-                  label="כותרת"
-                  placeholder="לדוגמה: אוזניות גיימינג איכותיות"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  fullWidth
-                />
-                {duplicateTitle && (
-                  <Alert severity="warning">כותרת זו קיימת במערכת</Alert>
-                )}
-                <Tooltip
-                  title="תיאור מפורט משפר את סיכויי האישור"
-                  placement="top"
-                >
+            {loading ? <LoadingCircle /> :
+              activeStep === 0 && (
+                <Stack spacing={2}>
                   <TextField
-                    label="תיאור"
-                    placeholder="פרטו את המוצר/שירות, למה הוא חשוב, וכל מידע שיעזור לאשר"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    multiline
-                    minRows={5}
+                    label="כותרת"
+                    placeholder="לדוגמה: אוזניות גיימינג איכותיות"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
                     fullWidth
                   />
-                </Tooltip>
-                <TextField
-                  select
-                  label="קטגוריה"
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  fullWidth
-                >
-                  {categories.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button
-                    variant="contained"
-                    disabled={!canProceedStep1()}
-                    onClick={() => setActiveStep(1)}
+                  {duplicateTitle && (
+                    <Alert severity="warning">כותרת זו קיימת במערכת</Alert>
+                  )}
+                  <Tooltip
+                    title="תיאור מפורט משפר את סיכויי האישור"
+                    placement="top"
                   >
-                    הבא
-                  </Button>
-                </Box>
-              </Stack>
-            )}
+                    <TextField
+                      label="תיאור"
+                      placeholder="פרטו את המוצר/שירות, למה הוא חשוב, וכל מידע שיעזור לאשר"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      multiline
+                      minRows={5}
+                      fullWidth
+                    />
+                  </Tooltip>
+                  <TextField
+                    select
+                    label="קטגוריה"
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    fullWidth
+                  >
+                    {categories.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      disabled={!canProceedStep1()}
+                      onClick={() => setActiveStep(1)}
+                    >
+                      הבא
+                    </Button>
+                  </Box>
+                </Stack>
+              )}
 
             {activeStep === 1 && (
               <Stack spacing={2}>
