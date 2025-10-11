@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
-import { GroupStatus } from "@prisma/client";
+import { GroupStatus } from "lib/types/status";
 
 export async function GET(req: Request) {
   try {
@@ -79,8 +79,8 @@ export async function POST(req: Request) {
       data: {
         title,
         description,
-        categoryId: categoryId ?? null,
-        status: 'PENDING' as any,
+        categoryId: categoryId,
+        status: GroupStatus.PENDING,
       },
     });
 
