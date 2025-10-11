@@ -20,6 +20,7 @@ enum GroupStatus {
   CANCELED
   EXPIRED
   PENDING
+  PREVIEW
 }
 
 // ----------------------------------------------------
