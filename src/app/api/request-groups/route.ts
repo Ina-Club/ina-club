@@ -4,6 +4,7 @@ import { GroupStatus } from "lib/types/status";
 
 export async function GET(req: Request) {
   try {
+    // This represents GET by title
     const { searchParams } = new URL(req.url);
     const title = searchParams.get('title');
     if (title) {
@@ -11,6 +12,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ exists: !!exists });
     }
 
+    // This represents GET all request groups.
     const rows = await prisma.requestGroup.findMany({
       select: {
         id: true,
