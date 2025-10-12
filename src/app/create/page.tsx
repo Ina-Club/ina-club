@@ -99,8 +99,8 @@ export default function CreateRequestGroupPage() {
       errors.category = "קטגוריה היא שדה חובה";
     }
 
-    // Check for duplicate title if title is provided
-    if (title.trim() && !errors.title) {
+    // Check for duplicate title if title is provided and no errors remain
+    if (title.trim() && !Object.keys(errors).length) {
       const isUnique = await verifyUniqueTitle();
       if (!isUnique) {
         errors.duplicate = "כותרת זו כבר קיימת במערכת";
