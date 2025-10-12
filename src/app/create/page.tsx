@@ -14,7 +14,6 @@ import {
   Step,
   StepLabel,
   Tooltip,
-  Chip,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useRouter } from "next/navigation";
@@ -22,6 +21,13 @@ import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupPreview from "@/components/request-group/request-group-preview";
 import { LoadingCircle } from "@/components/loading-circle";
+
+interface ValidationErrors {
+  title?: string;
+  description?: string;
+  category?: string;
+  duplicate?: string;
+}
 
 export default function CreateRequestGroupPage() {
   const router = useRouter();
@@ -35,7 +41,7 @@ export default function CreateRequestGroupPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [activeStep, setActiveStep] = useState(0);
-  const [duplicateTitle, setDuplicateTitle] = useState<boolean | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
   useEffect(() => {
     fetch("/api/categories")
@@ -44,22 +50,6 @@ export default function CreateRequestGroupPage() {
       .catch(() => setCategories([]))
       .finally(() => setLoading(false));
   }, []);
-
-  // useEffect(() => {
-  //   const controller = new AbortController();
-  //   const q = title.trim();
-  //   if (!q) {
-  //     setDuplicateTitle(null);
-  //     return;
-  //   }
-  //   fetch(`/api/request-groups?title=${encodeURIComponent(q)}`, {
-  //     signal: controller.signal,
-  //   })
-  //     .then((r) => r.json())
-  //     .then((d) => setDuplicateTitle(!!d.exists))
-  //     .catch(() => setDuplicateTitle(null));
-  //   return () => controller.abort();
-  // }, [title]);
 
   const handleUpload = async (files: FileList | null) => {
     if (!files || !files.length) return;
@@ -91,17 +81,34 @@ export default function CreateRequestGroupPage() {
   };
 
   const verifyUniqueTitle = async () => {
-    const res = await fetch(`/api/request-groups?title=${title}`);
+    if (!title.trim()) return true; // Empty title is handled by required validation
+    const res = await fetch(`/api/request-groups?title=${encodeURIComponent(title)}`);
     const data = await res.json();
     return !data.exists;
   }
 
   const canProceedStep1 = async () => {
-    if (!title.trim() || !description.trim() || !categoryId) {
-      return false;
+    const errors: typeof validationErrors = {};
+    if (!title.trim()) {
+      errors.title = "כותרת היא שדה חובה";
     }
-    return await verifyUniqueTitle();
-  }
+    if (!description.trim()) {
+      errors.description = "תיאור הוא שדה חובה";
+    }
+    if (!categoryId) {
+      errors.category = "קטגוריה היא שדה חובה";
+    }
+
+    // Check for duplicate title if title is provided
+    if (title.trim() && !errors.title) {
+      const isUnique = await verifyUniqueTitle();
+      if (!isUnique) {
+        errors.duplicate = "כותרת זו כבר קיימת במערכת";
+      }
+    }
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const canProceedStep2 = () => imageUrls.length > 0;
 
@@ -133,10 +140,28 @@ export default function CreateRequestGroupPage() {
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    if (duplicateTitle) {
-      setDuplicateTitle(false);
+    // Clear validation errors when user starts typing
+    if (validationErrors.title) {
+      setValidationErrors(prev => ({ ...prev, title: undefined }));
     }
-  }
+    if (validationErrors.duplicate) {
+      setValidationErrors(prev => ({ ...prev, duplicate: undefined }));
+    }
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: undefined }));
+    }
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value);
+    if (validationErrors.category) {
+      setValidationErrors(prev => ({ ...prev, category: undefined }));
+    }
+  };
 
   return (
     <Box sx={{ width: "100%", mt: 0 }}>
@@ -185,12 +210,11 @@ export default function CreateRequestGroupPage() {
                     placeholder="לדוגמה: אוזניות גיימינג איכותיות"
                     value={title}
                     onChange={(e) => handleTitleChange(e.target.value)}
+                    error={!!validationErrors.title || !!validationErrors.duplicate}
+                    helperText={validationErrors.title || validationErrors.duplicate}
                     required
                     fullWidth
                   />
-                  {duplicateTitle && (
-                    <Alert severity="warning">כותרת זו קיימת במערכת</Alert>
-                  )}
                   <Tooltip
                     title="תיאור מפורט משפר את סיכויי האישור"
                     placement="top"
@@ -199,9 +223,12 @@ export default function CreateRequestGroupPage() {
                       label="תיאור"
                       placeholder="פרטו את המוצר/שירות, למה הוא חשוב, וכל מידע שיעזור לאשר"
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={(e) => handleDescriptionChange(e.target.value)}
+                      error={!!validationErrors.description}
+                      helperText={validationErrors.description}
                       multiline
                       minRows={5}
+                      required
                       fullWidth
                     />
                   </Tooltip>
@@ -209,7 +236,10 @@ export default function CreateRequestGroupPage() {
                     select
                     label="קטגוריה"
                     value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    error={!!validationErrors.category}
+                    helperText={validationErrors.category}
+                    required
                     fullWidth
                   >
                     {categories.map((c) => (
@@ -222,11 +252,9 @@ export default function CreateRequestGroupPage() {
                     <Button
                       variant="contained"
                       onClick={async () => {
-                        if (await canProceedStep1()) {
+                        const isValid: boolean = await canProceedStep1();
+                        if (isValid) {
                           setActiveStep(1);
-                          setDuplicateTitle(false);
-                        } else {
-                          setDuplicateTitle(true);
                         }
                       }}
                     >
