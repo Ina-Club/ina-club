@@ -14,65 +14,63 @@ import {
   Step,
   StepLabel,
   Tooltip,
-  Chip,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useRouter } from "next/navigation";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupPreview from "@/components/request-group/request-group-preview";
+import { LoadingCircle } from "@/components/loading-circle";
+import { UploadDropzone } from "@/components/upload-dropzone";
+
+interface ValidationErrors {
+  title?: string;
+  description?: string;
+  category?: string;
+  duplicate?: string;
+}
 
 export default function CreateRequestGroupPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [requestGroupImages, setRequestGroupImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [activeStep, setActiveStep] = useState(0);
-  const [duplicateTitle, setDuplicateTitle] = useState<boolean | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
   useEffect(() => {
     fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => setCategories(data.categories ?? []))
-      .catch(() => setCategories([]));
+      .catch(() => setCategories([]))
+      .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const q = title.trim();
-    if (!q) {
-      setDuplicateTitle(null);
-      return;
-    }
-    fetch(`/api/request-groups?title=${encodeURIComponent(q)}`, {
-      signal: controller.signal,
-    })
-      .then((r) => r.json())
-      .then((d) => setDuplicateTitle(!!d.exists))
-      .catch(() => setDuplicateTitle(null));
-    return () => controller.abort();
-  }, [title]);
+  const withClearError = (handler: () => void) => () => {
+    setError("");
+    handler();
+  };
 
-  const handleUpload = async (files: FileList | null) => {
-    if (!files || !files.length) return;
+  const handleUpload = async (): Promise<boolean> => {
+    if (!requestGroupImages || !requestGroupImages.length)
+      return false;
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET;
     if (!cloudName || !preset) {
       setError("חסר קונפיגורציה להעלאת תמונות");
-      return;
+      return false;
     }
     setError("");
     setUploading(true);
     try {
       const uploaded: string[] = [];
-      for (const file of Array.from(files)) {
+      const promises = requestGroupImages.map(async (file) => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", preset);
@@ -80,21 +78,60 @@ export default function CreateRequestGroupPage() {
           `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
           { method: "POST", body: formData }
         );
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          throw new Error(j.error?.mesage); // TODO: This should be logged somewhere
+        }
         const data = await res.json();
         if (data.secure_url) uploaded.push(data.secure_url as string);
-      }
-      setImageUrls((prev) => [...prev, ...uploaded]);
-    } finally {
+      });
+      await Promise.all(promises)
+      return true;
+    }
+    catch (err) {
+      setError("שגיאה בהעלאת תמונה, אנא נסו שנית מאוחר יותר");
+    }
+    finally {
       setUploading(false);
     }
+    return false;
   };
 
-  const canProceedStep1 = () =>
-    title.trim() &&
-    description.trim() &&
-    categoryId &&
-    duplicateTitle === false;
-  const canProceedStep2 = () => imageUrls.length > 0;
+  const verifyUniqueTitle = async () => {
+    if (!title.trim()) return true; // Empty title is handled by required validation
+    const res = await fetch(`/api/request-groups?title=${encodeURIComponent(title)}`);
+    const data = await res.json();
+    return !data.exists;
+  }
+
+  const canProceedStep1 = async () => {
+    const errors: typeof validationErrors = {};
+    if (!title.trim()) {
+      errors.title = "כותרת היא שדה חובה";
+    }
+    if (!description.trim()) {
+      errors.description = "תיאור הוא שדה חובה";
+    }
+    if (!categoryId) {
+      errors.category = "קטגוריה היא שדה חובה";
+    }
+
+    // Check for duplicate title if title is provided and no errors remain
+    if (title.trim() && !Object.keys(errors).length) {
+      const isUnique = await verifyUniqueTitle();
+      if (!isUnique) {
+        errors.duplicate = "כותרת זו כבר קיימת במערכת";
+      }
+    }
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const canProceedStep2 = () => requestGroupImages.length > 0;
+
+  const convertImagesToUrls = () => {
+    return requestGroupImages.map((image) => URL.createObjectURL(image));
+  }
 
   const handleSubmitFinal = async () => {
     setError("");
@@ -107,7 +144,7 @@ export default function CreateRequestGroupPage() {
           title,
           description,
           categoryId: categoryId || null,
-          imageUrls,
+          imageUrls: convertImagesToUrls(),
         }),
       });
       if (!res.ok) {
@@ -119,6 +156,31 @@ export default function CreateRequestGroupPage() {
       setError(e.message || "שגיאה");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    // Clear validation errors when user starts typing
+    if (validationErrors.title) {
+      setValidationErrors(prev => ({ ...prev, title: undefined }));
+    }
+    if (validationErrors.duplicate) {
+      setValidationErrors(prev => ({ ...prev, duplicate: undefined }));
+    }
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+    if (validationErrors.description) {
+      setValidationErrors(prev => ({ ...prev, description: undefined }));
+    }
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value);
+    if (validationErrors.category) {
+      setValidationErrors(prev => ({ ...prev, category: undefined }));
     }
   };
 
@@ -161,144 +223,91 @@ export default function CreateRequestGroupPage() {
           }}
         >
           <Box>
-            {activeStep === 0 && (
-              <Stack spacing={2}>
-                <TextField
-                  label="כותרת"
-                  placeholder="לדוגמה: אוזניות גיימינג איכותיות"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  fullWidth
-                />
-                {duplicateTitle && (
-                  <Alert severity="warning">כותרת זו קיימת במערכת</Alert>
-                )}
-                <Tooltip
-                  title="תיאור מפורט משפר את סיכויי האישור"
-                  placement="top"
-                >
+            {loading ? <LoadingCircle loadingText="טוען..."/> :
+              activeStep === 0 && (
+                <Stack spacing={2}>
                   <TextField
-                    label="תיאור"
-                    placeholder="פרטו את המוצר/שירות, למה הוא חשוב, וכל מידע שיעזור לאשר"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    multiline
-                    minRows={5}
+                    label="כותרת"
+                    placeholder="לדוגמה: אוזניות גיימינג איכותיות"
+                    value={title}
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                    error={!!validationErrors.title || !!validationErrors.duplicate}
+                    helperText={validationErrors.title || validationErrors.duplicate}
+                    required
                     fullWidth
                   />
-                </Tooltip>
-                <TextField
-                  select
-                  label="קטגוריה"
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  fullWidth
-                >
-                  {categories.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button
-                    variant="contained"
-                    disabled={!canProceedStep1()}
-                    onClick={() => setActiveStep(1)}
+                  <Tooltip
+                    title="תיאור מפורט משפר את סיכויי האישור"
+                    placement="top"
                   >
-                    הבא
-                  </Button>
-                </Box>
-              </Stack>
-            )}
+                    <TextField
+                      label="תיאור"
+                      placeholder="פרטו את המוצר/שירות, למה הוא חשוב, וכל מידע שיעזור לאשר"
+                      value={description}
+                      onChange={(e) => handleDescriptionChange(e.target.value)}
+                      error={!!validationErrors.description}
+                      helperText={validationErrors.description}
+                      multiline
+                      minRows={5}
+                      required
+                      fullWidth
+                    />
+                  </Tooltip>
+                  <TextField
+                    select
+                    label="קטגוריה"
+                    value={categoryId}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    error={!!validationErrors.category}
+                    helperText={validationErrors.category}
+                    required
+                    fullWidth
+                  >
+                    {categories.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      onClick={async () => {
+                        const isValid: boolean = await canProceedStep1();
+                        if (isValid) {
+                          setActiveStep(1);
+                        }
+                      }}
+                    >
+                      הבא
+                    </Button>
+                  </Box>
+                </Stack>
+              )}
 
             {activeStep === 1 && (
               <Stack spacing={2}>
-                <Button
-                  component="label"
-                  variant="outlined"
-                  disabled={uploading}
-                >
-                  {uploading ? "מעלה..." : "העלה תמונות (לפחות אחת)"}
-                  <input
-                    hidden
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => handleUpload(e.target.files)}
-                  />
-                </Button>
-                {/* Reorder by simple move up/down */}
-                {imageUrls.map((url, i) => (
-                  <Box
-                    key={i}
-                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={url}
-                      alt="uploaded"
-                      style={{
-                        width: 96,
-                        height: 64,
-                        objectFit: "cover",
-                        borderRadius: 8,
-                      }}
-                    />
-                    <Button
-                      size="small"
-                      disabled={i === 0}
-                      onClick={() =>
-                        setImageUrls((prev) => {
-                          const arr = [...prev];
-                          const t = arr[i - 1];
-                          arr[i - 1] = arr[i];
-                          arr[i] = t;
-                          return arr;
-                        })
-                      }
-                    >
-                      למעלה
-                    </Button>
-                    <Button
-                      size="small"
-                      disabled={i === imageUrls.length - 1}
-                      onClick={() =>
-                        setImageUrls((prev) => {
-                          const arr = [...prev];
-                          const t = arr[i + 1];
-                          arr[i + 1] = arr[i];
-                          arr[i] = t;
-                          return arr;
-                        })
-                      }
-                    >
-                      למטה
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() =>
-                        setImageUrls((prev) =>
-                          prev.filter((_, idx) => idx !== i)
-                        )
-                      }
-                    >
-                      מחיקה
-                    </Button>
-                  </Box>
-                ))}
+                <UploadDropzone
+                  multiple={true}
+                  title="העלה תמונות (לפחות אחת...)"
+                  handleFileUpload={setRequestGroupImages}
+                  initFiles={requestGroupImages}
+                />
                 <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button variant="outlined" onClick={() => setActiveStep(0)}>
+                  <Button variant="outlined" onClick={withClearError(() => setActiveStep(0))}>
                     חזור
                   </Button>
                   <Button
                     variant="contained"
                     disabled={!canProceedStep2()}
-                    onClick={() => setActiveStep(2)}
+                    onClick={withClearError(async () => {
+                      const success = await handleUpload();
+                      if (success) {
+                        setActiveStep(2);
+                      }
+                    })}
                   >
-                    הבא
+                    {uploading ? <CircularProgress size={20} color="inherit" /> : "הבא"}
                   </Button>
                 </Box>
               </Stack>
@@ -324,7 +333,7 @@ export default function CreateRequestGroupPage() {
                   title={title}
                   description={description}
                   category={categories.find((c) => c.id === categoryId)?.name}
-                  images={imageUrls}
+                  images={convertImagesToUrls()}
                   participantsCount={1}
                   participantAvatars={[]}
                   status={GroupStatus.OPEN}
@@ -440,7 +449,7 @@ export default function CreateRequestGroupPage() {
                   category:
                     categories.find((c) => c.id === categoryId)?.name ||
                     "קטגוריה",
-                  images: imageUrls.length ? imageUrls : ["/InaClubLogo.png"],
+                  images: requestGroupImages.length ? convertImagesToUrls() : ["/InaClubLogo.png"],
                   participants: [],
                   openedGroups: [],
                   status: GroupStatus.PREVIEW,
