@@ -291,6 +291,7 @@ export default function CreateRequestGroupPage() {
                   multiple={true}
                   title="העלה תמונות (לפחות אחת...)"
                   handleFileUpload={setRequestGroupImages}
+                  initFiles={requestGroupImages}
                 />
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <Button variant="outlined" onClick={withClearError(() => setActiveStep(0))}>
