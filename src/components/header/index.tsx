@@ -8,7 +8,6 @@ import {
   Button,
   Tabs,
   Tab,
-  Typography,
   Drawer,
   List,
   ListItemButton,
@@ -17,14 +16,6 @@ import {
   Divider,
   Menu,
   MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Stack,
-  TextField,
-  Select,
-  FormControl,
-  InputLabel
 } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
@@ -41,7 +32,6 @@ import {
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { UploadDropzone } from '@/components/upload-dropzone';
 
 const navigationItems = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
@@ -125,34 +115,6 @@ export default function Header() {
         הרשמה
       </MenuItem>,
     ];
-
-  // Request Group Creation Dialog
-  const maxCharacters: number = 250;
-  const dropzoneTitle: string = "גרור תמונה לכאן או לחץ לבחירה";
-  const [productImage, setProductImage] = useState<File[]>([]);
-  const [openRequestGroupDialog, setOpenRequestGroupDialog] = useState(false);
-  const [descriptionLength, setDescriptionLength] = useState(0);
-  const [category, setCategory] = useState("");
-  const categoryList: string[] = ["אלקטרוניקה", "ביגוד", "מזון"];
-
-  const handleDescriptionChange = (newText: string) => {
-    const desiredNewLength: number = newText.length;
-    if (desiredNewLength <= maxCharacters) {
-      setDescriptionLength(desiredNewLength);
-    }
-  }
-
-  const handleInputsReset = () => {
-    setProductImage([]);
-    setCategory("");
-    setDescriptionLength(0);
-  }
-
-  const handleRequestGroupDialogClose = () => {
-    console.log(productImage);
-    handleInputsReset();
-    setOpenRequestGroupDialog(false);
-  }
 
   return (
     <>
@@ -346,57 +308,6 @@ export default function Header() {
           </List>
         </Box>
       </Drawer>
-
-      {/* Request group creation dialog */}
-      <Dialog open={openRequestGroupDialog} onClose={handleRequestGroupDialogClose} fullWidth>
-        <DialogTitle sx={{ display: "flex", justifyContent: "center", mt: 2 }} variant="h5"> בקשה לקבוצת רכישה חדשה</DialogTitle>
-        <DialogContent>
-          <Box sx={{
-            mx: "auto",
-            mt: { xs: 2, md: 2 },
-            p: 4,
-            border: "1px solid #ddd",
-            borderRadius: 2
-          }}>
-            <Stack spacing={2} component="form">
-              <TextField label="כותרת" required fullWidth />
-              <FormControl required fullWidth>
-                <InputLabel required>קטגוריה</InputLabel>
-                <Select
-                  required
-                  value={category}
-                  label="קטגוריה"
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  {categoryList.map((opt, i) => (
-                    <MenuItem key={i} value={opt}>{opt}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField
-                label="תיאור"
-                required
-                fullWidth
-                multiline
-                rows={4}
-                onChange={(e) => handleDescriptionChange(e.target.value)}
-                slotProps={{
-                  htmlInput: { maxLength: maxCharacters }
-                }}
-                helperText={`${descriptionLength}/${maxCharacters} תווים`}
-              />
-              <Typography>הוסף תמונה (אופציונלי):</Typography>
-              <UploadDropzone multiple={true} title={dropzoneTitle} handleFileUpload={setProductImage} />
-              <Button type="submit" variant="contained" color="primary" fullWidth>
-                הגש בקשה
-              </Button>
-            </Stack>
-          </Box>
-        </DialogContent>
-        <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={handleRequestGroupDialogClose}>סגור</Button>
-        </Box>
-      </Dialog>
     </>
   );
 }
