@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
-import { GroupStatus } from "@prisma/client";
+import { GroupStatus } from "lib/types/status";
 
 export async function GET(req: Request) {
   try {
+    // This represents GET by title
     const { searchParams } = new URL(req.url);
     const title = searchParams.get('title');
     if (title) {
@@ -11,6 +12,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ exists: !!exists });
     }
 
+    // This represents GET all request groups.
     const rows = await prisma.requestGroup.findMany({
       select: {
         id: true,
@@ -64,10 +66,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { title, description, categoryId, imageUrls } = body as {
-      title: string; description?: string; categoryId?: string; imageUrls?: string[];
+      title: string; description: string; categoryId: string; imageUrls: string[];
     };
     if (!title) return NextResponse.json({ error: "כותרת חובה" }, { status: 400 });
-
+    if (!description) return NextResponse.json({ error: "תיאור חובה" }, { status: 400 });
+    if (!categoryId) return NextResponse.json({ error: "קטגוריה חובה" }, { status: 400 });
+    if (!imageUrls) return NextResponse.json({ error: "חובה תמונה אחת לפחות" }, { status: 400 });
     // duplicate title check (case-insensitive)
     const exists = await prisma.requestGroup.findFirst({
       where: { title: { equals: title, mode: 'insensitive' } },
@@ -79,18 +83,15 @@ export async function POST(req: Request) {
       data: {
         title,
         description,
-        categoryId: categoryId ?? null,
-        status: 'PENDING' as any,
+        categoryId: categoryId,
+        status: GroupStatus.PENDING,
       },
     });
 
-    if (imageUrls?.length) {
-      for (let i = 0; i < imageUrls.length; i++) {
-        const url = imageUrls[i];
-        const img = await prisma.image.create({ data: { url } });
-        await prisma.requestGroupImage.create({ data: { requestGroupId: created.id, imageId: img.id, order: i } });
-      }
-    }
+    imageUrls.map(async (url, i) => {
+      const img = await prisma.image.create({ data: { url } });
+      await prisma.requestGroupImage.create({ data: { requestGroupId: created.id, imageId: img.id, order: i } });
+    })
 
     return NextResponse.json({ id: created.id }, { status: 201 });
   } catch (e) {

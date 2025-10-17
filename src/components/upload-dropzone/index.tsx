@@ -18,16 +18,17 @@ interface UploadDropzoneProps {
   maxSizeMB?: number;         // 10
   multiple?: boolean;         // true
   title?: string;             // "הוסף תמונות"
+  initFiles?: File[];         // If files provided, display them at render time
 };
 
 const acceptedFileTypes: string[] = ["image/png", "image/jpeg", "image/gif"];
 
-export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ handleFileUpload, accept = acceptedFileTypes, maxSizeMB = 10, multiple, title }) => {
+export const UploadDropzone: React.FC<UploadDropzoneProps> = ({ handleFileUpload, accept = acceptedFileTypes, maxSizeMB = 10, multiple, title, initFiles }) => {
   const theme = useTheme();
   const maxBytes: number = maxSizeMB * 1024 * 1024;
   const inputRef = useRef<HTMLInputElement>(null);
   const openPicker = () => inputRef.current?.click();
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>(initFiles ?? []);
   const [filesSizeInBytes, setFilesSizeInBytes] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
