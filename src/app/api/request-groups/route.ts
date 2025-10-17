@@ -88,10 +88,11 @@ export async function POST(req: Request) {
       },
     });
 
-    imageUrls.map(async (url, i) => {
+    const promises = imageUrls.map(async (url, i) => {
       const img = await prisma.image.create({ data: { url } });
       await prisma.requestGroupImage.create({ data: { requestGroupId: created.id, imageId: img.id, order: i } });
     })
+    await Promise.all(promises);
 
     return NextResponse.json({ id: created.id }, { status: 201 });
   } catch (e) {
