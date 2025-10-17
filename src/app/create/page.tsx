@@ -223,7 +223,7 @@ export default function CreateRequestGroupPage() {
           }}
         >
           <Box>
-            {loading ? <LoadingCircle /> :
+            {loading ? <LoadingCircle loadingText="טוען..."/> :
               activeStep === 0 && (
                 <Stack spacing={2}>
                   <TextField
@@ -306,7 +306,7 @@ export default function CreateRequestGroupPage() {
                       }
                     })}
                   >
-                    הבא
+                    {uploading ? <CircularProgress size={20} color="inherit" /> : "הבא"}
                   </Button>
                 </Box>
               </Stack>
