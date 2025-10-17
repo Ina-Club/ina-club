@@ -21,6 +21,7 @@ import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupPreview from "@/components/request-group/request-group-preview";
 import { LoadingCircle } from "@/components/loading-circle";
+import { UploadDropzone } from "@/components/upload-dropzone";
 
 interface ValidationErrors {
   title?: string;
@@ -35,7 +36,7 @@ export default function CreateRequestGroupPage() {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [requestGroupImages, setRequestGroupImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -51,19 +52,20 @@ export default function CreateRequestGroupPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleUpload = async (files: FileList | null) => {
-    if (!files || !files.length) return;
+  const handleUpload = async (): Promise<boolean> => {
+    if (!requestGroupImages || !requestGroupImages.length)
+      return false;
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET;
     if (!cloudName || !preset) {
       setError("חסר קונפיגורציה להעלאת תמונות");
-      return;
+      return false;
     }
     setError("");
     setUploading(true);
     try {
       const uploaded: string[] = [];
-      for (const file of Array.from(files)) {
+      const promises = requestGroupImages.map(async (file) => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", preset);
@@ -71,13 +73,23 @@ export default function CreateRequestGroupPage() {
           `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
           { method: "POST", body: formData }
         );
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          throw new Error(j.error?.mesage); // TODO: This should be logged somewhere
+        }
         const data = await res.json();
         if (data.secure_url) uploaded.push(data.secure_url as string);
-      }
-      setImageUrls((prev) => [...prev, ...uploaded]);
-    } finally {
+      });
+      await Promise.all(promises)
+      return true;
+    }
+    catch (err) {
+      setError("שגיאה בהעלאת תמונה, אנא נסו שנית מאוחר יותר");
+    }
+    finally {
       setUploading(false);
     }
+    return false;
   };
 
   const verifyUniqueTitle = async () => {
@@ -110,7 +122,11 @@ export default function CreateRequestGroupPage() {
     return Object.keys(errors).length === 0;
   };
 
-  const canProceedStep2 = () => imageUrls.length > 0;
+  const canProceedStep2 = () => requestGroupImages.length > 0;
+
+  const convertImagesToUrls = () => {
+    return requestGroupImages.map((image) => URL.createObjectURL(image));
+  }
 
   const handleSubmitFinal = async () => {
     setError("");
@@ -123,7 +139,7 @@ export default function CreateRequestGroupPage() {
           title,
           description,
           categoryId: categoryId || null,
-          imageUrls,
+          imageUrls: convertImagesToUrls(),
         }),
       });
       if (!res.ok) {
@@ -266,80 +282,11 @@ export default function CreateRequestGroupPage() {
 
             {activeStep === 1 && (
               <Stack spacing={2}>
-                <Button
-                  component="label"
-                  variant="outlined"
-                  disabled={uploading}
-                >
-                  {uploading ? "מעלה..." : "העלה תמונות (לפחות אחת)"}
-                  <input
-                    hidden
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={async (e) => await handleUpload(e.target.files)}
-                  />
-                </Button>
-                {/* Reorder by simple move up/down */}
-                {imageUrls.map((url, i) => (
-                  <Box
-                    key={i}
-                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={url}
-                      alt="uploaded"
-                      style={{
-                        width: 96,
-                        height: 64,
-                        objectFit: "cover",
-                        borderRadius: 8,
-                      }}
-                    />
-                    <Button
-                      size="small"
-                      disabled={i === 0}
-                      onClick={() =>
-                        setImageUrls((prev) => {
-                          const arr = [...prev];
-                          const t = arr[i - 1];
-                          arr[i - 1] = arr[i];
-                          arr[i] = t;
-                          return arr;
-                        })
-                      }
-                    >
-                      למעלה
-                    </Button>
-                    <Button
-                      size="small"
-                      disabled={i === imageUrls.length - 1}
-                      onClick={() =>
-                        setImageUrls((prev) => {
-                          const arr = [...prev];
-                          const t = arr[i + 1];
-                          arr[i + 1] = arr[i];
-                          arr[i] = t;
-                          return arr;
-                        })
-                      }
-                    >
-                      למטה
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() =>
-                        setImageUrls((prev) =>
-                          prev.filter((_, idx) => idx !== i)
-                        )
-                      }
-                    >
-                      מחיקה
-                    </Button>
-                  </Box>
-                ))}
+                <UploadDropzone
+                  multiple={true}
+                  title="העלה תמונות (לפחות אחת...)"
+                  handleFileUpload={setRequestGroupImages}
+                />
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <Button variant="outlined" onClick={() => setActiveStep(0)}>
                     חזור
@@ -347,7 +294,12 @@ export default function CreateRequestGroupPage() {
                   <Button
                     variant="contained"
                     disabled={!canProceedStep2()}
-                    onClick={() => setActiveStep(2)}
+                    onClick={async () => {
+                      const success = await handleUpload();
+                      if (success) {
+                        setActiveStep(2);
+                      }
+                    }}
                   >
                     הבא
                   </Button>
@@ -375,7 +327,7 @@ export default function CreateRequestGroupPage() {
                   title={title}
                   description={description}
                   category={categories.find((c) => c.id === categoryId)?.name}
-                  images={imageUrls}
+                  images={convertImagesToUrls()}
                   participantsCount={1}
                   participantAvatars={[]}
                   status={GroupStatus.OPEN}
@@ -491,7 +443,7 @@ export default function CreateRequestGroupPage() {
                   category:
                     categories.find((c) => c.id === categoryId)?.name ||
                     "קטגוריה",
-                  images: imageUrls.length ? imageUrls : ["/InaClubLogo.png"],
+                  images: requestGroupImages.length ? convertImagesToUrls() : ["/InaClubLogo.png"],
                   participants: [],
                   openedGroups: [],
                   status: GroupStatus.PREVIEW,
