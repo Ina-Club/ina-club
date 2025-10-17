@@ -52,6 +52,11 @@ export default function CreateRequestGroupPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const withClearError = (handler: () => void) => () => {
+    setError("");
+    handler();
+  };
+
   const handleUpload = async (): Promise<boolean> => {
     if (!requestGroupImages || !requestGroupImages.length)
       return false;
@@ -288,18 +293,18 @@ export default function CreateRequestGroupPage() {
                   handleFileUpload={setRequestGroupImages}
                 />
                 <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button variant="outlined" onClick={() => setActiveStep(0)}>
+                  <Button variant="outlined" onClick={withClearError(() => setActiveStep(0))}>
                     חזור
                   </Button>
                   <Button
                     variant="contained"
                     disabled={!canProceedStep2()}
-                    onClick={async () => {
+                    onClick={withClearError(async () => {
                       const success = await handleUpload();
                       if (success) {
                         setActiveStep(2);
                       }
-                    }}
+                    })}
                   >
                     הבא
                   </Button>
