@@ -85,6 +85,7 @@ export default function Page() {
       {/* Content area */}
       <Box
         sx={{
+          maxWidth: { xs: "100%", md: "85%" },
           display: "flex",
           flexDirection: "row",
           py: { xs: 2, md: 3 },
@@ -94,7 +95,13 @@ export default function Page() {
         }}
       >
         {/* Desktop sidebar filters */}
-        <Box sx={{ display: { xs: "none", md: "block" } }}>
+        <Box sx={{
+          display: { xs: "none", md: "block" },
+          position: "sticky",
+          top: "20px",
+          alignSelf: "flex-start",
+          zIndex: 1
+        }}>
           <GroupFilters mode="sidebar" group="request" filterState={filterState} onFilterChange={setFilterState} />
         </Box>
 
@@ -103,9 +110,8 @@ export default function Page() {
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, // mobile - 1 column, desktop - 3 columns
-            width: "100%",
+            flex: 1,
             px: { xs: 2, md: 2 },
-            position: "inherit",
             justifyContent: "center",
             alignItems: "center",
             gap: { xs: 3, md: 2 },
