@@ -19,13 +19,19 @@ export interface User {
 
 export interface ActiveGroup {
   id: string;
-  images: string[];
-  category: string;
   title: string;
+  description?: string;
+  status: GroupStatus;
+  category: string;
+  basePrice: number;
+  groupPrice: number;
+  minParticipants?: number;
+  maxParticipants?: number;
+  deadline: Date;
+  createdAt: Date;
+  company?: Company;
   participants: User[];
-  price: number;
-  numberOfParticipants: number;
-  deadline: Date; // ⬅️ new field
+  images: string[];
 }
 
 export interface Company {
