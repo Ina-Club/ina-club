@@ -1,20 +1,13 @@
 "use client";
 
-import {
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, Card, CardContent, CardMedia, Chip, IconButton, Typography } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { ActiveGroup } from "lib/dal";
 import { useState } from "react";
 import ParticipantsProgress from "./participations-progress-bar";
 import Countdown from "./countdown";
+import { useRouter } from "next/navigation";
 
 interface ActiveGroupCardProps {
   activeGroup: ActiveGroup;
@@ -23,6 +16,11 @@ interface ActiveGroupCardProps {
 const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
   const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
+  const router = useRouter();
+
+  const goToActiveGroup = () => {
+    router.push(`/active-groups/${activeGroup.id}`);
+  };
 
   return (
     <Card
@@ -38,8 +36,10 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         "&:hover": {
           transform: "translateY(-6px)",
           boxShadow: 8,
+          cursor: "pointer",
         },
       }}
+      onClick={goToActiveGroup}
     >
       {/* Image Section */}
       <Box sx={{ position: "relative" }}>
@@ -64,7 +64,10 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
             boxShadow: 2,
             "&:hover": { bgcolor: "grey.100" },
           }}
-          onClick={() => setLiked(!liked)}
+          onClick={(e) => {
+            e.stopPropagation(); // כדי שלחיצה על הלב לא תפעיל ניווט
+            setLiked(!liked);
+          }}
         >
           {liked ? (
             <FavoriteIcon sx={{ color: "red" }} />
@@ -104,7 +107,10 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
             {activeGroup.images.map((_, idx) => (
               <Box
                 key={idx}
-                onClick={() => setCurrentImage(idx)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImage(idx);
+                }}
                 sx={{
                   width: 8,
                   height: 8,
@@ -142,9 +148,18 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
             mb: 1,
           }}
         >
-          <Typography variant="subtitle1" fontWeight={700} color="primary.main">
-            ₪{activeGroup.price.toLocaleString()}
-          </Typography>
+          <Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textDecoration: "line-through" }}
+            >
+              ₪{activeGroup.basePrice}
+            </Typography>
+            <Typography variant="subtitle1" fontWeight={700} color="primary.main">
+              ₪{activeGroup.groupPrice}
+            </Typography>
+          </Box>
           <Typography variant="body2" color="text.secondary">
             / לאדם
           </Typography>
@@ -157,7 +172,7 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         <Box sx={{ mb: 2 }}>
           <ParticipantsProgress
             current={activeGroup.participants.length}
-            max={activeGroup.numberOfParticipants}
+            max={activeGroup.maxParticipants ?? activeGroup.participants.length}
           />
         </Box>
       </CardContent>
