@@ -21,9 +21,11 @@ import {
   LocalOffer as LocalOfferIcon,
 } from "@mui/icons-material";
 import { SearchBar } from "@/components/search-bar";
+import { useTheme } from "@mui/material/styles";
 import type { NeedMoreInfoResponse, PriceResponse } from "../../lib/types/smart-search";
 
 export default function SmartSearchComponent() {
+  const theme = useTheme();
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,27 +181,69 @@ export default function SmartSearchComponent() {
 
               {option.options && option.options.length > 0 ? (
                 // יש אפשרויות לבחירה - הצג Select עם אופציות
-                <FormControl fullWidth>
-                  <InputLabel>{option.category}</InputLabel>
-                  <Select
-                    value={selectedValues[option.category || ""] || ""}
-                    label={option.category}
-                    onChange={(e) => handleSelectChange(option.category || "", e.target.value)}
+                <Box>
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>{option.category}</InputLabel>
+                    <Select
+                      value={selectedValues[option.category || ""] || ""}
+                      label={option.category}
+                      onChange={(e) => handleSelectChange(option.category || "", e.target.value)}
+                      disabled={loading}
+                    >
+                      {option.options.map((opt: string) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* כפתור לדילוג על הפרטים */}
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => handleSelectChange(option.category || "", "__SKIP_DETAILS__")}
                     disabled={loading}
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: "0.75rem",
+                      textDecoration: "underline",
+                      "&:hover": {
+                        color: "primary.main",
+                        textDecoration: "underline",
+                      },
+                    }}
                   >
-                    {option.options.map((opt: string) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    לא משנה לי הפרטים, תן לי הערכה גסה
+                  </Button>
+                </Box>
               ) : (
-                // אין אפשרויות ואין שדות חסרים - הודעה כללית
-                <Box sx={{ p: 2, bgcolor: "warning.light", borderRadius: 1 }}>
-                  <Typography variant="body2">
-                    אנא הזן פרטים נוספים לחיפוש מדויק יותר
-                  </Typography>
+                // אין אפשרויות ואין שדות חסרים - הצג אפשרות להערכה גסה
+                <Box>
+                  <Box sx={{ p: 2, bgcolor: "warning.light", borderRadius: 1, mb: 2 }}>
+                    <Typography variant="body2">
+                      אנא הזן פרטים נוספים לחיפוש מדויק יותר
+                    </Typography>
+                  </Box>
+
+                  {/* כפתור לדילוג על הפרטים גם במקרה הזה */}
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => handleSelectChange(option.category || "", "__SKIP_DETAILS__")}
+                    disabled={loading}
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: "0.75rem",
+                      textDecoration: "underline",
+                      "&:hover": {
+                        color: "primary.main",
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    לא משנה לי הפרטים, תן לי הערכה גסה בכל זאת
+                  </Button>
                 </Box>
               )}
             </Box>
@@ -229,7 +273,7 @@ export default function SmartSearchComponent() {
           sx={{
             p: 3,
             boxShadow: 4,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
             color: "white",
           }}
         >
@@ -331,6 +375,105 @@ export default function SmartSearchComponent() {
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
         </Box>
+      )}
+
+      {/* Welcome Section - מוצג רק כשאין חיפוש פעיל */}
+      {!searchText && !loading && dynamicSelects.length === 0 && !priceResult && (
+        <Card
+          sx={{
+            p: 4,
+            mb: 3,
+            textAlign: "center",
+            background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+            border: "2px solid",
+            borderColor: "primary.light",
+          }}
+        >
+          <Typography variant="h5" sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}>
+            🌟 מה תרצה לחפש היום?
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
+            השתמש בחיפוש החכם שלנו כדי למצוא את המוצר המושלם ולהצטרף לקבוצת רכישה שתחסוך לך כסף
+          </Typography>
+
+          {/* Popular Categories */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+              קטגוריות פופולריות
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center" }}>
+              {[
+                "סמארטפונים",
+                "מחשבים ניידים",
+                "טלוויזיות",
+                "מכונות כביסה",
+                "מקררים",
+                "מזגנים",
+                "רכבים",
+                "אופניים חשמליים"
+              ].map((category) => (
+                <Chip
+                  key={category}
+                  label={category}
+                  onClick={() => setSearchText(category)}
+                  sx={{
+                    bgcolor: "primary.light",
+                    color: "primary.main",
+                    "&:hover": {
+                      bgcolor: "primary.main",
+                      color: "white",
+                    },
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                    py: 1,
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Search Examples */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+              דוגמאות לחיפוש
+            </Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
+              {[
+                "אייפון 15 פרו מקס",
+                "מקבוק אייר M3",
+                "טלוויזיה 65 אינץ' Samsung",
+                "מכונת כביסה 9 ק״ג",
+                "מקרר דלת צרדה",
+                "מזגן 1.5 כ״ס"
+              ].map((example) => (
+                <Chip
+                  key={example}
+                  label={example}
+                  onClick={() => setSearchText(example)}
+                  variant="outlined"
+                  sx={{
+                    borderColor: "secondary.main",
+                    color: "secondary.main",
+                    "&:hover": {
+                      bgcolor: "secondary.main",
+                      color: "white",
+                      borderColor: "secondary.main",
+                    },
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* How it works */}
+          <Box sx={{ mt: 3, p: 2, bgcolor: "rgba(145, 57, 214, 0.05)", borderRadius: 2 }}>
+            <Typography variant="body2" sx={{ color: "secondary.main", fontWeight: 500 }}>
+              💡 איך זה עובד? פשוט תחפש את המוצר שמעניין אותך, ואנחנו נעזור לך למצוא את המחיר הטוב ביותר דרך קבוצת רכישה
+            </Typography>
+          </Box>
+        </Card>
       )}
     </Box>
   );
