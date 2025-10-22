@@ -39,18 +39,6 @@ export default function Page() {
     return applyFilters(allRequestGroups, searchText, filterState);
   }, [allRequestGroups, searchText, filterState]);
 
-  // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
-  // useEffect(() => {
-  //   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-  //     event.preventDefault();
-  //   };
-
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
-
   return (
     <>
       <DefaultPageBanner header={headerText} description={descriptionText} />
