@@ -1,30 +1,49 @@
-'use client';
+"use client";
+
 import { Suspense, useState, useEffect, useMemo } from "react";
-import { mockActiveGroups } from "lib/mock";
 import { Box } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
-import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import ActiveGroupCard from "@/components/card/active-group-card";
+import ActiveGroupCardSkeleton from "@/components/skeleton/active-group-card-skeleton";
 import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
 import { ActiveGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
+import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 
 export default function Page() {
-  const headerText: string = "קבוצות הרכישה הפעילות";
-  const descriptionText: string = "בעמוד זה חברות מציגות את ההצעות והבקשות שלהן, כדי לאפשר ללקוחות להצטרף לרכישות קבוצתיות וליהנות ממחירים משתלמים.";
-  const allActiveGroups: ActiveGroup[] = mockActiveGroups.concat(mockActiveGroups);
+  const headerText = "קבוצות הרכישה הפעילות";
+  const descriptionText =
+    "גלה את כל הקבוצות הפעילות, הצטרף לרכישות קבוצתיות וחסוך כסף יחד עם אחרים.";
+
+  const [allActiveGroups, setAllActiveGroups] = useState<ActiveGroup[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
     locations: [],
     popularities: [],
-    priceRange: [0, 10_000]
+    priceRange: [0, 10_000],
   });
 
-  // Apply all filters (text + categories + price + future filters)
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch("/api/active-groups")
+      .then((r) => r.json())
+      .then((data) => {
+        if (active) setAllActiveGroups(data.activeGroups ?? []);
+      })
+      .catch(() => setAllActiveGroups([]))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const filteredActiveGroups = useMemo(() => {
     return applyFilters(allActiveGroups, searchText, filterState);
   }, [allActiveGroups, searchText, filterState]);
@@ -32,13 +51,14 @@ export default function Page() {
   return (
     <>
       <DefaultPageBanner header={headerText} description={descriptionText} />
-      {/* Top bar: Search + (mobile) Filters trigger */}
+
+      {/* Top bar: Search + Mobile filters trigger */}
       <Box
         sx={{
           maxWidth: 800,
           mx: "auto",
           position: "relative",
-          mt: { xs: -6, md: -3 }, // מרים את הסרגל חיפוש שיהיה קצת מעל הגרדיאנט
+          mt: { xs: -6, md: -3 },
           bgcolor: "white",
           boxShadow: 3,
           borderRadius: "12px",
@@ -47,17 +67,21 @@ export default function Page() {
           display: "flex",
           alignItems: "center",
           border: "2px solid transparent",
-          "&:hover": {
-            borderColor: "#1a2a5a"
-          }
+          "&:hover": { borderColor: "#1a2a5a" },
         }}
       >
-        {/* Search box */}
-        <SearchBar searchText={searchText} placeholderText="חיפוש קבוצות רכישה..." handleSearchTextChange={setSearchText} />
-
-        {/* Mobile filters trigger (inside the same row as search) */}
+        <SearchBar
+          searchText={searchText}
+          placeholderText="חיפוש קבוצות..."
+          handleSearchTextChange={setSearchText}
+        />
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" group="active" filterState={filterState} onFilterChange={setFilterState} />
+          <GroupFilters
+            mode="trigger"
+            group="active"
+            filterState={filterState}
+            onFilterChange={setFilterState}
+          />
         </Box>
       </Box>
 
@@ -74,21 +98,28 @@ export default function Page() {
         }}
       >
         {/* Desktop sidebar filters */}
-        <Box sx={{
-          display: { xs: "none", md: "block" },
-          position: "sticky",
-          top: "20px",
-          alignSelf: "flex-start",
-          zIndex: 1
-        }}>
-          <GroupFilters mode="sidebar" group="active" filterState={filterState} onFilterChange={setFilterState} />
+        <Box
+          sx={{
+            display: { xs: "none", md: "block" },
+            position: "sticky",
+            top: "20px",
+            alignSelf: "flex-start",
+            zIndex: 1,
+          }}
+        >
+          <GroupFilters
+            mode="sidebar"
+            group="active"
+            filterState={filterState}
+            onFilterChange={setFilterState}
+          />
         </Box>
 
         {/* Cards grid */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, // mobile - 1 column, desktop - 3 columns
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
             flex: 1,
             px: { xs: 2, md: 2 },
             justifyContent: "center",
@@ -97,7 +128,11 @@ export default function Page() {
           }}
         >
           <Suspense fallback={<GroupSectionSkeleton />}>
-            {filteredActiveGroups.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <ActiveGroupCardSkeleton key={i} />
+              ))
+            ) : filteredActiveGroups.length > 0 ? (
               filteredActiveGroups.map((activeGroup, index) => (
                 <ActiveGroupCard key={index} activeGroup={activeGroup} />
               ))
@@ -108,14 +143,14 @@ export default function Page() {
                   left: "50%",
                   width: "100%",
                   transform: "translateX(-50%)",
-                  mt: { xs: 4, md: 2 }, // space below search bar
+                  mt: { xs: 4, md: 2 },
                   display: "flex",
                   justifyContent: "center",
                   color: "text.secondary",
-                  textAlign: "center"
+                  textAlign: "center",
                 }}
               >
-                לא נמצאו קבוצות רכישה התואמות לחיפוש שלך
+                לא נמצאו קבוצות התואמות לחיפוש שלך
               </Box>
             )}
           </Suspense>
