@@ -7,6 +7,7 @@ import CompanyCard from "../card/company-card";
 import { Company } from "lib/dal";
 import { useState, useEffect } from "react";
 import { LoadingCircle } from "../loading-circle";
+import CompanyCardSkeleton from "../skeleton/company-card-skeleton";
 
 interface CompanySectionWrapperProps { }
 
@@ -33,16 +34,8 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
       linkUrl={`/companies`}
     >
       <ResponsiveHorizontalListWrapper gap="16px">
-      {loading ?
-          <LoadingCircle sx={{
-            position: "absolute",
-            left: "50%",
-            width: "100%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }} /> :
+        {loading ?
+          Array.from({ length: 6 }).map((_, i) => <CompanyCardSkeleton key={i} />) :
           (allCompanies.length > 0 ?
             allCompanies.map((company, index) => (
               <Box
