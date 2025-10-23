@@ -17,7 +17,7 @@ const RequestGroupSectionWrapper: React.FC<RequestGroupSectionWrapperProps> = ()
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch('/api/request-groups/?status=open')
+    fetch('/api/request-groups/?status=open&lastWeek=true')
       .then(r => r.json())
       .then(data => { if (active) setAllOpenRequestGroupsWithParent(data.requestGroups ?? []); })
       .catch(() => setAllOpenRequestGroupsWithParent([]))

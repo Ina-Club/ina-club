@@ -17,7 +17,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch('/api/active-groups/?status=open')
+    fetch('/api/active-groups/?status=open&lastWeek=true')
       .then(r => r.json())
       .then(data => { if (active) setAllOpenActiveGroupsWithParent(data.activeGroups ?? []); })
       .catch(() => setAllOpenActiveGroupsWithParent([]))
