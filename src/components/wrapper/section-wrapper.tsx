@@ -76,7 +76,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
               color: "#1a2a5a",
               borderColor: "#1a2a5a",
               "&:hover": {
-                backgroundColor: "rgba(145, 57, 214, 0.04)",
+                backgroundColor: "rgba(255, 140, 66, 0.04)",
               },
             }}
           >
