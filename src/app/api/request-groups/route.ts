@@ -4,12 +4,21 @@ import { GroupStatus } from "lib/types/status";
 
 export async function GET(req: Request) {
   try {
-    // This represents GET by title
+    // This represents GET by url params.
     const { searchParams } = new URL(req.url);
-    const title = searchParams.get('title');
-    if (title) {
-      const exists = await prisma.requestGroup.findFirst({ where: { title: { equals: title, mode: 'insensitive' } }, select: { id: true } });
+    const titleParam = searchParams.get('title');
+    const statusParam = searchParams.get('status');
+    const where: any = {};
+    if (titleParam) {
+      const exists = await prisma.requestGroup.findFirst({ where: { title: { equals: titleParam, mode: 'insensitive' } }, select: { id: true } });
       return NextResponse.json({ exists: !!exists });
+    }
+    if (statusParam) {
+      const status: GroupStatus = GroupStatus[statusParam.toUpperCase() as keyof typeof GroupStatus]
+      if (!status) {
+        return NextResponse.json({ error: "Incorrect status provided!" }, { status: 400 });
+      }
+      where.status = status;
     }
 
     // This represents GET all request groups.
@@ -37,6 +46,7 @@ export async function GET(req: Request) {
         },
         activeGroups: { select: { id: true } },
       },
+      where,
       orderBy: { createdAt: "desc" },
     });
 
