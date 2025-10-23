@@ -7,7 +7,7 @@ import {
   Link,
   IconButton,
   Divider,
-  useTheme,
+  useTheme
 } from "@mui/material";
 import {
   Facebook as FacebookIcon,
@@ -27,42 +27,31 @@ export default function Footer() {
     <Box
       component="footer"
       sx={{
-        background:
-          "linear-gradient(140deg,rgba(255, 255, 255, 1) 0%, rgba(211, 224, 235, 1) 100%)",
-        color: "#64748b",
+        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+        color: "white",
         py: 6,
         mt: "auto",
-        boxShadow: "0px -3px 10px rgba(0,0,0,0.1)",
       }}
     >
       <Container maxWidth="lg">
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 4,
-          }}
-        >
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4 }}>
           {/* מידע על החברה */}
           <Box sx={{ flex: { xs: "none", md: 1 } }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               InaClub
             </Typography>
             <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.6 }}>
-              הפלטפורמה המובילה בישראל לרכישות קבוצתיות חכמות. חסוך כסף על
-              המוצרים שאתה אוהב עם אלפי קונים נוספים.
+              הפלטפורמה המובילה בישראל לרכישות קבוצתיות חכמות.
+              חסוך כסף על המוצרים שאתה אוהב עם אלפי קונים נוספים.
             </Typography>
 
             {/* רשתות חברתיות */}
             <Box sx={{ display: "flex", gap: 1 }}>
               <IconButton
                 sx={{
-                  bgcolor: theme.palette.primary.light,
-                  color: theme.palette.primary.main,
-                  "&:hover": {
-                    bgcolor: theme.palette.primary.main,
-                    color: "white",
-                  },
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                  color: "white",
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
                 }}
                 aria-label="פייסבוק"
               >
@@ -70,12 +59,9 @@ export default function Footer() {
               </IconButton>
               <IconButton
                 sx={{
-                  bgcolor: theme.palette.secondary.light,
-                  color: theme.palette.secondary.main,
-                  "&:hover": {
-                    bgcolor: theme.palette.secondary.main,
-                    color: "white",
-                  },
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                  color: "white",
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
                 }}
                 aria-label="אינסטגרם"
               >
@@ -83,9 +69,9 @@ export default function Footer() {
               </IconButton>
               <IconButton
                 sx={{
-                  bgcolor: "#1DA1F2",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
                   color: "white",
-                  "&:hover": { bgcolor: "#1991DB" },
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
                 }}
                 aria-label="טוויטר"
               >
@@ -93,9 +79,9 @@ export default function Footer() {
               </IconButton>
               <IconButton
                 sx={{
-                  bgcolor: "#0077B5",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
                   color: "white",
-                  "&:hover": { bgcolor: "#005885" },
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
                 }}
                 aria-label="לינקדאין"
               >
@@ -103,9 +89,9 @@ export default function Footer() {
               </IconButton>
               <IconButton
                 sx={{
-                  bgcolor: "#FF0000",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
                   color: "white",
-                  "&:hover": { bgcolor: "#CC0000" },
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
                 }}
                 aria-label="יוטיוב"
               >
@@ -120,52 +106,22 @@ export default function Footer() {
               קישורים מהירים
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <Link
-                href="/"
-                underline="hover"
-                color="inherit"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
+              <Link href="/" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 🏠 דף הבית
               </Link>
-              <Link
-                href="/smart-search"
-                underline="hover"
-                color="inherit"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
+              <Link href="/smart-search" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 🔍 חיפוש חכם
               </Link>
-              <Link
-                href="/active-groups"
-                underline="hover"
-                color="inherit"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
+              <Link href="/active-groups" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 👥 קבוצות פעילות
               </Link>
-              <Link
-                href="/request-groups"
-                underline="hover"
-                color="inherit"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
+              <Link href="/request-groups" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 📋 קבוצות מבוקשות
               </Link>
-              <Link
-                href="/create"
-                underline="hover"
-                color="inherit"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
+              <Link href="/create" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 ➕ צור קבוצה חדשה
               </Link>
-              <Link
-                href="/profile"
-                underline="hover"
-                color="inherit"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
+              <Link href="/profile" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 👤 הפרופיל שלי
               </Link>
             </Box>
@@ -179,62 +135,47 @@ export default function Footer() {
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <EmailIcon sx={{ fontSize: 20 }} />
-                <Typography variant="body2">info@inaclub.co.il</Typography>
+                <Typography variant="body2">
+                  info@inaclub.co.il
+                </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <PhoneIcon sx={{ fontSize: 20 }} />
-                <Typography variant="body2">03-1234567</Typography>
+                <Typography variant="body2">
+                  03-1234567
+                </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocationIcon sx={{ fontSize: 20 }} />
-                <Typography variant="body2">תל אביב, ישראל</Typography>
+                <Typography variant="body2">
+                  תל אביב, ישראל
+                </Typography>
               </Box>
             </Box>
 
             {/* לינקים משפטיים */}
-            <Box
-              sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}
-            >
-              <Link
-                href="/privacy"
-                underline="hover"
-                color="inherit"
-                variant="body2"
-              >
+            <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+              <Link href="/privacy" underline="hover" color="inherit" variant="body2">
                 מדיניות פרטיות
               </Link>
-              <Link
-                href="/terms"
-                underline="hover"
-                color="inherit"
-                variant="body2"
-              >
+              <Link href="/terms" underline="hover" color="inherit" variant="body2">
                 תנאי שימוש
               </Link>
-              <Link
-                href="/contact"
-                underline="hover"
-                color="inherit"
-                variant="body2"
-              >
+              <Link href="/contact" underline="hover" color="inherit" variant="body2">
                 צור קשר
               </Link>
             </Box>
           </Box>
         </Box>
 
-        <Divider sx={{ my: 3, bgcolor: "rgba(0, 0, 0, 0.1)" }} />
+        <Divider sx={{ my: 3, bgcolor: "rgba(255, 255, 255, 0.2)" }} />
 
         {/* זכויות יוצרים */}
         <Box sx={{ textAlign: "center" }}>
-          <Typography variant="body2" sx={{ color: "#374151" }}>
-            © {new Date().getFullYear()} כל הזכויות שמורות לחברת Ina Innovations
-            Ltd.
+          <Typography variant="body2">
+            © {new Date().getFullYear()} כל הזכויות שמורות לחברת Ina Innovations Ltd.
           </Typography>
-          <Typography
-            variant="caption"
-            sx={{ color: "#6b7280", mt: 1, display: "block" }}
-          >
+          <Typography variant="caption" sx={{ opacity: 0.8, mt: 1, display: "block" }}>
             פלטפורמת רכישות קבוצתיות חכמות לכלל האוכלוסייה בישראל
           </Typography>
         </Box>
