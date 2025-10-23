@@ -1,14 +1,29 @@
-import { mockActiveGroups, mockRequestGroups } from "lib/mock";
+'use client'
+
 import SectionWrapper from "./section-wrapper";
 import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
 import { Box } from "@mui/material";
 import ActiveGroupCard from "../card/active-group-card";
+import { useState, useEffect } from "react";
+import { ActiveGroup } from "lib/dal";
+import { LoadingCircle } from "../loading-circle";
 
-interface GroupSectionWrapperProps {}
+interface GroupSectionWrapperProps { }
 
-const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
-  //TODO: REMOVE mock
-  const allOpenedGroupsWithParent = mockActiveGroups.concat(mockActiveGroups);
+const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
+  const [allOpenedGroupsWithParent, setAllOpenedGroupsWithParent] = useState<ActiveGroup[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch('/api/active-groups/?status=open')
+      .then(r => r.json())
+      .then(data => { if (active) setAllOpenedGroupsWithParent(data.activeGroups ?? []); })
+      .catch(() => setAllOpenedGroupsWithParent([]))
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   return (
     <>
@@ -19,7 +34,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
         linkUrl={`/requestGroups`}
       >
         <ResponsiveHorizontalListWrapper gap="16px">
-          {allOpenedGroupsWithParent.map((activeGroup, index) => (
+          {loading ? <LoadingCircle /> : allOpenedGroupsWithParent.map((activeGroup, index) => (
             <Box
               key={index}
               sx={{
