@@ -17,7 +17,6 @@ interface CompanyCardProps {
 }
 
 const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
-  console.log(company.categories)
   return (
     <Card
       sx={{
