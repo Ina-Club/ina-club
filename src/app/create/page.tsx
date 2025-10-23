@@ -37,7 +37,6 @@ export default function CreateRequestGroupPage() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [requestGroupImages, setRequestGroupImages] = useState<File[]>([]);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -81,7 +80,6 @@ export default function CreateRequestGroupPage() {
         if (data.secure_url) uploaded.push(data.secure_url as string);
       });
       await Promise.all(promises)
-      setUploadedImageUrls([...uploaded]);
       return uploaded;
     }
     catch (err) {
