@@ -11,7 +11,7 @@ import { LoadingCircle } from "../loading-circle";
 interface GroupSectionWrapperProps { }
 
 const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
-  const [allOpenedGroupsWithParent, setAllOpenedGroupsWithParent] = useState<ActiveGroup[]>([]);
+  const [allOpenActiveGroupsWithParent, setAllOpenActiveGroupsWithParent] = useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -19,8 +19,8 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
     setLoading(true);
     fetch('/api/active-groups/?status=open')
       .then(r => r.json())
-      .then(data => { if (active) setAllOpenedGroupsWithParent(data.activeGroups ?? []); })
-      .catch(() => setAllOpenedGroupsWithParent([]))
+      .then(data => { if (active) setAllOpenActiveGroupsWithParent(data.activeGroups ?? []); })
+      .catch(() => setAllOpenActiveGroupsWithParent([]))
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
@@ -28,24 +28,50 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
   return (
     <>
       <SectionWrapper
-        title={`הבקשות הפופולריות`}
-        subTitle={`הבקשות החמות של השבוע האחרון`}
-        linkLabel={`צפה בכל הבקשות`}
-        linkUrl={`/requestGroups`}
+        title={`הקבוצות הפופולריות`}
+        subTitle={`קבוצות הרכישה החמות של השבוע האחרון`}
+        linkLabel={`צפה בכל הקבוצות`}
+        linkUrl={`/activeGroups`}
       >
         <ResponsiveHorizontalListWrapper gap="16px">
-          {loading ? <LoadingCircle /> : allOpenedGroupsWithParent.map((activeGroup, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <ActiveGroupCard activeGroup={activeGroup} />
-            </Box>
-          ))}
+          {loading ?
+            <LoadingCircle sx={{
+              position: "absolute",
+              left: "50%",
+              width: "100%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }} /> :
+            (allOpenActiveGroupsWithParent.length > 0 ?
+              allOpenActiveGroupsWithParent.map((activeGroup, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <ActiveGroupCard activeGroup={activeGroup} />
+                </Box>
+              )) :
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: "50%",
+                  width: "100%",
+                  transform: "translateX(-50%)",
+                  display: "flex",
+                  justifyContent: "center",
+                  color: "text.secondary",
+                  textAlign: "center"
+                }}
+              >
+                לא נמצאו קבוצות מהשבוע האחרון
+              </Box>
+            )}
         </ResponsiveHorizontalListWrapper>
       </SectionWrapper>
     </>
