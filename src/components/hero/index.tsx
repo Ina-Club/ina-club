@@ -140,7 +140,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
               borderRadius: 3,
               border: "1px solid  #1a2a5a",
               fontWeight: "bold",
-              "&:hover": { backgroundColor: "rgba(145, 57, 214, 0.04)" },
+              "&:hover": { backgroundColor: "rgba(255, 140, 66, 0.04)" },
             }}
           >
             עיין בקבוצות פעילות

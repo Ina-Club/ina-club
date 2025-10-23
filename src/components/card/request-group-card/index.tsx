@@ -268,7 +268,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             }}
             sx={{
               bgcolor: "#fff7ec",
-              color: "#f0a868",
+              color: "#ff8c42",
               fontSize: "0.75rem",
               "& .MuiAlert-icon": {
                 color: "#f0a868",
@@ -278,7 +278,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
               py: "2px",
             }}
           >
-            <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#f0a868" }}>
+            <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#ff8c42" }}>
               ממתין לקבוצה ראשונה
             </AlertTitle>
             עוד מעט מעוניינים ונפתח קבוצה

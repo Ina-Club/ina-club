@@ -22,15 +22,22 @@ import {
 } from "@mui/icons-material";
 import { SearchBar } from "@/components/search-bar";
 import { useTheme } from "@mui/material/styles";
-import type { NeedMoreInfoResponse, PriceResponse } from "../../lib/types/smart-search";
+import type {
+  NeedMoreInfoResponse,
+  PriceResponse,
+} from "../../lib/types/smart-search";
 
 export default function SmartSearchComponent() {
   const theme = useTheme();
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dynamicSelects, setDynamicSelects] = useState<NeedMoreInfoResponse[]>([]);
-  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
+  const [dynamicSelects, setDynamicSelects] = useState<NeedMoreInfoResponse[]>(
+    []
+  );
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
+    {}
+  );
   const [priceResult, setPriceResult] = useState<PriceResponse | null>(null);
 
   const handleSearch = async () => {
@@ -100,7 +107,9 @@ export default function SmartSearchComponent() {
 
       if (data.needsMoreInfo) {
         // צריך עוד מידע - הוסף select נוסף
-        const alreadyExists = dynamicSelects.some((opt) => opt.category === data.category);
+        const alreadyExists = dynamicSelects.some(
+          (opt) => opt.category === data.category
+        );
         if (!alreadyExists) {
           setDynamicSelects((prev) => [...prev, data as NeedMoreInfoResponse]);
         }
@@ -150,7 +159,9 @@ export default function SmartSearchComponent() {
             variant="contained"
             onClick={handleSearch}
             disabled={loading || !searchText.trim()}
-            startIcon={loading ? <CircularProgress size={20} /> : <SearchIcon />}
+            startIcon={
+              loading ? <CircularProgress size={20} /> : <SearchIcon />
+            }
             sx={{ minWidth: 120 }}
           >
             {loading ? "מחפש..." : "חפש"}
@@ -168,7 +179,10 @@ export default function SmartSearchComponent() {
       {/* Dynamic Selects */}
       {dynamicSelects.length > 0 && (
         <Card sx={{ p: 3, mb: 3, boxShadow: 2 }}>
-          <Typography variant="h6" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}
+          >
             <SearchIcon color="primary" />
             בואו נדייק את החיפוש
           </Typography>
@@ -187,7 +201,12 @@ export default function SmartSearchComponent() {
                     <Select
                       value={selectedValues[option.category || ""] || ""}
                       label={option.category}
-                      onChange={(e) => handleSelectChange(option.category || "", e.target.value)}
+                      onChange={(e) =>
+                        handleSelectChange(
+                          option.category || "",
+                          e.target.value
+                        )
+                      }
                       disabled={loading}
                     >
                       {option.options.map((opt: string) => (
@@ -202,7 +221,12 @@ export default function SmartSearchComponent() {
                   <Button
                     variant="text"
                     size="small"
-                    onClick={() => handleSelectChange(option.category || "", "__SKIP_DETAILS__")}
+                    onClick={() =>
+                      handleSelectChange(
+                        option.category || "",
+                        "__SKIP_DETAILS__"
+                      )
+                    }
                     disabled={loading}
                     sx={{
                       color: "text.secondary",
@@ -220,7 +244,14 @@ export default function SmartSearchComponent() {
               ) : (
                 // אין אפשרויות ואין שדות חסרים - הצג אפשרות להערכה גסה
                 <Box>
-                  <Box sx={{ p: 2, bgcolor: "warning.light", borderRadius: 1, mb: 2 }}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: "warning.light",
+                      borderRadius: 1,
+                      mb: 2,
+                    }}
+                  >
                     <Typography variant="body2">
                       אנא הזן פרטים נוספים לחיפוש מדויק יותר
                     </Typography>
@@ -230,7 +261,12 @@ export default function SmartSearchComponent() {
                   <Button
                     variant="text"
                     size="small"
-                    onClick={() => handleSelectChange(option.category || "", "__SKIP_DETAILS__")}
+                    onClick={() =>
+                      handleSelectChange(
+                        option.category || "",
+                        "__SKIP_DETAILS__"
+                      )
+                    }
                     disabled={loading}
                     sx={{
                       color: "text.secondary",
@@ -310,25 +346,45 @@ export default function SmartSearchComponent() {
             </Box>
 
             <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
+              >
                 <LocalOfferIcon sx={{ fontSize: 18 }} />
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   הנחה קבוצתית
                 </Typography>
               </Box>
-              <Typography variant="h5" sx={{ fontWeight: 600, color: "#ffd700" }}>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 600, color: "#ffd700" }}
+              >
                 {priceResult.groupDiscount}%
               </Typography>
             </Box>
 
             <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 0.5,
+                }}
+              >
                 <TrendingUpIcon sx={{ fontSize: 18 }} />
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   מחיר סופי
                 </Typography>
               </Box>
-              <Typography variant="h5" sx={{ fontWeight: 600, color: "#4ade80" }}>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 600, color: "#4ade80" }}
+              >
                 ₪{priceResult.finalPrice.toLocaleString()}
               </Typography>
             </Box>
@@ -378,103 +434,128 @@ export default function SmartSearchComponent() {
       )}
 
       {/* Welcome Section - מוצג רק כשאין חיפוש פעיל */}
-      {!searchText && !loading && dynamicSelects.length === 0 && !priceResult && (
-        <Card
-          sx={{
-            p: 4,
-            mb: 3,
-            textAlign: "center",
-            background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-            border: "2px solid",
-            borderColor: "primary.light",
-          }}
-        >
-          <Typography variant="h5" sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}>
-            🌟 מה תרצה לחפש היום?
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
-            השתמש בחיפוש החכם שלנו כדי למצוא את המוצר המושלם ולהצטרף לקבוצת רכישה שתחסוך לך כסף
-          </Typography>
-
-          {/* Popular Categories */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-              קטגוריות פופולריות
+      {!searchText &&
+        !loading &&
+        dynamicSelects.length === 0 &&
+        !priceResult && (
+          <Card
+            sx={{
+              p: 4,
+              mb: 3,
+              textAlign: "center",
+              background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+              border: "2px solid",
+              borderColor: "primary.light",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}
+            >
+              מה תרצה לחפש היום?
             </Typography>
-            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center" }}>
-              {[
-                "סמארטפונים",
-                "מחשבים ניידים",
-                "טלוויזיות",
-                "מכונות כביסה",
-                "מקררים",
-                "מזגנים",
-                "רכבים",
-                "אופניים חשמליים"
-              ].map((category) => (
-                <Chip
-                  key={category}
-                  label={category}
-                  onClick={() => setSearchText(category)}
-                  sx={{
-                    bgcolor: "primary.light",
-                    color: "primary.main",
-                    "&:hover": {
-                      bgcolor: "primary.main",
-                      color: "white",
-                    },
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    py: 1,
-                  }}
-                />
-              ))}
+            <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
+              השתמש בחיפוש החכם שלנו כדי למצוא את המוצר המושלם ולהצטרף לקבוצת
+              רכישה שתחסוך לך כסף
+            </Typography>
+
+            {/* Popular Categories */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+                קטגוריות פופולריות
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                }}
+              >
+                {[
+                  "סמארטפונים",
+                  "מחשבים ניידים",
+                  "טלוויזיות",
+                  "מכונות כביסה",
+                  "מקררים",
+                  "מזגנים",
+                  "רכבים",
+                  "אופניים חשמליים",
+                ].map((category) => (
+                  <Chip
+                    key={category}
+                    label={category}
+                    onClick={() => setSearchText(category)}
+                    sx={{
+                      bgcolor: "primary.light",
+                      color: "primary.main",
+                      "&:hover": {
+                        bgcolor: "primary.main",
+                        color: "white",
+                      },
+                      cursor: "pointer",
+                      fontSize: "0.875rem",
+                      py: 1,
+                    }}
+                  />
+                ))}
+              </Box>
             </Box>
-          </Box>
 
-          {/* Search Examples */}
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-              דוגמאות לחיפוש
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
-              {[
-                "אייפון 15 פרו מקס",
-                "מקבוק אייר M3",
-                "טלוויזיה 65 אינץ' Samsung",
-                "מכונת כביסה 9 ק״ג",
-                "מקרר דלת צרדה",
-                "מזגן 1.5 כ״ס"
-              ].map((example) => (
-                <Chip
-                  key={example}
-                  label={example}
-                  onClick={() => setSearchText(example)}
-                  variant="outlined"
-                  sx={{
-                    borderColor: "secondary.main",
-                    color: "secondary.main",
-                    "&:hover": {
-                      bgcolor: "secondary.main",
-                      color: "white",
+            {/* Search Examples */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+                דוגמאות לחיפוש
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                }}
+              >
+                {[
+                  "אייפון 15 פרו מקס",
+                  "מקבוק אייר M3",
+                  "טלוויזיה 65 אינץ' Samsung",
+                  "מכונת כביסה 9 ק״ג",
+                  "מקרר דלת צרדה",
+                  "מזגן 1.5 כ״ס",
+                ].map((example) => (
+                  <Chip
+                    key={example}
+                    label={example}
+                    onClick={() => setSearchText(example)}
+                    variant="outlined"
+                    sx={{
                       borderColor: "secondary.main",
-                    },
-                    cursor: "pointer",
-                    fontSize: "0.8rem",
-                  }}
-                />
-              ))}
+                      color: "secondary.main",
+                      "&:hover": {
+                        bgcolor: "secondary.main",
+                        color: "white",
+                        borderColor: "secondary.main",
+                      },
+                      cursor: "pointer",
+                      fontSize: "0.8rem",
+                    }}
+                  />
+                ))}
+              </Box>
             </Box>
-          </Box>
 
-          {/* How it works */}
-          <Box sx={{ mt: 3, p: 2, bgcolor: "rgba(145, 57, 214, 0.05)", borderRadius: 2 }}>
-            <Typography variant="body2" sx={{ color: "secondary.main", fontWeight: 500 }}>
-              💡 איך זה עובד? פשוט תחפש את המוצר שמעניין אותך, ואנחנו נעזור לך למצוא את המחיר הטוב ביותר דרך קבוצת רכישה
-            </Typography>
-          </Box>
-        </Card>
-      )}
+            {/* How it works */}
+            <Box sx={{ mt: 3, p: 2, bgcolor: "#fff7ec", borderRadius: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "secondary.main", fontWeight: 500 }}
+              >
+                איך זה עובד? פשוט תחפש את המוצר שמעניין אותך, ואנחנו נעזור לך
+                למצוא את המחיר הטוב ביותר דרך קבוצת רכישה
+              </Typography>
+            </Box>
+          </Card>
+        )}
     </Box>
   );
 }
