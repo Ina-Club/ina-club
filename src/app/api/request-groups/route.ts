@@ -8,6 +8,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const titleParam = searchParams.get('title');
     const statusParam = searchParams.get('status');
+    const lastWeekParam = searchParams.get('lastWeek');
     const where: any = {};
     if (titleParam) {
       const exists = await prisma.requestGroup.findFirst({ where: { title: { equals: titleParam, mode: 'insensitive' } }, select: { id: true } });
@@ -19,6 +20,13 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: "Incorrect status provided!" }, { status: 400 });
       }
       where.status = status;
+    }
+    if (lastWeekParam === 'true') {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      where.createdAt = {
+        gte: oneWeekAgo
+      };
     }
 
     // This represents GET all request groups.
