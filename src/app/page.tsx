@@ -1,8 +1,7 @@
-import CompanyCard from "@/components/card/compant-card";
 import { Hero } from "@/components/hero";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import ActiveGroupSectionWrapper from "@/components/wrapper/active-group-section-wrapper";
-import CompanySectionWrapper from "@/components/wrapper/company-section-erapper";
+import CompanySectionWrapper from "@/components/wrapper/company-section-wrapper";
 import RequestGroupSectionWrapper from "@/components/wrapper/request-group-section-wrapper";
 import { Box, Container } from "@mui/material";
 import { Suspense } from "react";

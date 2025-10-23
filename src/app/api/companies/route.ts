@@ -19,9 +19,9 @@ export async function GET(req: Request) {
             id: company.id,
             title: company.title,
             logo: company.logo,
-            description: company.description,
-            categories: company.categories,
-            websiteUrl: company.websiteUrl
+            subTitle: company.description,
+            categories: company.categories.map((category) => category.name),
+            url: company.websiteUrl
         }));
 
         return NextResponse.json({ companies: data });
