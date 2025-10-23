@@ -6,7 +6,7 @@ import { Box } from "@mui/material";
 import ActiveGroupCard from "../card/active-group-card";
 import { useState, useEffect } from "react";
 import { ActiveGroup } from "lib/dal";
-import { LoadingCircle } from "../loading-circle";
+import ActiveGroupCardSkeleton from "../skeleton/active-group-card-skeleton";
 
 interface GroupSectionWrapperProps { }
 
@@ -35,15 +35,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
       >
         <ResponsiveHorizontalListWrapper gap="16px">
           {loading ?
-            <LoadingCircle sx={{
-              position: "absolute",
-              left: "50%",
-              width: "100%",
-              transform: "translateX(-50%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }} /> :
+            Array.from({ length: 6 }).map((_, i) => <ActiveGroupCardSkeleton key={i} />) :
             (allOpenActiveGroupsWithParent.length > 0 ?
               allOpenActiveGroupsWithParent.map((activeGroup, index) => (
                 <Box

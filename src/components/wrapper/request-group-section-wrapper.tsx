@@ -4,9 +4,9 @@ import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
 import { Box } from "@mui/material";
 import RequestGroupCard from "../card/request-group-card";
 import SectionWrapper from "./section-wrapper";
-import { LoadingCircle } from "../loading-circle";
 import { RequestGroup } from "lib/dal";
 import { useState, useEffect } from "react";
+import RequestGroupCardSkeleton from "../skeleton/request-group-card-skeleton";
 
 interface RequestGroupSectionWrapperProps { }
 
@@ -34,15 +34,7 @@ const RequestGroupSectionWrapper: React.FC<RequestGroupSectionWrapperProps> = ()
     >
       <ResponsiveHorizontalListWrapper gap="16px">
         {loading ?
-          <LoadingCircle sx={{
-            position: "absolute",
-            left: "50%",
-            width: "100%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }} /> :
+          Array.from({ length: 6 }).map((_, i) => <RequestGroupCardSkeleton key={i} />) :
           (allOpenRequestGroupsWithParent.length > 0 ?
             allOpenRequestGroupsWithParent.map((requestGroup, index) => (
               <Box
