@@ -62,7 +62,7 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
                 textAlign: "center"
               }}
             >
-              לא נמצאו בקשות מהשבוע האחרון
+              לא נמצאו חברות
             </Box>
           )}
       </ResponsiveHorizontalListWrapper>
