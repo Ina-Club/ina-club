@@ -25,15 +25,6 @@ interface PriceAnalyzerCardProps {
     handleExpansion: (requestGroup: RequestGroup) => Promise<AIProductData | null>;
 }
 
-// Mock data for demonstration
-// const mockProduct = {
-//     name: "Sony WH-1000XM4 Wireless Headphones",
-//     image: "/api/placeholder/200/150",
-//     price: 279.99,
-//     category: "Electronics",
-//     description: "Click for detailed product information",
-// };
-
 const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, handleExpansion }) => {
     const loadingText: string = "מחשב מידע...";
     const baseData: AIProductData = {
@@ -77,7 +68,7 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
                         >
                             <CardMedia
                                 component="img"
-                                image={requestGroup.images[0]} //TODO: you can do better
+                                image={requestGroup.images[0]}
                                 alt={requestGroup.title}
                                 sx={{
                                     width: 120,
