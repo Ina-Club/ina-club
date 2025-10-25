@@ -16,6 +16,9 @@ import {
   Divider,
   Menu,
   MenuItem,
+  Avatar,
+  Typography,
+  Paper,
 } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,6 +31,10 @@ import {
   Group as GroupIcon,
   Search as SearchIcon,
   TrendingUp as TrendingUpIcon,
+  Person as PersonIcon,
+  Login as LoginIcon,
+  Logout as LogoutIcon,
+  HowToReg as HowToRegIcon,
 } from "@mui/icons-material";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
@@ -66,55 +73,113 @@ export default function Header() {
 
   const profileMenuItems = loggedIn
     ? [
-      <MenuItem
-        key="profile"
-        onClick={() => {
-          handleMenuClose();
-          window.location.href = "/profile";
-        }}
-      >
-        פרופיל
-      </MenuItem>,
-      <MenuItem
-        key="signout"
-        onClick={() => {
-          handleMenuClose();
-          signOut();
-        }}
-      >
-        התנתק
-      </MenuItem>,
-    ]
+        <MenuItem
+          key="profile"
+          onClick={() => {
+            handleMenuClose();
+            window.location.href = "/profile";
+          }}
+          sx={{
+            py: 1.5,
+            px: 2,
+            borderRadius: 1,
+            mx: 1,
+            mb: 0.5,
+            transition: 'all 0.2s',
+            '&:hover': {
+              backgroundColor: '#f8fafc',
+              color: '#1a2a5a',
+            },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+        >
+          <PersonIcon sx={{ fontSize: 20, color: '#64748b' }} />
+          <Typography sx={{ fontWeight: 500 }}>פרופיל</Typography>
+        </MenuItem>,
+        <MenuItem
+          key="signout"
+          onClick={() => {
+            handleMenuClose();
+            signOut();
+          }}
+          sx={{
+            py: 1.5,
+            px: 2,
+            borderRadius: 1,
+            mx: 1,
+            mb: 0.5,
+            transition: 'all 0.2s',
+            color: '#dc2626',
+            '&:hover': {
+              backgroundColor: '#fef2f2',
+              color: '#dc2626',
+            },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+        >
+          <LogoutIcon sx={{ fontSize: 20 }} />
+          <Typography sx={{ fontWeight: 500 }}>התנתק</Typography>
+        </MenuItem>,
+      ]
     : [
-      // TODO: Remove this - this is for development purposes
-      <MenuItem
-        key="profile"
-        onClick={() => {
-          handleMenuClose();
-          window.location.href = "/profile";
-        }}
-      >
-        פרופיל
-      </MenuItem>,
-      <MenuItem
-        key="signin"
-        onClick={() => {
-          handleMenuClose();
-          window.location.href = "/auth/signin";
-        }}
-      >
-        התחברות
-      </MenuItem>,
-      <MenuItem
-        key="signup"
-        onClick={() => {
-          handleMenuClose();
-          window.location.href = "/auth/signup";
-        }}
-      >
-        הרשמה
-      </MenuItem>,
-    ];
+       
+        <MenuItem
+          key="signin"
+          onClick={() => {
+            handleMenuClose();
+            window.location.href = "/auth/signin";
+          }}
+          sx={{
+            py: 1.5,
+            px: 2,
+            borderRadius: 1,
+            mx: 1,
+            mb: 0.5,
+            transition: 'all 0.2s',
+            '&:hover': {
+              backgroundColor: '#f8fafc',
+              color: '#1a2a5a',
+            },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+        >
+          <LoginIcon sx={{ fontSize: 20, color: '#64748b' }} />
+          <Typography sx={{ fontWeight: 500 }}>התחברות</Typography>
+        </MenuItem>,
+        <MenuItem
+          key="signup"
+          onClick={() => {
+            handleMenuClose();
+            window.location.href = "/auth/signup";
+          }}
+          sx={{
+            py: 1.5,
+            px: 2,
+            borderRadius: 1,
+            mx: 1,
+            mb: 0.5,
+            transition: 'all 0.2s',
+            backgroundColor: '#1a2a5a',
+            color: '#fff',
+            '&:hover': {
+              backgroundColor: '#0f172a',
+              color: '#fff',
+            },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+        >
+          <HowToRegIcon sx={{ fontSize: 20 }} />
+          <Typography sx={{ fontWeight: 600 }}>הרשמה</Typography>
+        </MenuItem>,
+      ];
 
   return (
     <>
@@ -193,39 +258,102 @@ export default function Header() {
               <FavoriteIcon />
             </IconButton>
 
-            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+            <IconButton
+              onClick={handleMenuOpen}
+              sx={{
+                p: 0,
+                borderRadius: '50%',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                }
+              }}
+            >
               {loggedIn && session?.user?.image ? (
                 <Image
                   src={session.user.image}
                   alt="Avatar"
                   width={40}
                   height={40}
-                  style={{ borderRadius: "50%" }}
+                  style={{
+                    borderRadius: "50%",
+                    border: '2px solid transparent',
+                    transition: 'border-color 0.2s',
+                  }}
                   unoptimized // optional: bypass optimization if needed
                 />
               ) : (
-                <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
+                <AccountCircleIcon
+                  sx={{
+                    fontSize: 40,
+                    color: "#64748b",
+                    transition: 'color 0.2s',
+                    '&:hover': {
+                      color: '#1a2a5a',
+                    }
+                  }}
+                />
               )}
             </IconButton>
 
-            <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
+            <Menu
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={handleMenuClose}
+              PaperProps={{
+                sx: {
+                  borderRadius: 2,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                  border: '1px solid #e2e8f0',
+                  mt: 1,
+                  minWidth: 200,
+                }
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
               {profileMenuItems}
             </Menu>
           </Box>
 
           {/* Mobile Right Side */}
           <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
-            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+            <IconButton
+              onClick={handleMenuOpen}
+              sx={{
+                p: 0,
+                borderRadius: '50%',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                }
+              }}
+            >
               {loggedIn && session?.user?.image ? (
                 <Image
                   src={session.user.image}
                   alt="Avatar"
                   width={40}
                   height={40}
-                  style={{ borderRadius: "50%" }}
+                  style={{
+                    borderRadius: "50%",
+                    border: '2px solid transparent',
+                    transition: 'border-color 0.2s',
+                  }}
                 />
               ) : (
-                <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
+                <AccountCircleIcon
+                  sx={{
+                    fontSize: 40,
+                    color: "#64748b",
+                    transition: 'color 0.2s',
+                    '&:hover': {
+                      color: '#1a2a5a',
+                    }
+                  }}
+                />
               )}
             </IconButton>
             <IconButton
@@ -311,4 +439,3 @@ export default function Header() {
     </>
   );
 }
-

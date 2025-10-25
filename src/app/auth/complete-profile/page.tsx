@@ -96,7 +96,7 @@ export default function CompleteProfilePage() {
   if (status === "loading") return null;
 
   return (
-    <Box sx={{ maxWidth: 480, mx: "auto", mt: 8, p: 4, border: "1px solid #ddd", borderRadius: 2 }}>
+    <Box sx={{ maxWidth: 480, mx: "auto", mt: 8, mb: 8, p: 4, border: "1px solid #ddd", borderRadius: 2 }}>
       <Typography variant="h5" mb={3} textAlign="center">השלמת פרופיל</Typography>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -121,5 +121,3 @@ export default function CompleteProfilePage() {
     </Box>
   );
 }
-
-

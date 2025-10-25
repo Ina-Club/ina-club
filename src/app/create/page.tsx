@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupPreview from "@/components/request-group/request-group-preview";
@@ -32,6 +33,7 @@ interface ValidationErrors {
 
 export default function CreateRequestGroupPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
@@ -43,13 +45,23 @@ export default function CreateRequestGroupPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
+  // Check authentication
   useEffect(() => {
+    if (status === "loading") return; // Still loading
+
+    if (status === "unauthenticated") {
+      // Redirect to signin with a nice message (they might already have an account)
+      router.push("/auth/signin?message=login_required");
+      return;
+    }
+
+    // Load categories only if authenticated
     fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => setCategories(data.categories ?? []))
       .catch(() => setCategories([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [status, router]);
 
   const withClearError = (handler: () => void) => () => {
     setError("");

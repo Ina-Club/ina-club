@@ -1,4 +1,4 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
+import NextAuth, { type NextAuthOptions, type User } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import Credentials from "next-auth/providers/credentials";
@@ -8,7 +8,25 @@ import { Resend } from "resend";
 import bcrypt from "bcrypt";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: {
+    ...PrismaAdapter(prisma),
+    createUser: async (data: User) => {
+      // Override createUser to handle profile picture properly
+      const user = await prisma.user.create({
+        data: {
+          name: data.name,
+          email: data.email!,
+          emailVerified: new Date(),
+          profilePicture: data.image
+            ? {
+                create: { url: data.image },
+              }
+            : undefined,
+        },
+      });
+      return user;
+    },
+  },
   providers: [
     // Email + Resend
     EmailProvider({
@@ -99,10 +117,18 @@ export const authOptions: NextAuthOptions = {
           });
 
           await prisma.user.update({
-            where: { id: existingUser.id },
+            where: { email: user.email! },
             data: {
               name: user.name ?? existingUser.name,
               emailVerified: new Date(),
+              profilePicture: user.image
+                ? {
+                    upsert: {
+                      create: { url: user.image },
+                      update: { url: user.image },
+                    },
+                  }
+                : undefined,
             },
           });
         }
