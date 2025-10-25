@@ -20,8 +20,8 @@ const theme = () =>
         dark: "#10347A",
       },
       secondary: {
-        main: "#9139D6",
-        dark: "#65467f",
+        main: "#ff8c42",
+        dark: "#e67e3a",
       },
       text: {
         primary: "#000000",

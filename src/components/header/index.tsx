@@ -36,7 +36,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 const navigationItems = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
   { title: "קבוצות פעילות", href: "/active-groups", icon: GroupIcon },
-  { title: "חיפוש חכם", href: "/search", icon: SearchIcon },
+  { title: "חיפוש חכם", href: "/smart-search", icon: SearchIcon },
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
 ];
 
