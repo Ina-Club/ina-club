@@ -2,23 +2,22 @@ import { Box, LinearProgress, Typography } from "@mui/material";
 
 interface ParticipantsProgressProps {
   current: number;
-  max: number;
+  min?: number;
+  max?: number;
 }
 
-const ParticipantsProgress: React.FC<ParticipantsProgressProps> = ({
-  current,
-  max,
-}) => {
-  const progress = Math.min((current / max) * 100, 100);
+const ParticipantsProgress: React.FC<ParticipantsProgressProps> = ({ current, min, max }) => {
+  const progress: number = max ? Math.min((current / max) * 100, 100) : 100;
+  const barTitle: string = max ? `${current} משתתפים מתוך ${max}` : `${current} משתתפים`;
 
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
         <Typography variant="body2" color="text.secondary">
-          {current} מתוך {max} משתתפים
+          {barTitle}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {Math.round(progress)}%
+          {max && `${Math.round(progress)}%`}
         </Typography>
       </Box>
       <LinearProgress
