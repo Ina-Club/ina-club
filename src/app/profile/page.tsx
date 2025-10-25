@@ -33,7 +33,6 @@ import { LoadingCircle } from "@/components/loading-circle";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { ActiveGroup, RequestGroup } from "lib/dal";
 import ActiveGroupCard from "@/components/card/active-group-card";
-import { mockActiveGroups, mockRequestGroups } from "lib/mock";
 
 interface UserProfile {
   id: string;
@@ -70,7 +69,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Profile() {
-  // const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -81,59 +80,47 @@ export default function Profile() {
   const [editProfilePicture, setEditProfilePicture] = useState<File[]>([]);
   const [tabValue, setTabValue] = useState(0);
   const [updateLoading, setUpdateLoading] = useState(false);
-  const mockedUser: UserProfile = {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    profilePicture: "https://via.placeholder.com/150",
-    createdAt: "2021-01-01",
-    emailVerified: "2021-01-01",
-    // TODO: Add pagintaion when displaying data
-    enrolledRequestGroups: mockRequestGroups.concat(mockRequestGroups),
-    enrolledActiveGroups: mockActiveGroups.concat(mockActiveGroups),
-    ownedRequestGroups: mockRequestGroups.concat(mockRequestGroups),
-  };
 
-  // TODO: Replace this with API integration that fetches the profile
   useEffect(() => {
-    setProfile(mockedUser);
-    setEditName(mockedUser.name);
-    setLoading(false);
-  }, []);
+    const fetchProfile = async () => {
+      try {
+        const signal = AbortSignal.timeout(10000);
+        const response = await fetch('/api/user/profile', { signal });
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('UNAUTHORIZED');
+          }
+          throw new Error('Failed to fetch profile');
+        }
+        const data = await response.json();
+        setProfile(data);
+        setEditName(data.name || '');
+      } catch (err) {
+        console.log(err);
+        if (err instanceof Error && err.name === 'TimeoutError') {
+          setError('שגיאה בטעינת הפרופיל');
+        } else if (err instanceof Error && err.message === 'UNAUTHORIZED') {
+          setError('עליך להתחבר כדי לצפות בפרופיל');
+        } else {
+          setError('שגיאה בטעינת הפרופיל');
+        }
+        console.error('Profile fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       const signal = AbortSignal.timeout(10000);
-  //       const response = await fetch('/api/user/profile', { signal });
-  //       if (!response.ok) {
-  //         throw new Error('Failed to fetch profile');
-  //       }
-  //       const data = await response.json();
-  //       setProfile(data);
-  //       setEditName(data.name || '');
-  //     } catch (err) {
-  //       console.log(err);
-  //       if (err instanceof Error && err.name === 'TimeoutError') {
-  //         setError('שגיאה בטעינת הפרופיל');
-  //       }
-  //       else {
-  //         setError('שגיאה בטעינת הפרופיל');
-  //       }
-  //       console.error('Profile fetch error:', err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+    if (status === 'loading') {
+      return; // Still loading session
+    }
 
-  //   if (session) {
-  //     fetchProfile();
-  //   }
-  //   else {
-  //     setError('עליך להתחבר כדי לצפות בפרופיל');
-  //     setLoading(false);
-  //   }
-  // }, [session]);
+    if (status === 'authenticated' && session) {
+      fetchProfile();
+    } else {
+      setError('עליך להתחבר כדי לצפות בפרופיל');
+      setLoading(false);
+    }
+  }, [session, status]);
 
   const handleEdit = () => {
     setEditing(true);
@@ -152,9 +139,22 @@ export default function Profile() {
       let profilePictureUrl = profile?.profilePicture;
       // If new profile picture uploaded, handle it here
       if (editProfilePicture.length > 0) {
-        // For now, we'll use the first image URL from the uploaded file
-        // In a real app, you'd upload to a storage service
-        profilePictureUrl = URL.createObjectURL(editProfilePicture[0]);
+        // Upload to Cloudinary
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+        const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET;
+        if (cloudName && preset) {
+          const formData = new FormData();
+          formData.append("file", editProfilePicture[0]);
+          formData.append("upload_preset", preset);
+          const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.secure_url) {
+            profilePictureUrl = data.secure_url;
+          }
+        }
       }
 
       const response = await fetch('/api/user/profile', {
@@ -216,8 +216,30 @@ export default function Profile() {
     );
   }
 
+  // Check if user has incomplete profile (no name or password)
+  const hasIncompleteProfile = !profile.name || profile.name.trim() === '';
+
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
+      {/* Incomplete Profile Alert */}
+      {hasIncompleteProfile && (
+        <Alert
+          severity="info"
+          sx={{ mb: 3, borderRadius: 2 }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => window.location.href = '/auth/complete-profile'}
+            >
+              השלם פרופיל
+            </Button>
+          }
+        >
+          נראה שעדיין לא השלמת את הפרופיל שלך. השלם את הפרופיל כדי לקבל חוויה מלאה מהפלטפורמה.
+        </Alert>
+      )}
+
       {/* Header */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
