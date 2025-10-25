@@ -14,7 +14,7 @@ import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-s
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
-  const [allRequestGroups, setAllRequestGroups] = useState<RequestGroup[]>([]);
+  const [openRequestGroups, setOpenRequestGroups] = useState<RequestGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({
@@ -26,30 +26,18 @@ export default function Page() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch('/api/request-groups')
+    fetch('/api/request-groups/?status=open')
       .then(r => r.json())
-      .then(data => { if (active) setAllRequestGroups(data.requestGroups ?? []); })
-      .catch(() => setAllRequestGroups([]))
+      .then(data => { if (active) setOpenRequestGroups(data.requestGroups ?? []); })
+      .catch(() => setOpenRequestGroups([]))
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
 
   // Apply all filters (text + categories + future filters)
   const filteredRequestGroups = useMemo(() => {
-    return applyFilters(allRequestGroups, searchText, filterState);
-  }, [allRequestGroups, searchText, filterState]);
-
-  // TODO: when filters will be lifted up, use this snippet to display an alert when a client attempts to refresh the app ONLY when filters were selected.
-  // useEffect(() => {
-  //   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-  //     event.preventDefault();
-  //   };
-
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
+    return applyFilters(openRequestGroups, searchText, filterState);
+  }, [openRequestGroups, searchText, filterState]);
 
   return (
     <>

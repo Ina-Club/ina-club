@@ -37,7 +37,6 @@ export default function CreateRequestGroupPage() {
   const [categoryId, setCategoryId] = useState<string>("");
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [requestGroupImages, setRequestGroupImages] = useState<File[]>([]);
-  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -57,17 +56,12 @@ export default function CreateRequestGroupPage() {
     handler();
   };
 
-  const handleUpload = async (): Promise<boolean> => {
-    if (!requestGroupImages || !requestGroupImages.length)
-      return false;
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET;
-    if (!cloudName || !preset) {
-      setError("חסר קונפיגורציה להעלאת תמונות");
-      return false;
-    }
+  const handleUpload = async (): Promise<string[]> => {
+    if (!requestGroupImages?.length)
+      return [];
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET!;
     setError("");
-    setUploading(true);
     try {
       const uploaded: string[] = [];
       const promises = requestGroupImages.map(async (file) => {
@@ -86,15 +80,12 @@ export default function CreateRequestGroupPage() {
         if (data.secure_url) uploaded.push(data.secure_url as string);
       });
       await Promise.all(promises)
-      return true;
+      return uploaded;
     }
     catch (err) {
       setError("שגיאה בהעלאת תמונה, אנא נסו שנית מאוחר יותר");
     }
-    finally {
-      setUploading(false);
-    }
-    return false;
+    return [];
   };
 
   const verifyUniqueTitle = async () => {
@@ -137,6 +128,10 @@ export default function CreateRequestGroupPage() {
     setError("");
     setSaving(true);
     try {
+      const urls: string[] = await handleUpload();
+      if (!urls) {
+        throw new Error("שגיאה בהעלאת התמונות");
+      }
       const res = await fetch("/api/request-groups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,7 +139,7 @@ export default function CreateRequestGroupPage() {
           title,
           description,
           categoryId: categoryId || null,
-          imageUrls: convertImagesToUrls(),
+          imageUrls: urls,
         }),
       });
       if (!res.ok) {
@@ -223,7 +218,7 @@ export default function CreateRequestGroupPage() {
           }}
         >
           <Box>
-            {loading ? <LoadingCircle loadingText="טוען..."/> :
+            {loading ? <LoadingCircle loadingText="טוען..." /> :
               activeStep === 0 && (
                 <Stack spacing={2}>
                   <TextField
@@ -300,14 +295,9 @@ export default function CreateRequestGroupPage() {
                   <Button
                     variant="contained"
                     disabled={!canProceedStep2()}
-                    onClick={withClearError(async () => {
-                      const success = await handleUpload();
-                      if (success) {
-                        setActiveStep(2);
-                      }
-                    })}
+                    onClick={withClearError(async () => setActiveStep(2))}
                   >
-                    {uploading ? <CircularProgress size={20} color="inherit" /> : "הבא"}
+                    הבא
                   </Button>
                 </Box>
               </Stack>
