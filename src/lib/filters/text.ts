@@ -1,16 +1,19 @@
-import { ActiveGroup, RequestGroup } from '../dal';
+import { ActiveGroup, RequestGroup, User } from '../dal';
 
 interface FilterableProperties {
     title: string,
     description: string,
     category: string,
-    basePrice: number;
-    groupPrice: number;
+    basePrice?: number;
+    groupPrice?: number;
+    participants?: User[];
     minParticipants?: number;
     maxParticipants?: number;
 }
 
-const searchableKeys: (keyof FilterableProperties)[] = ["title", "description", "category", "basePrice", "groupPrice", "minParticipants", "maxParticipants"];
+const searchableKeys: (keyof FilterableProperties)[] = [
+    "title", "description", "category", "basePrice", "groupPrice", "participants", "minParticipants", "maxParticipants"
+];
 
 export function filterByText<T extends ActiveGroup | RequestGroup>(items: T[], searchText: string): T[] {
     // for empty search text, return all items
@@ -22,7 +25,7 @@ export function filterByText<T extends ActiveGroup | RequestGroup>(items: T[], s
     return items.filter((item) => {
         return (searchableKeys as readonly (keyof FilterableProperties)[]).some((key) => {
             if (key in item) {
-                const value = item[key as keyof typeof item];
+                const value = key === "participants" ? item.participants.length : item[key as keyof typeof item];
                 return String(value ?? "").toLowerCase().includes(textLowerTrimmed);
             }
             return false;
