@@ -1,29 +1,76 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, getSession } from "next-auth/react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Box, Button, TextField, Typography, Stack, Alert, CircularProgress, Link as MuiLink } from "@mui/material";
 import NextLink from "next/link";
 
-export default function page() {
+export default function SignInPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string>("");
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message === 'login_required') {
+      setInfoMessage('עליך להתחבר כדי ליצור בקשה חדשה. אם אין לך חשבון, תוכל ליצור אחד למטה');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
     setError("");
-    const res = await signIn("credentials", { email, password, redirect: true, callbackUrl: "/" });
-    if (!res?.ok) {
+
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false, // Don't redirect immediately
+        callbackUrl: "/"
+      });
+
+      if (res?.ok) {
+        setStatus("success");
+        // Wait a moment for session to be established
+        setTimeout(async () => {
+          const session = await getSession();
+          if (session) {
+            router.push("/");
+          } else {
+            // If session still not available, try again
+            setTimeout(() => {
+              router.push("/");
+            }, 1000);
+          }
+        }, 500);
+      } else {
+        setStatus("error");
+        setError(res?.error || "אימייל או סיסמה אינם נכונים");
+      }
+    } catch (err) {
       setStatus("error");
-      setError("אימייל או סיסמה אינם נכונים");
+      setError("אירעה שגיאה בהתחברות. אנא נסה שוב.");
     }
   };
 
   return (
-    <Box sx={{ maxWidth: 420, mx: "auto", mt: 8, p: 4, border: "1px solid #ddd", borderRadius: 2 }}>
+    <Box
+      sx={{
+        maxWidth: 420,
+        mx: "auto",
+        mt: 8,
+        mb: 8, // Add bottom margin to account for footer
+        p: 4,
+        border: "1px solid #ddd",
+        borderRadius: 2
+      }}
+    >
       <Typography variant="h5" mb={3}>התחברות</Typography>
 
       <Stack spacing={2} component="form" onSubmit={handleSubmit}>
@@ -36,6 +83,16 @@ export default function page() {
 
       {status === "error" && (
         <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>
+      )}
+
+      {status === "success" && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          התחברות בהצלחה! מעביר אותך...
+        </Alert>
+      )}
+
+      {infoMessage && (
+        <Alert severity="info" sx={{ mt: 2 }}>{infoMessage}</Alert>
       )}
 
       <Typography variant="body2" align="center" my={2}>או</Typography>

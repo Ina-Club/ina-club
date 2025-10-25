@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import {
   Box,
   Button,
@@ -11,8 +12,10 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import NextLink from "next/link";
 
 export default function SignUpPage() {
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +24,14 @@ export default function SignUpPage() {
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message === 'login_required') {
+      setInfoMessage('עליך ליצור חשבון כדי ליצור בקשה חדשה');
+    }
+  }, [searchParams]);
 
   const handleUpload = async (file: File) => {
     if (!file) return;
@@ -78,6 +89,7 @@ export default function SignUpPage() {
         maxWidth: 400,
         mx: "auto",
         mt: 8,
+        mb: 8, // Add bottom margin to account for footer
         p: 4,
         border: "1px solid #ddd",
         borderRadius: 2,
@@ -91,6 +103,12 @@ export default function SignUpPage() {
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
+        </Alert>
+      )}
+
+      {infoMessage && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {infoMessage}
         </Alert>
       )}
 

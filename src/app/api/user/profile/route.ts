@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "lib/prisma";
 
 export async function GET() {
@@ -81,6 +81,26 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
+    }
+
+    // Check if user has completed their profile (has name and password)
+    const hasCompleteProfile = user.name && user.password;
+
+    // If user doesn't have complete profile, return basic info without groups data
+    if (!hasCompleteProfile) {
+      const basicProfile = {
+        id: user.id,
+        name: user.name || '',
+        email: user.email,
+        profilePicture: user.profilePicture?.url,
+        createdAt: user.createdAt,
+        emailVerified: user.emailVerified,
+        enrolledRequestGroups: [],
+        enrolledActiveGroups: [],
+        ownedRequestGroups: [],
+        ownedActiveGroups: []
+      };
+      return NextResponse.json(basicProfile);
     }
 
     // Transform the data to match the expected format
@@ -188,4 +208,3 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "שגיאה בשרת" }, { status: 500 });
   }
 }
-
