@@ -60,7 +60,17 @@ export default function SignInPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 420, mx: "auto", mt: 8, p: 4, border: "1px solid #ddd", borderRadius: 2 }}>
+    <Box
+      sx={{
+        maxWidth: 420,
+        mx: "auto",
+        mt: 8,
+        mb: 8, // Add bottom margin to account for footer
+        p: 4,
+        border: "1px solid #ddd",
+        borderRadius: 2
+      }}
+    >
       <Typography variant="h5" mb={3}>התחברות</Typography>
 
       <Stack spacing={2} component="form" onSubmit={handleSubmit}>

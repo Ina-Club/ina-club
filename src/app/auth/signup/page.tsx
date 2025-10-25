@@ -89,6 +89,7 @@ export default function SignUpPage() {
         maxWidth: 400,
         mx: "auto",
         mt: 8,
+        mb: 8, // Add bottom margin to account for footer
         p: 4,
         border: "1px solid #ddd",
         borderRadius: 2,
