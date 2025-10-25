@@ -24,10 +24,12 @@ import {
   Group as GroupIcon,
   Foundation as FoundationIcon,
   ShoppingBag as ShoppingBagIcon,
+  Delete as DeleteIcon,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "@/components/loading-circle";
 import RequestGroupCard from "@/components/card/request-group-card";
@@ -80,6 +82,9 @@ export default function Profile() {
   const [editProfilePicture, setEditProfilePicture] = useState<File[]>([]);
   const [tabValue, setTabValue] = useState(0);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -192,6 +197,37 @@ export default function Profile() {
     });
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== 'מחק את חשבוני') {
+      setError('אנא הקלד "מחק את חשבוני" כדי לאשר');
+      return;
+    }
+
+    setDeleteLoading(true);
+    try {
+      const response = await fetch('/api/user/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete account');
+      }
+
+      // Sign out and redirect to home
+      await signOut({ callbackUrl: '/' });
+    } catch (err) {
+      setError('שגיאה במחיקת החשבון. אנא נסה שוב.');
+      console.error('Delete account error:', err);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteDialogOpen(false);
+      setDeleteConfirmation('');
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
@@ -269,15 +305,24 @@ export default function Profile() {
                 הצטרף ב-{formatDate(profile.createdAt)}
               </Typography>
             </Box>
-            <Button
-              variant="outlined"
-              startIcon={<EditIcon />}
-              onClick={handleEdit}
-              disabled={editing}
-              sx={{ marginTop: 2 }}
-            >
-              ערוך פרופיל
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1, marginTop: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={handleEdit}
+                disabled={editing}
+              >
+                ערוך פרופיל
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => setDeleteDialogOpen(true)}
+              >
+                מחק חשבון
+              </Button>
+            </Box>
           </Box>
 
           <Dialog open={editing} onClose={handleCancel} fullWidth>
@@ -411,6 +456,67 @@ export default function Profile() {
           </Box>
         </Box>
       </Card>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ textAlign: 'center', color: '#dc2626' }}>
+          <WarningIcon sx={{ fontSize: 48, mb: 1 }} />
+          מחיקת חשבון
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom sx={{ textAlign: 'center', mb: 2 }}>
+            האם אתה בטוח שברצונך למחוק את החשבון שלך?
+          </Typography>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>שים לב:</strong> פעולה זו בלתי הפיכה. כל הנתונים שלך, כולל:
+            </Typography>
+            <Box component="ul" sx={{ mt: 1, mb: 0 }}>
+              <li>פרטי הפרופיל האישי</li>
+              <li>השתתפות בקבוצות רכישה</li>
+              <li>בקשות שיצרת</li>
+              <li>היסטוריית הפעילות</li>
+            </Box>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              יימחקו לצמיתות ולא ניתן יהיה לשחזר אותם.
+            </Typography>
+          </Alert>
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+            אנא הקלד "<strong>מחק את חשבוני</strong>" כדי לאשר:
+          </Typography>
+          <TextField
+            fullWidth
+            variant="outlined"
+            sx={{ mt: 2 }}
+            placeholder="מחק את חשבוני"
+            value={deleteConfirmation}
+            onChange={(e) => setDeleteConfirmation(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', gap: 2, pb: 3 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={deleteLoading}
+          >
+            ביטול
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteAccount}
+            disabled={deleteLoading || deleteConfirmation !== 'מחק את חשבוני'}
+            startIcon={deleteLoading ? <LoadingCircle loadingText="" /> : <DeleteIcon />}
+          >
+            {deleteLoading ? 'מוחק...' : 'מחק חשבון'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
