@@ -6,15 +6,30 @@ import { GroupStatus } from "lib/types/status";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const title = searchParams.get("title");
-
-    // Check if exists by title
-    if (title) {
+    const titleParam = searchParams.get('title');
+    const statusParam = searchParams.get('status');
+    const lastWeekParam = searchParams.get('lastWeek');
+    const where: any = {};
+    if (titleParam) {
       const exists = await prisma.activeGroup.findFirst({
-        where: { title: { equals: title, mode: "insensitive" } },
+        where: { title: { equals: titleParam, mode: "insensitive" } },
         select: { id: true },
       });
       return NextResponse.json({ exists: !!exists });
+    }
+    if (statusParam) {
+      const status: GroupStatus = GroupStatus[statusParam.toUpperCase() as keyof typeof GroupStatus]
+      if (!status) {
+        return NextResponse.json({ error: "Incorrect status provided!" }, { status: 400 });
+      }
+      where.status = status;
+    }
+    if (lastWeekParam === 'true') {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      where.createdAt = {
+        gte: oneWeekAgo
+      };
     }
 
     // Get all active groups
@@ -44,6 +59,7 @@ export async function GET(req: Request) {
           orderBy: { order: "asc" },
         },
       },
+      where,
       orderBy: { createdAt: "desc" },
     });
 
