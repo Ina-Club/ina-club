@@ -54,6 +54,8 @@ export async function GET(req: Request) {
             },
           },
         },
+        minParticipants: true,
+        maxParticipants: true,
         images: {
           select: { image: { select: { url: true } }, order: true },
           orderBy: { order: "asc" },
@@ -78,6 +80,8 @@ export async function GET(req: Request) {
         image: p.user.profilePicture?.url ?? "",
         mail: p.user.email,
       })),
+      minParticipants: r.minParticipants,
+      maxParticipants: r.maxParticipants
     }));
 
     return NextResponse.json({ activeGroups: data });
@@ -91,7 +95,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { title, description, categoryId, basePrice, groupPrice, deadline, imageUrls } = body as {
+    const { title, description, categoryId, basePrice, groupPrice, deadline, imageUrls, minParticipants, maxParticipants } = body as {
       title: string;
       description: string;
       categoryId: string;
@@ -99,6 +103,8 @@ export async function POST(req: Request) {
       groupPrice: number;
       deadline: string;
       imageUrls: string[];
+      minParticipants?: number;
+      maxParticipants?: number;
     };
 
     if (!title) return NextResponse.json({ error: "כותרת חובה" }, { status: 400 });
@@ -124,7 +130,7 @@ export async function POST(req: Request) {
         basePrice,
         groupPrice,
         deadline: new Date(deadline),
-        status: GroupStatus.PENDING,
+        status: GroupStatus.OPEN,
       },
     });
 
