@@ -22,9 +22,9 @@ export default function CompanyCardSkeleton() {
                 <Skeleton variant="rounded" width={50} height={100} />
             </Box>
             <CardContent sx={{ p: 2, width: 120 }}>
-                <Skeleton variant="text" />
-                <Skeleton variant="text" />
-                <Skeleton variant="text" />
+                <Skeleton variant="text" width="80%"/>
+                <Skeleton variant="text" width="100%"/>
+                <Skeleton variant="text" width="60%"/>
             </CardContent>
         </Card>
     );

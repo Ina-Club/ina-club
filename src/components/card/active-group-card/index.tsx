@@ -172,7 +172,8 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         <Box sx={{ mb: 2 }}>
           <ParticipantsProgress
             current={activeGroup.participants.length}
-            max={activeGroup.maxParticipants ?? activeGroup.participants.length}
+            min={activeGroup.minParticipants}
+            max={activeGroup.maxParticipants}
           />
         </Box>
       </CardContent>

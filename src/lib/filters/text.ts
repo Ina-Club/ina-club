@@ -1,35 +1,35 @@
-import { ActiveGroup, RequestGroup } from '../dal';
+import { ActiveGroup, RequestGroup, User } from '../dal';
+
+interface FilterableProperties {
+    title: string,
+    description: string,
+    category: string,
+    basePrice?: number;
+    groupPrice?: number;
+    participants?: User[];
+    minParticipants?: number;
+    maxParticipants?: number;
+}
+
+const searchableKeys: (keyof FilterableProperties)[] = [
+    "title", "description", "category", "basePrice", "groupPrice", "participants", "minParticipants", "maxParticipants"
+];
 
 export function filterByText<T extends ActiveGroup | RequestGroup>(items: T[], searchText: string): T[] {
     // for empty search text, return all items
     if (!searchText.trim()) {
         return items;
     }
+    const textLowerTrimmed: string = searchText.toLowerCase().trim();
 
-    const searchLowerTrimmed: string = searchText.toLowerCase().trim();
-
-    // TODO: Improve filters when card data is fully fetched from card object.
     return items.filter((item) => {
-        if (item.title.toLowerCase().includes(searchLowerTrimmed)) {
-            return true;
-        }
-        if (item.category.toLowerCase().includes(searchLowerTrimmed)) {
-            return true;
-        }
-
-        if ('price' in item) {
-            const activeGroup = item as ActiveGroup;
-
-            if (activeGroup.price.toString().includes(searchLowerTrimmed)) {
-                return true;
+        return (searchableKeys as readonly (keyof FilterableProperties)[]).some((key) => {
+            if (key in item) {
+                const value = key === "participants" ? item.participants.length : item[key as keyof typeof item];
+                return String(value ?? "").toLowerCase().includes(textLowerTrimmed);
             }
-            if (activeGroup.numberOfParticipants.toString().includes(searchLowerTrimmed)) {
-                return true;
-            }
-            if (activeGroup.deadline.toString().toLowerCase().includes(searchLowerTrimmed)) {
-                return true;
-            }
-        }
+            return false;
+        });
 
         // TODO: If the data will be displayed somehow, for RequestGroup consider search in specific properties of the relevant OpenActiveGroups.
         // TODO: Enable Search in countdown text (days, hours, minutes in Hebrew)
@@ -60,8 +60,6 @@ export function filterByText<T extends ActiveGroup | RequestGroup>(items: T[], s
         //         return true;
         //     }
         // }
-        
-        return false;
     });
 }
 
