@@ -29,6 +29,7 @@ export async function DELETE() {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
     }
 
+    // TODO: Why? foreign keys are supposed to be deleted (cascade)
     // Delete all related data in the correct order to avoid foreign key constraints
     // 1. Delete group memberships
     await prisma.requestGroupParticipant.deleteMany({
@@ -39,6 +40,7 @@ export async function DELETE() {
       where: { userId: user.id }
     });
 
+    // TODO: oh boy, fix this
     // 2. Delete groups owned by the user (this will cascade delete related data)
     await prisma.requestGroup.deleteMany({
       where: { createdById: user.id }
