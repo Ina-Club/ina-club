@@ -13,6 +13,7 @@ import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import RequestGroupImages from "@/components/request-group/request-group-images";
+import NotFound from "app/not-found";
 
 export default async function ActiveGroupDetail({
   params,
@@ -60,18 +61,7 @@ export default async function ActiveGroupDetail({
 
   if (!ag) {
     return (
-      <Box
-        sx={{
-          maxWidth: 1200,
-          mx: "auto",
-          px: 2,
-          py: 4,
-          textAlign: "center",
-          color: "text.secondary",
-        }}
-      >
-        לא נמצאה קבוצת רכישה פעילה
-      </Box>
+      <NotFound />
     );
   }
 
