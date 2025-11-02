@@ -12,6 +12,7 @@ import { prisma } from "lib/prisma";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupImages from "@/components/request-group/request-group-images";
+import NotFound from "app/not-found";
 
 export default async function RequestGroupDetail({
   params,
@@ -50,18 +51,7 @@ export default async function RequestGroupDetail({
 
   if (!rg) {
     return (
-      <Box
-        sx={{
-          maxWidth: 1200,
-          mx: "auto",
-          px: 2,
-          py: 4,
-          textAlign: "center",
-          color: "text.secondary",
-        }}
-      >
-        לא נמצאה בקשה
-      </Box>
+      <NotFound />
     );
   }
 
