@@ -2,11 +2,11 @@
 
 import { Container, Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
-import SmartSearchComponent from "@/components/smart-search";
+import PriceAnalyzerComponent from "@/components/price-analyzer";
 
-export default function SmartSearchPage() {
-  const headerText = "חיפוש חכם";
-  const descriptionText = "מצא את המוצר המושלם עבורך וגלה כמה תוכל לחסוך באמצעות קבוצת רכישה";
+export default function PriceAnalyzerPage() {
+  const headerText = "מנתח מחירים";
+  const descriptionText = "מצא את המוצר המושלם עבורך באמצעות מנתח מחירים מבוסס AI וגלה כמה תוכל לחסוך בעזרת קבוצת רכישה.";
 
   return (
     <>
@@ -25,7 +25,7 @@ export default function SmartSearchPage() {
             mb: { xs: 4, md: 4 },
           }}
         >
-          <SmartSearchComponent />
+          <PriceAnalyzerComponent />
         </Box>
       </Container>
     </>
