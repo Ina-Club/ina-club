@@ -18,14 +18,14 @@ import {
 import { RequestGroup } from "lib/dal";
 import { useState } from "react";
 import { LoadingCircle } from "@/components/loading-circle";
-import { AIProductData } from "app/price-analyzer/page";
+import { AIProductData } from "app/smart-search/page";
 
-interface PriceAnalyzerCardProps {
+interface SmartSearchCardProps {
     requestGroup: RequestGroup;
     handleExpansion: (requestGroup: RequestGroup) => Promise<AIProductData | null>;
 }
 
-const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, handleExpansion }) => {
+const SmartSearchCard: React.FC<SmartSearchCardProps> = ({ requestGroup, handleExpansion }) => {
     const loadingText: string = "מחשב מידע...";
     const baseData: AIProductData = {
         // TODO: use name, model somewhere
@@ -231,4 +231,4 @@ const PriceAnalyzerCard: React.FC<PriceAnalyzerCardProps> = ({ requestGroup, han
     );
 };
 
-export default PriceAnalyzerCard;
+export default SmartSearchCard;
