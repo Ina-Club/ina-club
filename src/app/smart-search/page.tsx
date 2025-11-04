@@ -14,10 +14,10 @@ import {
     AttachMoney as AttachMoneyIcon,
 } from "@mui/icons-material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
-import PriceAnalyzerCard from '@/components/card/price-analyzer-card';
+import SmartSearchCard from '@/components/card/smart-search-card';
 import { RequestGroup } from 'lib/dal';
 import { mockRequestGroups } from "lib/mock";
-import { PRICE_ANALYZER_PROMPT } from "ai/prompts";
+import { SMART_SEARCH_PROMPT } from "ai/prompts";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton"
 import { SearchBar } from "@/components/search-bar";
 
@@ -97,12 +97,12 @@ const handleAISearch = async (requestGroup: RequestGroup): Promise<AIProductData
     }
 
     try {
-        const price_analyzer_prompt: string =
-            PRICE_ANALYZER_PROMPT.replace('{productName}', requestGroup.title).replace('{propertyList}', propertyList.toString());
+        const smartSearchPrompt: string =
+            SMART_SEARCH_PROMPT.replace('{productName}', requestGroup.title).replace('{propertyList}', propertyList.toString());
         const response: Response = await fetch("/api/ai/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: price_analyzer_prompt, schema: responseSchema }),
+            body: JSON.stringify({ prompt: smartSearchPrompt, schema: responseSchema }),
         });
         console.log(response);
         const data = await response.json();
@@ -118,9 +118,9 @@ const handleAISearch = async (requestGroup: RequestGroup): Promise<AIProductData
     }
 }
 
-export default function PriceAnalyzerPage() {
-    const headerText: string = "מנתח מחירים חכם"
-    const descriptionText: string = "גלה תובנות על השוק באמצעות מנתח מחירים מבוסס AI כדי לבצע רכישות חכמות יותר."
+export default function SmartSearchPage() {
+    const headerText: string = "חיפוש חכם"
+    const descriptionText: string = "גלה תובנות על השוק באמצעות חיפוש חכם מבוסס AI כדי לבצע רכישות חכמות יותר."
     const [selectedCategory, setSelectedCategory] = useState("Electronics");
     const [searchText, setSearchText] = useState("");
     const requestGroups: RequestGroup[] = mockRequestGroups.concat(mockRequestGroups);
@@ -180,7 +180,7 @@ export default function PriceAnalyzerPage() {
                 </Box>
                 <Suspense fallback={<GroupSectionSkeleton />}>
                     {requestGroups.map((requestGroup, index) => (
-                        <PriceAnalyzerCard key={index} requestGroup={requestGroup} handleExpansion={handleAISearch} />
+                        <SmartSearchCard key={index} requestGroup={requestGroup} handleExpansion={handleAISearch} />
                     ))}
                 </Suspense>
 

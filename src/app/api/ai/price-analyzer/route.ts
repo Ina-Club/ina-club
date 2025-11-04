@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
-import type { SmartSearchResponse } from "../../../../lib/types/smart-search";
 
 export const runtime = "nodejs";
 
@@ -179,7 +178,7 @@ ${hasSkipDetails ? "המשתמש ביקש לדלג על הפרטים המדוי�
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Smart search error:", error);
+    console.error("price analyzer error:", error);
     return NextResponse.json(
       { error: "שגיאה בחיפוש החכם" },
       { status: 500 }
