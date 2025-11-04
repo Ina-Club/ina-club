@@ -25,9 +25,9 @@ import { useTheme } from "@mui/material/styles";
 import type {
   NeedMoreInfoResponse,
   PriceResponse,
-} from "../../lib/types/smart-search";
+} from "../../lib/types/price-analyzer";
 
-export default function SmartSearchComponent() {
+export default function PriceAnalyzerComponent() {
   const theme = useTheme();
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +51,7 @@ export default function SmartSearchComponent() {
     setPriceResult(null);
 
     try {
-      const response = await fetch("/api/ai/smart-search", {
+      const response = await fetch("/api/ai/price-analyzer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -90,7 +90,7 @@ export default function SmartSearchComponent() {
     setError(null);
 
     try {
-      const response = await fetch("/api/ai/smart-search", {
+      const response = await fetch("/api/ai/price-analyzer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

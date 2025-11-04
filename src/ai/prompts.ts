@@ -1,4 +1,4 @@
-export const PRICE_ANALYZER_PROMPT: string =
+export const SMART_SEARCH_PROMPT: string =
     `
     Generate a JSON object for a {productName}.
     You are a market researcher expert that is familiar with all kinds of products.

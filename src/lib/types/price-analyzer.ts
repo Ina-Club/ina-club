@@ -17,4 +17,4 @@ export interface PriceResponse {
   notes: string;
 }
 
-export type SmartSearchResponse = NeedMoreInfoResponse | PriceResponse;
+export type PriceAnalyzerResponse = NeedMoreInfoResponse | PriceResponse;
