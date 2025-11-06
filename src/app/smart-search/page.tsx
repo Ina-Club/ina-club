@@ -1,269 +1,284 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import {
-    Box,
-    Container,
-    Typography,
-    Chip,
-    Card,
-} from "@mui/material";
-import {
-    Psychology as PsychologyIcon,
-    Category as CategoryIcon,
-    AttachMoney as AttachMoneyIcon,
-} from "@mui/icons-material";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { Box, Button, Card, Container, Typography } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
-import SmartSearchCard from '@/components/card/smart-search-card';
-import { RequestGroup } from 'lib/dal';
-import { mockRequestGroups } from "lib/mock";
-import { SMART_SEARCH_PROMPT } from "ai/prompts";
-import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton"
 import { SearchBar } from "@/components/search-bar";
+import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
+import ActiveGroupCard from "@/components/card/active-group-card";
+import ActiveGroupCardSkeleton from "@/components/skeleton/active-group-card-skeleton";
+import RequestGroupCard from "@/components/card/request-group-card";
+import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-skeleton";
+import { ActiveGroup, RequestGroup } from "lib/dal";
+import { filterByText } from "lib/filters/text";
 
-const categories = [
-    "Electronics",
-    "Fashion",
-    "Home-Goods",
-    "Jewelry",
-    "Gaming",
-    "Outdoor",
-    "Fitness",
-    "Automotive",
-    "Technology"
-];
-
-const aiInsights = [
-    "Electronics have moderate margins with bulk pricing advantages",
-    "Luxury items maintain higher margins",
-    "Current market conditions favor higher discounts"
-];
-
-const aiSteps = [
-    {
-        icon: <CategoryIcon />,
-        title: "זיהוי קטגוריה",
-        description: "AI מזהה קטגוריית מוצר עבור ניתוח מלא ומדויק."
-    },
-    {
-        icon: <PsychologyIcon />,
-        title: "ניתוח חכם",
-        description: "מנתח תבניות בשוק, עונתיות ותחרויות בתחומים שונים."
-    },
-    {
-        icon: <AttachMoneyIcon />,
-        title: "תמחור",
-        description: "מחשב הנחות אופטימליות על בסיס כמויות, טרנדים ומצב השוק."
-    }
-];
-
+// Kept for compatibility with SmartSearchCard (if referenced elsewhere)
 export interface AIProductData {
-    name: string,
-    model: string,
-    minPrice: number,
-    maxPrice: number
-    averagePrice: number,
-    notesInHebrew: string
-}
-
-const isAIProductData = (obj: unknown): obj is AIProductData => {
-    if (typeof obj !== "object" || obj === null) return false;
-    const o = obj as Record<string, unknown>;
-
-    return (
-        typeof o.name === "string" &&
-        typeof o.model === "string" &&
-        typeof o.minPrice === "number" &&
-        typeof o.maxPrice === "number" &&
-        typeof o.averagePrice === "number" &&
-        Number.isFinite(o.averagePrice) &&
-        typeof o.notesInHebrew === "string"
-    );
-}
-
-const handleAISearch = async (requestGroup: RequestGroup): Promise<AIProductData | null> => {
-    const propertyList: string[] = ["name", "model", "minPrice", "maxPrice", "averagePrice", "notesInHebrew"];
-    const responseSchema = {
-        type: "object",
-        properties: {
-            name: { type: "string" },
-            model: { type: "string" },
-            minPrice: { type: "number" },
-            maxPrice: { type: "number" },
-            averagePrice: { type: "number" },
-            notesInHebrew: { type: "string" },
-        },
-        required: propertyList,
-    }
-
-    try {
-        const smartSearchPrompt: string =
-            SMART_SEARCH_PROMPT.replace('{productName}', requestGroup.title).replace('{propertyList}', propertyList.toString());
-        const response: Response = await fetch("/api/ai/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: smartSearchPrompt, schema: responseSchema }),
-        });
-        console.log(response);
-        const data = await response.json();
-        if (!response.ok || !isAIProductData(data)) {
-            console.log("Failed to fetch AI data: ", response.statusText);
-            return null;
-        }
-        return data;
-    }
-    catch (err) {
-        console.log("Failed Sending the request to AI!", err);
-        return null;
-    }
+  name: string;
+  model: string;
+  minPrice: number;
+  maxPrice: number;
+  averagePrice: number;
+  notesInHebrew: string;
 }
 
 export default function SmartSearchPage() {
-    const headerText: string = "חיפוש חכם"
-    const descriptionText: string = "גלה תובנות על השוק באמצעות חיפוש חכם מבוסס AI כדי לבצע רכישות חכמות יותר."
-    const [selectedCategory, setSelectedCategory] = useState("Electronics");
-    const [searchText, setSearchText] = useState("");
-    const requestGroups: RequestGroup[] = mockRequestGroups.concat(mockRequestGroups);
+  const headerText: string = "חיפוש חכם";
+  const descriptionText: string =
+    "חפשו טקסט חופשי ונציג קבוצות פעילות ובקשות רלוונטיות בהקשר המבוקש.";
 
-    return (
-        <>
-            <DefaultPageBanner header={headerText} description={descriptionText} />
-            <Container
+  // Input text vs. submitted query text
+  const [searchText, setSearchText] = useState("");
+  const [queryText, setQueryText] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const [allActiveGroups, setAllActiveGroups] = useState<ActiveGroup[]>([]);
+  const [allRequestGroups, setAllRequestGroups] = useState<RequestGroup[]>([]);
+  const [loadingActive, setLoadingActive] = useState(true);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  const [errorActive, setErrorActive] = useState<string | null>(null);
+  const [errorRequests, setErrorRequests] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setLoadingActive(true);
+    setErrorActive(null);
+    fetch("/api/active-groups")
+      .then((r) => r.json())
+      .then((data) => {
+        if (active) setAllActiveGroups(data.activeGroups ?? []);
+      })
+      .catch(() => {
+        if (active) setErrorActive("שגיאה בטעינת קבוצות פעילות");
+      })
+      .finally(() => {
+        if (active) setLoadingActive(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    setLoadingRequests(true);
+    setErrorRequests(null);
+    fetch("/api/request-groups")
+      .then((r) => r.json())
+      .then((data) => {
+        if (active) setAllRequestGroups(data.requestGroups ?? []);
+      })
+      .catch(() => {
+        if (active) setErrorRequests("שגיאה בטעינת בקשות");
+      })
+      .finally(() => {
+        if (active) setLoadingRequests(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Extract a max price if the query contains something like "עד 5000" or "<= 5000"
+  const parsedMaxPrice = useMemo(() => {
+    const text = queryText.trim();
+    if (!text) return null as number | null;
+    const numberMatch = text.match(/\d{3,}/g); // basic number capture (>= 3 digits)
+    if (!numberMatch) return null;
+    if (/עד|<=|פחות|מתחת/i.test(text)) {
+      const n = parseInt(numberMatch[numberMatch.length - 1], 10);
+      return Number.isFinite(n) ? n : null;
+    }
+    return null;
+  }, [queryText]);
+
+  const filteredActiveGroups = useMemo(() => {
+    if (!hasSearched) return [] as ActiveGroup[];
+    let items = filterByText(allActiveGroups, queryText);
+    if (parsedMaxPrice != null) {
+      items = items.filter((ag) => {
+        const price = typeof ag.groupPrice === "number" ? ag.groupPrice : (ag as any).price;
+        return typeof price === "number" ? price <= parsedMaxPrice : true;
+      });
+    }
+    return items;
+  }, [allActiveGroups, hasSearched, queryText, parsedMaxPrice]);
+
+  const filteredRequestGroups = useMemo(() => {
+    if (!hasSearched) return [] as RequestGroup[];
+    // Text-based filtering only (API doesn't expose prices for opened groups)
+    return filterByText(allRequestGroups, queryText);
+  }, [allRequestGroups, hasSearched, queryText]);
+
+  const triggerSearch = () => {
+    setQueryText(searchText);
+    setHasSearched(true);
+  };
+
+  return (
+    <>
+      <DefaultPageBanner header={headerText} description={descriptionText} />
+
+      {/* Search bar */}
+      <Box
+        sx={{
+          maxWidth: 900,
+          mx: "auto",
+          position: "relative",
+          mt: { xs: -6, md: -3 },
+          mb: 2,
+          bgcolor: "white",
+          boxShadow: 3,
+          borderRadius: "12px",
+          py: { xs: 2, md: 1 },
+          px: { xs: 2, md: 2 },
+          display: "flex",
+          alignItems: "center",
+          border: "2px solid transparent",
+          "&:hover": { borderColor: "#1a2a5a" },
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") triggerSearch();
+        }}
+      >
+        <SearchBar
+          searchText={searchText}
+          placeholderText="חפשו טקסט חופשי..."
+          handleSearchTextChange={setSearchText}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<SearchIcon />}
+          onClick={triggerSearch}
+          sx={{ ml: 1, whiteSpace: "nowrap" }}
+          disabled={!searchText.trim()}
+        >
+          חיפוש
+        </Button>
+      </Box>
+
+      {!searchText ? (
+        <Container maxWidth="md" sx={{ mb: 6 }}>
+          <Card sx={{ p: { xs: 2, md: 3 } }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+              איך להשתמש בחיפוש החכם
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              הזינו טקסט חופשי ולחצו על כפתור "חיפוש" כדי לראות תוצאות.
+            </Typography>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              דוגמאות שאפשר לנסות:
+            </Typography>
+            <Box component="ul" sx={{ pl: 3, m: 0 }}>
+              <li>
+                <Typography variant="body2">"מכונית עד 5000 ש"ח" — מציג קבוצות פעילות עד מחיר זה ובקשות רלוונטיות.</Typography>
+              </li>
+              <li>
+                <Typography variant="body2">"אוזניות ביטול רעשים" — חיפוש לפי שם מוצר/קטגוריה/תיאור.</Typography>
+              </li>
+            </Box>
+            <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
+              מה יוצג לאחר חיפוש?
+            </Typography>
+            <Box component="ul" sx={{ pl: 3, m: 0 }}>
+              <li>
+                <Typography variant="body2">קבוצות פעילות רלוונטיות בצד שמאל.</Typography>
+              </li>
+              <li>
+                <Typography variant="body2">בקשות רלוונטיות בצד ימין.</Typography>
+              </li>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              טיפ: ניתן גם ללחוץ Enter כדי לבצע חיפוש.
+            </Typography>
+          </Card>
+        </Container>
+      ) : (
+        // Two-column results: left Active, right Requests
+        <Container maxWidth="lg" sx={{ mb: 6 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: { xs: 3, md: 4 },
+              alignItems: "start",
+            }}
+          >
+            {/* Active Groups (left) */}
+            <Box>
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                קבוצות פעילות רלוונטיות
+              </Typography>
+              {errorActive && (
+                <Card sx={{ p: 2, mb: 2, bgcolor: "#fff7f7", color: "#b71c1c" }}>
+                  <Typography variant="body2">{errorActive}</Typography>
+                </Card>
+              )}
+              <Box
                 sx={{
-                    px: { xs: "17px", md: "0px" },
-                    py: 4,
-                    maxWidth: "1200px",
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                  gap: { xs: 2, md: 2 },
                 }}
-            >
-                {/* Search Section */}
-                <Box
-                    sx={{
-                        maxWidth: 800,
-                        mx: "auto",
-                        position: "relative",
-                        mt: { xs: -8, md: -7 }, // מרים את הסרגל חיפוש שיהיה קצת מעל הגרדיאנט
-                        mb: {xs: 2, md: 2},
-                        bgcolor: "white",
-                        boxShadow: 3,
-                        borderRadius: "12px",
-                        py: { xs: 2, md: 1 },
-                        px: { xs: 2, md: 2 },
-                        display: "flex",
-                        alignItems: "center",
-                        border: "2px solid transparent",
-                        "&:hover": {
-                            borderColor: "#1a2a5a"
-                        }
-                    }}
-                >
-                    <SearchBar searchText={searchText} placeholderText="חיפוש מוצרים..." handleSearchTextChange={setSearchText} />
-                </Box>
-                {/* Category Filters */}
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, flexWrap: "wrap", mb: 2 }}>
-                    {categories.map((category) => (
-                        <Chip
-                            key={category}
-                            label={category}
-                            onClick={() => setSelectedCategory(category)}
-                            variant={selectedCategory === category ? "filled" : "outlined"}
-                            sx={{
-                                backgroundColor: selectedCategory === category ? "primary.main" : "transparent",
-                                color: selectedCategory === category ? "white" : "primary.main",
-                                borderColor: "primary.main",
-                                "&:hover": {
-                                    backgroundColor: selectedCategory === category ? "primary.dark" : "primary.light",
-                                    color: "white",
-                                },
-                            }}
-                        />
-                    ))}
-                </Box>
+              >
                 <Suspense fallback={<GroupSectionSkeleton />}>
-                    {requestGroups.map((requestGroup, index) => (
-                        <SmartSearchCard key={index} requestGroup={requestGroup} handleExpansion={handleAISearch} />
-                    ))}
+                  {loadingActive ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <ActiveGroupCardSkeleton key={i} />
+                    ))
+                  ) : filteredActiveGroups.length > 0 ? (
+                    filteredActiveGroups.map((ag, i) => (
+                      <ActiveGroupCard key={i} activeGroup={ag} />
+                    ))
+                  ) : (
+                    <Typography color="text.secondary" sx={{ mt: 1 }}>
+                      לא נמצאו קבוצות פעילות מתאימות
+                    </Typography>
+                  )}
                 </Suspense>
+              </Box>
+            </Box>
 
-                <Box
-                    sx={{
-                        display: "grid",
-                        gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, // mobile - 1 column, desktop - 3 columns
-                        width: "100%",
-                        px: { xs: 2, md: 2 },
-                        position: "inherit",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: { xs: 3, md: 2 },
-                    }}
-                >
-                    {/* AI Analysis Insights */}
-                    <Card sx={{ p: 2, height: "100%" }}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                            <PsychologyIcon sx={{ color: "secondary.main" }} />
-                            <Typography variant="h6" fontWeight={600}>
-                                תובנות ניתוח AI
-                            </Typography>
-                        </Box>
-
-                        <Box sx={{ pl: 4 }}>
-                            {aiInsights.map((insight, index) => (
-                                <Typography key={index} variant="body2" sx={{ mb: 2, position: "relative" }}>
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            position: "absolute",
-                                            left: -20,
-                                            top: 6,
-                                            width: 6,
-                                            height: 6,
-                                            backgroundColor: "secondary.main",
-                                            borderRadius: "50%",
-                                        }}
-                                    />
-                                    {insight}
-                                </Typography>
-                            ))}
-                        </Box>
-                    </Card>
-
-                    <Card sx={{ p: 2 }}>
-                        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                            איך עובד תמחור באמצעות AI?
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            התהליך שלנו בן 3 שלבים קריטיים לצורך חיזוי הנחה ושמירה על מחיר אופטימלי.
-                        </Typography>
-
-                        {aiSteps.map((step, index) => (
-                            <Box key={index} sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}>
-                                <Box
-                                    sx={{
-                                        width: 40,
-                                        height: 40,
-                                        borderRadius: "50%",
-                                        backgroundColor: index === 0 ? "primary.main" : index === 1 ? "#ff9800" : "#4caf50",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        color: "white",
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    {step.icon}
-                                </Box>
-                                <Box>
-                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-                                        {step.title}:
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {step.description}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        ))}
-                    </Card>
-                </Box>
-            </Container>
-        </>
-    );
+            {/* Request Groups (right) */}
+            <Box>
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                בקשות רלוונטיות
+              </Typography>
+              {errorRequests && (
+                <Card sx={{ p: 2, mb: 2, bgcolor: "#fff7f7", color: "#b71c1c" }}>
+                  <Typography variant="body2">{errorRequests}</Typography>
+                </Card>
+              )}
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                  gap: { xs: 2, md: 2 },
+                }}
+              >
+                <Suspense fallback={<GroupSectionSkeleton />}>
+                  {loadingRequests ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <RequestGroupCardSkeleton key={i} />
+                    ))
+                  ) : filteredRequestGroups.length > 0 ? (
+                    filteredRequestGroups.map((rg, i) => (
+                      <RequestGroupCard key={i} requestGroup={rg} />
+                    ))
+                  ) : (
+                    <Typography color="text.secondary" sx={{ mt: 1 }}>
+                      לא נמצאו בקשות מתאימות
+                    </Typography>
+                  )}
+                </Suspense>
+              </Box>
+            </Box>
+          </Box>
+        </Container>
+      )}
+    </>
+  );
 }
+
