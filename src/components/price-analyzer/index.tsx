@@ -138,13 +138,12 @@ export default function PriceAnalyzerComponent() {
       {/* Search Bar */}
       <Card
         sx={{
-          p: 2,
+          p: 1,
           mb: 3,
           boxShadow: 3,
+          borderRadius: "12px",
           border: "2px solid transparent",
-          "&:hover": {
-            borderColor: "primary.main",
-          },
+          "&:hover": { borderColor: "#1a2a5a" },
         }}
       >
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
