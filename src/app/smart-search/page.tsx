@@ -10,17 +10,9 @@ import ActiveGroupCard from "@/components/card/active-group-card";
 import ActiveGroupCardSkeleton from "@/components/skeleton/active-group-card-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
 import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-skeleton";
-import { ActiveGroup, RequestGroup } from "lib/dal";
+import { ActiveGroup, RequestGroup, PublicGroup } from "lib/dal";
 import { LoadingCircle } from "@/components/loading-circle";
-
-export interface AIProductData {
-    name: string;
-    model: string;
-    minPrice: number;
-    maxPrice: number;
-    averagePrice: number;
-    notesInHebrew: string;
-}
+import { SMART_SEARCH_PROMPT } from "ai/prompts";
 
 export default function SmartSearchPage() {
     const headerText: string = "חיפוש חכם";
@@ -86,7 +78,44 @@ export default function SmartSearchPage() {
         setDisplayHelp(false);
         await requestGroupsPromise;
         await activeGroupsPromise;
+        return await handleAISearch();
     };
+
+    const handleAISearch = async (): Promise<PublicGroup | null> => {
+        const propertyList: string[] = ["requestGroups", "activeGroups"];
+        const responseSchema = {
+            type: "object",
+            properties: {
+                requestGroups: { type: ["string"] },
+                activeGroups: { type: ["string"] },
+            },
+            required: propertyList,
+        }
+
+        try {
+            const smartSearchPrompt: string =
+                SMART_SEARCH_PROMPT.replace('{requestGroups}', requestGroups.toString())
+                    .replace('{activeGroups}', activeGroups.toString())
+                    .replace('{searchText}', searchText);
+            const response: Response = await fetch("/api/ai/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: smartSearchPrompt, schema: responseSchema }),
+            });
+            console.log(response);
+            const data = await response.json();
+            if (!response.ok || data.requestGroups === undefined || data.activeGroups === undefined) {
+                console.log("Failed to fetch AI data: ", response.statusText);
+                return null;
+            }
+            setLoadingSearch(false);
+            return data;
+        }
+        catch (err) {
+            console.log("Failed Sending the request to AI!", err);
+            return null;
+        }
+    }
 
     return (
         <>
