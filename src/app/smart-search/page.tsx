@@ -35,7 +35,7 @@ export default function SmartSearchPage() {
         let active = true;
         setLoadingActive(true);
         setErrorActive(null);
-        activeGroupsPromise = fetch("/api/active-groups")
+        activeGroupsPromise = fetch("/api/active-groups/?status=open")
             .then((r) => r.json())
             .then((data) => {
                 if (active) setActiveGroups(data.activeGroups ?? []);
@@ -55,7 +55,7 @@ export default function SmartSearchPage() {
         let active = true;
         setLoadingRequests(true);
         setErrorRequests(null);
-        requestGroupsPromise = fetch("/api/request-groups")
+        requestGroupsPromise = fetch("/api/request-groups/?status=open")
             .then((r) => r.json())
             .then((data) => {
                 if (active) setRequestGroups(data.requestGroups ?? []);
@@ -73,10 +73,11 @@ export default function SmartSearchPage() {
 
     // Currently we dont wait for this to end when we call this, we can change this is the future if required.
     const handleSmartSearch = async () => {
+        console.log(requestGroupsPromise, activeGroupsPromise);
         setLoadingSearch(true);
         setDisplayHelp(false);
-        await requestGroupsPromise;
-        await activeGroupsPromise;
+        await Promise.all([requestGroupsPromise, activeGroupsPromise]);
+        console.log(requestGroupsPromise, activeGroupsPromise);
         await handleAISearch();
     };
 
