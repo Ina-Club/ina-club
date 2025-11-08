@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { Box, Button, Card, Container, Typography } from "@mui/material";
+import { Box, Button, Card, CircularProgress, Container, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { SearchBar } from "@/components/search-bar";
@@ -28,14 +28,11 @@ export default function SmartSearchPage() {
     const [errorActive, setErrorActive] = useState<string | null>(null);
     const [errorRequests, setErrorRequests] = useState<string | null>(null);
 
-    let requestGroupsPromise: Promise<any> | null = null;
-    let activeGroupsPromise: Promise<any> | null = null;
-
     useEffect(() => {
         let active = true;
         setLoadingActive(true);
         setErrorActive(null);
-        activeGroupsPromise = fetch("/api/active-groups/?status=open")
+        fetch("/api/active-groups/?status=open")
             .then((r) => r.json())
             .then((data) => {
                 if (active) setActiveGroups(data.activeGroups ?? []);
@@ -55,7 +52,7 @@ export default function SmartSearchPage() {
         let active = true;
         setLoadingRequests(true);
         setErrorRequests(null);
-        requestGroupsPromise = fetch("/api/request-groups/?status=open")
+        fetch("/api/request-groups/?status=open")
             .then((r) => r.json())
             .then((data) => {
                 if (active) setRequestGroups(data.requestGroups ?? []);
@@ -73,11 +70,8 @@ export default function SmartSearchPage() {
 
     // Currently we dont wait for this to end when we call this, we can change this is the future if required.
     const handleSmartSearch = async () => {
-        console.log(requestGroupsPromise, activeGroupsPromise);
         setLoadingSearch(true);
         setDisplayHelp(false);
-        await Promise.all([requestGroupsPromise, activeGroupsPromise]);
-        console.log(requestGroupsPromise, activeGroupsPromise);
         await handleAISearch();
     };
 
@@ -159,9 +153,9 @@ export default function SmartSearchPage() {
                     startIcon={<SearchIcon />}
                     onClick={handleSmartSearch}
                     sx={{ ml: 1, whiteSpace: "nowrap" }}
-                    disabled={!searchText.trim()}
+                    disabled={!searchText.trim() || loadingActive || loadingRequests}
                 >
-                    חיפוש
+                    {(loadingActive || loadingRequests) ? <CircularProgress size={25} /> : 'חיפוש'}
                 </Button>
             </Box>
 
