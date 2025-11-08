@@ -10,19 +10,17 @@ import ActiveGroupCard from "@/components/card/active-group-card";
 import ActiveGroupCardSkeleton from "@/components/skeleton/active-group-card-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
 import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-skeleton";
-import { ActiveGroup, RequestGroup, PublicGroup } from "lib/dal";
+import { ActiveGroup, RequestGroup } from "lib/dal";
+import { toPublicGroups } from "lib/transformers/group";
 import { LoadingCircle } from "@/components/loading-circle";
 import { SMART_SEARCH_PROMPT } from "ai/prompts";
 
 export default function SmartSearchPage() {
     const headerText: string = "חיפוש חכם";
-    const descriptionText: string =
-        "חפשו טקסט חופשי ונציג קבוצות פעילות ובקשות רלוונטיות בהקשר המבוקש.";
-
-    // Input text vs. submitted query text
+    const descriptionText: string = "חפשו טקסט חופשי ונציג קבוצות פעילות ובקשות רלוונטיות בהקשר המבוקש.";
     const [searchText, setSearchText] = useState("");
-    const [activeGroups, setAllActiveGroups] = useState<ActiveGroup[]>([]);
-    const [requestGroups, setAllRequestGroups] = useState<RequestGroup[]>([]);
+    const [activeGroups, setActiveGroups] = useState<ActiveGroup[]>([]);
+    const [requestGroups, setRequestGroups] = useState<RequestGroup[]>([]);
     const [loadingActive, setLoadingActive] = useState(true);
     const [loadingRequests, setLoadingRequests] = useState(true);
     const [displayHelp, setDisplayHelp] = useState(true);
@@ -40,7 +38,7 @@ export default function SmartSearchPage() {
         activeGroupsPromise = fetch("/api/active-groups")
             .then((r) => r.json())
             .then((data) => {
-                if (active) setAllActiveGroups(data.activeGroups ?? []);
+                if (active) setActiveGroups(data.activeGroups ?? []);
             })
             .catch(() => {
                 if (active) setErrorActive("שגיאה בטעינת קבוצות פעילות");
@@ -60,7 +58,7 @@ export default function SmartSearchPage() {
         requestGroupsPromise = fetch("/api/request-groups")
             .then((r) => r.json())
             .then((data) => {
-                if (active) setAllRequestGroups(data.requestGroups ?? []);
+                if (active) setRequestGroups(data.requestGroups ?? []);
             })
             .catch(() => {
                 if (active) setErrorRequests("שגיאה בטעינת בקשות");
@@ -73,15 +71,16 @@ export default function SmartSearchPage() {
         };
     }, []);
 
+    // Currently we dont wait for this to end when we call this, we can change this is the future if required.
     const handleSmartSearch = async () => {
         setLoadingSearch(true);
         setDisplayHelp(false);
         await requestGroupsPromise;
         await activeGroupsPromise;
-        return await handleAISearch();
+        await handleAISearch();
     };
 
-    const handleAISearch = async (): Promise<PublicGroup | null> => {
+    const handleAISearch = async () => {
         const propertyList: string[] = ["requestGroups", "activeGroups"];
         const responseSchema = {
             type: "object",
@@ -91,29 +90,36 @@ export default function SmartSearchPage() {
             },
             required: propertyList,
         }
-
+        const smartSearchPrompt: string =
+            SMART_SEARCH_PROMPT.replace('{requestGroups}', JSON.stringify(toPublicGroups(requestGroups)))
+                .replace('{activeGroups}', JSON.stringify(toPublicGroups(activeGroups)))
+                .replace('{searchText}', searchText);
         try {
-            const smartSearchPrompt: string =
-                SMART_SEARCH_PROMPT.replace('{requestGroups}', requestGroups.toString())
-                    .replace('{activeGroups}', activeGroups.toString())
-                    .replace('{searchText}', searchText);
+            console.log(JSON.stringify(toPublicGroups(requestGroups)));
             const response: Response = await fetch("/api/ai/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: smartSearchPrompt, schema: responseSchema }),
             });
-            console.log(response);
             const data = await response.json();
             if (!response.ok || data.requestGroups === undefined || data.activeGroups === undefined) {
                 console.log("Failed to fetch AI data: ", response.statusText);
-                return null;
+                // setError()
+            }
+            else {
+                // Using sets for O(1) access to a group by it's ID.
+                const serverRequestGroupIds: Set<string> = new Set(data.requestGroups);
+                const serverActiveGroupIds: Set<string> = new Set(data.activeGroups);
+                const filteredRequestGroups: RequestGroup[] = requestGroups.filter((rg) => serverRequestGroupIds.has(rg.id));
+                const filteredActiveGroups: ActiveGroup[] = activeGroups.filter((ag) => serverActiveGroupIds.has(ag.id));
+                setRequestGroups(filteredRequestGroups);
+                setActiveGroups(filteredActiveGroups);
             }
             setLoadingSearch(false);
-            return data;
         }
         catch (err) {
             console.log("Failed Sending the request to AI!", err);
-            return null;
+            // setError()
         }
     }
 
