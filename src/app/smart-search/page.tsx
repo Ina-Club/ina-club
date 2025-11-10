@@ -1,20 +1,16 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { Box, Button, Card, CircularProgress, Container, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Button, CircularProgress } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { SearchBar } from "@/components/search-bar";
-import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
-import ActiveGroupCard from "@/components/card/active-group-card";
-import ActiveGroupCardSkeleton from "@/components/skeleton/active-group-card-skeleton";
-import RequestGroupCard from "@/components/card/request-group-card";
-import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-skeleton";
 import { ActiveGroup, RequestGroup } from "lib/dal";
 import { toPublicGroups } from "lib/transformers/group";
 import { LoadingCircle } from "@/components/loading-circle";
 import { SMART_SEARCH_PROMPT } from "ai/prompts";
 import { SmartSearchHelper } from "@/components/smart-search/helper";
+import { SmartSearchComponent } from "@/components/smart-search";
 
 export default function SmartSearchPage() {
     const headerText: string = "חיפוש חכם";
@@ -26,7 +22,7 @@ export default function SmartSearchPage() {
     const [displayedRequestGroups, setDisplayedRequestGroups] = useState<RequestGroup[]>([]);
     const [loadingActive, setLoadingActive] = useState(true);
     const [loadingRequests, setLoadingRequests] = useState(true);
-    const [displayHelp, setDisplayHelp] = useState(true);
+    const [displayHelper, setDisplayHelper] = useState(true);
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [errorActive, setErrorActive] = useState<string | null>(null);
     const [errorRequests, setErrorRequests] = useState<string | null>(null);
@@ -74,7 +70,7 @@ export default function SmartSearchPage() {
     // Currently we dont wait for this to end when we call this, we can change this is the future if required.
     const handleSmartSearch = async () => {
         setLoadingSearch(true);
-        setDisplayHelp(false);
+        setDisplayHelper(false);
         await handleAISearch();
     };
 
@@ -162,89 +158,19 @@ export default function SmartSearchPage() {
                 </Button>
             </Box>
 
-            {displayHelp ? <SmartSearchHelper /> : !loadingSearch ? (
-                // Two-column results: left Active, right Requests
-                <Container maxWidth="lg" sx={{ mb: 6 }}>
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                            gap: { xs: 3, md: 4 },
-                            alignItems: "start",
-                        }}
-                    >
-                        {/* Active Groups (left) */}
-                        <Box>
-                            <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                                קבוצות פעילות רלוונטיות
-                            </Typography>
-                            {errorActive && (
-                                <Card sx={{ p: 2, mb: 2, bgcolor: "#fff7f7", color: "#b71c1c" }}>
-                                    <Typography variant="body2">{errorActive}</Typography>
-                                </Card>
-                            )}
-                            <Box
-                                sx={{
-                                    display: "grid",
-                                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                                    gap: { xs: 2, md: 2 },
-                                }}
-                            >
-                                <Suspense fallback={<GroupSectionSkeleton />}>
-                                    {loadingActive ? (
-                                        Array.from({ length: 4 }).map((_, i) => (
-                                            <ActiveGroupCardSkeleton key={i} />
-                                        ))
-                                    ) : displayedActiveGroups.length > 0 ? (
-                                        displayedActiveGroups.map((ag, i) => (
-                                            <ActiveGroupCard key={i} activeGroup={ag} />
-                                        ))
-                                    ) : (
-                                        <Typography color="text.secondary" sx={{ mt: 1 }}>
-                                            לא נמצאו קבוצות פעילות מתאימות
-                                        </Typography>
-                                    )}
-                                </Suspense>
-                            </Box>
-                        </Box>
-
-                        {/* Request Groups (right) */}
-                        <Box>
-                            <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-                                בקשות רלוונטיות
-                            </Typography>
-                            {errorRequests && (
-                                <Card sx={{ p: 2, mb: 2, bgcolor: "#fff7f7", color: "#b71c1c" }}>
-                                    <Typography variant="body2">{errorRequests}</Typography>
-                                </Card>
-                            )}
-                            <Box
-                                sx={{
-                                    display: "grid",
-                                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                                    gap: { xs: 2, md: 2 },
-                                }}
-                            >
-                                <Suspense fallback={<GroupSectionSkeleton />}>
-                                    {loadingRequests ? (
-                                        Array.from({ length: 4 }).map((_, i) => (
-                                            <RequestGroupCardSkeleton key={i} />
-                                        ))
-                                    ) : displayedRequestGroups.length > 0 ? (
-                                        displayedRequestGroups.map((rg, i) => (
-                                            <RequestGroupCard key={i} requestGroup={rg} />
-                                        ))
-                                    ) : (
-                                        <Typography color="text.secondary" sx={{ mt: 1 }}>
-                                            לא נמצאו בקשות מתאימות
-                                        </Typography>
-                                    )}
-                                </Suspense>
-                            </Box>
-                        </Box>
-                    </Box>
-                </Container>
-            ) : (<LoadingCircle loadingText="מחפש..." />)
+            {displayHelper ?
+                <SmartSearchHelper />
+                : (!loadingSearch ?
+                    <SmartSearchComponent
+                        errorActive={errorActive}
+                        loadingActive={loadingActive}
+                        errorRequests={errorRequests}
+                        loadingRequests={loadingRequests}
+                        displayedActiveGroups={displayedActiveGroups}
+                        displayedRequestGroups={displayedRequestGroups}
+                    />
+                    :
+                    <LoadingCircle loadingText="מחפש..." />)
             }
         </>
     );
