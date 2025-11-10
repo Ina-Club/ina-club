@@ -1,4 +1,4 @@
-import { Box, Card, Container, Typography } from "@mui/material"
+import { Alert, Box, Card, Container, Typography } from "@mui/material"
 import { Suspense } from "react"
 import GroupSectionSkeleton from "../skeleton/group-section-skeleton"
 import RequestGroupCardSkeleton from "../skeleton/request-group-card-skeleton"
@@ -10,6 +10,7 @@ import { ActiveGroup, RequestGroup } from "@/lib/dal"
 interface SmartSearchComponentProps {
     errorActive: string | null;
     errorRequests: string | null;
+    errorAi: string | null;
     loadingActive: boolean;
     loadingRequests: boolean;
     displayedActiveGroups: ActiveGroup[];
@@ -17,11 +18,12 @@ interface SmartSearchComponentProps {
 }
 
 export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
-    errorActive, loadingActive, errorRequests, loadingRequests, displayedActiveGroups, displayedRequestGroups
+    errorActive, loadingActive, errorRequests, errorAi, loadingRequests, displayedActiveGroups, displayedRequestGroups
 }) => {
     return (
         // Two-column results: left Active, right Requests
         <Container maxWidth="lg" sx={{ mb: 6 }}>
+            {errorAi && <Alert severity="error" sx={{ mb: 2 }}>{errorAi}</Alert>}
             <Box
                 sx={{
                     display: "grid",

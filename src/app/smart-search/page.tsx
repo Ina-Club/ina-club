@@ -26,6 +26,7 @@ export default function SmartSearchPage() {
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [errorActive, setErrorActive] = useState<string | null>(null);
     const [errorRequests, setErrorRequests] = useState<string | null>(null);
+    const [errorAi, setErrorAi] = useState<string | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -69,6 +70,7 @@ export default function SmartSearchPage() {
 
     // Currently we dont wait for this to end when we call this, we can change this is the future if required.
     const handleSmartSearch = async () => {
+        setErrorAi(null);
         setLoadingSearch(true);
         setDisplayHelper(false);
         await handleAISearch();
@@ -98,7 +100,7 @@ export default function SmartSearchPage() {
             const data = await response.json();
             if (!response.ok || data.requestGroups === undefined || data.activeGroups === undefined) {
                 console.log("Failed to fetch AI data: ", response.statusText);
-                // setError()
+                setErrorAi("שגיאה בשליפת הנתונים מAI, אנא נסו שנית מאוחר יותר.")
             }
             else {
                 // Using sets for O(1) access to a group by it's ID.
@@ -113,7 +115,7 @@ export default function SmartSearchPage() {
         }
         catch (err) {
             console.log("Failed Sending the request to AI!", err);
-            // setError()
+            setErrorAi("שגיאה בשליפת הנתונים מAI, אנא נסו שנית מאוחר יותר.")
         }
     }
 
@@ -165,6 +167,7 @@ export default function SmartSearchPage() {
                         errorActive={errorActive}
                         loadingActive={loadingActive}
                         errorRequests={errorRequests}
+                        errorAi={errorAi}
                         loadingRequests={loadingRequests}
                         displayedActiveGroups={displayedActiveGroups}
                         displayedRequestGroups={displayedRequestGroups}
