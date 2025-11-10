@@ -42,3 +42,12 @@ export interface Company {
   categories: string[];
   url: string;
 }
+
+export interface PublicGroup {
+  id: string;
+  category: string;
+  title: string;
+  description?: string;
+  basePrice?: number;
+  groupPrice?: number;
+}

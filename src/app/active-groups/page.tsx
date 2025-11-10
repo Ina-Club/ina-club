@@ -30,7 +30,7 @@ export default function Page() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch("/api/active-groups")
+    fetch("/api/active-groups/?status=open")
       .then((r) => r.json())
       .then((data) => {
         if (active) setAllActiveGroups(data.activeGroups ?? []);
