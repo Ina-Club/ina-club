@@ -20,7 +20,9 @@ export default function SmartSearchPage() {
     const descriptionText: string = "חפשו טקסט חופשי ונציג קבוצות פעילות ובקשות רלוונטיות בהקשר המבוקש.";
     const [searchText, setSearchText] = useState("");
     const [activeGroups, setActiveGroups] = useState<ActiveGroup[]>([]);
+    const [displayedActiveGroups, setDisplayedActiveGroups] = useState<ActiveGroup[]>([]);
     const [requestGroups, setRequestGroups] = useState<RequestGroup[]>([]);
+    const [displayedRequestGroups, setDisplayedRequestGroups] = useState<RequestGroup[]>([]);
     const [loadingActive, setLoadingActive] = useState(true);
     const [loadingRequests, setLoadingRequests] = useState(true);
     const [displayHelp, setDisplayHelp] = useState(true);
@@ -107,8 +109,8 @@ export default function SmartSearchPage() {
                 const serverActiveGroupIds: Set<string> = new Set(data.activeGroups);
                 const filteredRequestGroups: RequestGroup[] = requestGroups.filter((rg) => serverRequestGroupIds.has(rg.id));
                 const filteredActiveGroups: ActiveGroup[] = activeGroups.filter((ag) => serverActiveGroupIds.has(ag.id));
-                setRequestGroups(filteredRequestGroups);
-                setActiveGroups(filteredActiveGroups);
+                setDisplayedRequestGroups(filteredRequestGroups);
+                setDisplayedActiveGroups(filteredActiveGroups);
             }
             setLoadingSearch(false);
         }
@@ -228,8 +230,8 @@ export default function SmartSearchPage() {
                                         Array.from({ length: 4 }).map((_, i) => (
                                             <ActiveGroupCardSkeleton key={i} />
                                         ))
-                                    ) : activeGroups.length > 0 ? (
-                                        activeGroups.map((ag, i) => (
+                                    ) : displayedActiveGroups.length > 0 ? (
+                                        displayedActiveGroups.map((ag, i) => (
                                             <ActiveGroupCard key={i} activeGroup={ag} />
                                         ))
                                     ) : (
@@ -263,8 +265,8 @@ export default function SmartSearchPage() {
                                         Array.from({ length: 4 }).map((_, i) => (
                                             <RequestGroupCardSkeleton key={i} />
                                         ))
-                                    ) : requestGroups.length > 0 ? (
-                                        requestGroups.map((rg, i) => (
+                                    ) : displayedRequestGroups.length > 0 ? (
+                                        displayedRequestGroups.map((rg, i) => (
                                             <RequestGroupCard key={i} requestGroup={rg} />
                                         ))
                                     ) : (
