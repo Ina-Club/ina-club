@@ -36,9 +36,10 @@ import {
   Logout as LogoutIcon,
   HowToReg as HowToRegIcon,
 } from "@mui/icons-material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { getAvatarInitials } from "lib/utils/avatar";
 
 const navigationItems = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
@@ -60,10 +61,31 @@ export default function Header() {
   );
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
   // NextAuth session
   const { data: session } = useSession();
   const loggedIn = !!session;
+
+  // Fetch user profile picture
+  useEffect(() => {
+    if (loggedIn && session?.user?.email) {
+      fetch('/api/user/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data.profilePicture) {
+            setProfilePicture(data.profilePicture);
+          }
+          if (data.name) {
+            setUserName(data.name);
+          }
+        })
+        .catch(() => {
+          // Ignore errors
+        });
+    }
+  }, [loggedIn, session]);
 
   // Profile Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -270,19 +292,19 @@ export default function Header() {
                 }
               }}
             >
-              {loggedIn && session?.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt="Avatar"
-                  width={40}
-                  height={40}
-                  style={{
-                    borderRadius: "50%",
-                    border: '2px solid transparent',
-                    transition: 'border-color 0.2s',
+              {loggedIn ? (
+                <Avatar
+                  src={profilePicture || undefined}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    border: '2px solid',
+                    borderColor: 'primary.main',
                   }}
-                  unoptimized // optional: bypass optimization if needed
-                />
+                >
+                  {!profilePicture && userName ? getAvatarInitials(userName) : null}
+                  {!profilePicture && !userName && <AccountCircleIcon />}
+                </Avatar>
               ) : (
                 <AccountCircleIcon
                   sx={{

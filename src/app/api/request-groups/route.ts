@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET(req: Request) {
   try {
@@ -82,6 +84,20 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
+    }
+
     const body = await req.json();
     const { title, description, categoryId, imageUrls } = body as {
       title: string; description: string; categoryId: string; imageUrls: string[];
@@ -103,6 +119,12 @@ export async function POST(req: Request) {
         description,
         categoryId: categoryId,
         status: GroupStatus.PENDING,
+        createdById: user.id,
+        participants: {
+          create: {
+            userId: user.id,
+          },
+        },
       },
     });
 

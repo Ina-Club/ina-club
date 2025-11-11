@@ -12,6 +12,7 @@ import {
 import { GroupStatus } from "lib/types/status";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import RequestGroupImages from "./request-group-images";
+import { getAvatarInitials } from "lib/utils/avatar";
 
 interface PreviewProps {
   title: string;
@@ -101,7 +102,7 @@ export default function RequestGroupPreview({
         >
           {participantAvatars.map((p) => (
             <Avatar key={p.id} src={p.url} sx={{ width: 32, height: 32 }}>
-              {!p.url ? p.name.charAt(0) : null}
+              {!p.url ? getAvatarInitials(p.name) : null}
             </Avatar>
           ))}
           {participantsCount > participantAvatars.length && (

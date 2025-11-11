@@ -35,6 +35,7 @@ import { LoadingCircle } from "@/components/loading-circle";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { ActiveGroup, RequestGroup } from "lib/dal";
 import ActiveGroupCard from "@/components/card/active-group-card";
+import { getAvatarInitials } from "lib/utils/avatar";
 
 interface UserProfile {
   id: string;
@@ -46,6 +47,7 @@ interface UserProfile {
   enrolledRequestGroups: Array<RequestGroup>;
   enrolledActiveGroups: Array<ActiveGroup>;
   ownedRequestGroups: Array<RequestGroup>;
+  pendingRequestGroups: Array<RequestGroup>;
 }
 
 interface TabPanelProps {
@@ -284,7 +286,8 @@ export default function Profile() {
               sx={{ width: { xs: 60, md: 80 }, height: { xs: 60, md: 80 } }}
               src={profile.profilePicture}
             >
-              <PersonIcon sx={{ fontSize: 40 }} />
+              {!profile.profilePicture ? getAvatarInitials(profile.name) : null}
+              {!profile.profilePicture && !profile.name && <PersonIcon sx={{ fontSize: 40 }} />}
             </Avatar>
             <Box sx={{ flexGrow: 1 }}>
               <Typography
@@ -438,16 +441,16 @@ export default function Profile() {
               )}
             </TabPanel>
 
-            {/* Owned Request Groups Tab */}
+            {/* Pending Request Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שאתה פתחת ({profile.ownedRequestGroups.length})
+                בקשות ממתינות לאישור ({profile.pendingRequestGroups.length})
               </Typography>
-              {profile.ownedRequestGroups.length === 0 ? (
-                <Alert severity="info">עדיין לא יצרת בקשות</Alert>
+              {profile.pendingRequestGroups.length === 0 ? (
+                <Alert severity="info">אין לך בקשות ממתינות לאישור</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.ownedRequestGroups.map((requestGroup, index) => (
+                  {profile.pendingRequestGroups.map((requestGroup, index) => (
                     <RequestGroupCard key={index} requestGroup={requestGroup} />
                   ))}
                 </Box>

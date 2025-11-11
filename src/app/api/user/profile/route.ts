@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "lib/prisma";
+import { GroupStatus } from "lib/types/status";
 
 export async function GET() {
   try {
@@ -25,6 +26,23 @@ export async function GET() {
                   },
                   orderBy: {
                     order: 'asc'
+                  }
+                },
+                participants: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: { select: { url: true } }
+                      }
+                    }
+                  }
+                },
+                activeGroups: {
+                  select: {
+                    id: true
                   }
                 }
               }
@@ -58,6 +76,23 @@ export async function GET() {
               },
               orderBy: {
                 order: 'asc'
+              }
+            },
+            participants: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    profilePicture: { select: { url: true } }
+                  }
+                }
+              }
+            },
+            activeGroups: {
+              select: {
+                id: true
               }
             }
           }
@@ -98,7 +133,8 @@ export async function GET() {
         enrolledRequestGroups: [],
         enrolledActiveGroups: [],
         ownedRequestGroups: [],
-        ownedActiveGroups: []
+        ownedActiveGroups: [],
+        pendingRequestGroups: []
       };
       return NextResponse.json(basicProfile);
     }
@@ -111,16 +147,25 @@ export async function GET() {
       profilePicture: user.profilePicture?.url,
       createdAt: user.createdAt,
       emailVerified: user.emailVerified,
-      enrolledRequestGroups: user.requestGroupMemberships.map(membership => ({
-        id: membership.requestGroup.id,
-        title: membership.requestGroup.title,
-        description: membership.requestGroup.description,
-        category: membership.requestGroup.category?.name,
-        status: membership.requestGroup.status,
-        createdAt: membership.requestGroup.createdAt,
-        joinedAt: membership.joinedAt,
-        images: membership.requestGroup.images.map(img => img.image.url)
-      })),
+      enrolledRequestGroups: user.requestGroupMemberships
+        .filter(membership => membership.requestGroup.status === GroupStatus.OPEN)
+        .map(membership => ({
+          id: membership.requestGroup.id,
+          title: membership.requestGroup.title,
+          description: membership.requestGroup.description,
+          category: membership.requestGroup.category?.name,
+          status: membership.requestGroup.status,
+          createdAt: membership.requestGroup.createdAt,
+          joinedAt: membership.joinedAt,
+          images: membership.requestGroup.images.length ? membership.requestGroup.images.map(img => img.image.url) : ["/InaClubLogo.png"],
+          participants: membership.requestGroup.participants.map(p => ({
+            id: p.user.id,
+            name: p.user.name || "",
+            image: p.user.profilePicture?.url || "",
+            mail: p.user.email
+          })),
+          openedGroups: membership.requestGroup.activeGroups.map(ag => ({ id: ag.id }))
+        })),
       enrolledActiveGroups: user.activeGroupMemberships.map(membership => ({
         id: membership.activeGroup.id,
         title: membership.activeGroup.title,
@@ -160,7 +205,25 @@ export async function GET() {
         status: group.status,
         createdAt: group.createdAt,
         images: group.images.map(img => img.image.url)
-      }))
+      })),
+      pendingRequestGroups: user.requestGroups
+        .filter(group => group.status === GroupStatus.PENDING)
+        .map(group => ({
+          id: group.id,
+          title: group.title,
+          description: group.description,
+          category: group.category?.name || "",
+          status: group.status,
+          createdAt: group.createdAt,
+          images: group.images.length ? group.images.map(img => img.image.url) : ["/InaClubLogo.png"],
+          participants: group.participants.map(p => ({
+            id: p.user.id,
+            name: p.user.name || "",
+            image: p.user.profilePicture?.url || "",
+            mail: p.user.email
+          })),
+          openedGroups: group.activeGroups.map(ag => ({ id: ag.id }))
+        }))
     };
 
     return NextResponse.json(transformedUser);

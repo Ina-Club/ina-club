@@ -14,6 +14,8 @@ import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import RequestGroupImages from "@/components/request-group/request-group-images";
 import NotFound from "app/not-found";
+import JoinButton from "@/components/join-button";
+import { getAvatarInitials } from "lib/utils/avatar";
 
 export default async function ActiveGroupDetail({
   params,
@@ -73,6 +75,7 @@ export default async function ActiveGroupDetail({
     id: p.user.id,
     name: p.user.name || p.user.email,
     url: p.user.profilePicture?.url || undefined,
+    initials: getAvatarInitials(p.user.name),
   }));
 
   // Similar ActiveGroups
@@ -199,7 +202,7 @@ export default async function ActiveGroupDetail({
                   alt={p.name}
                   sx={{ width: 36, height: 36 }}
                 >
-                  {!p.url ? p.name.charAt(0) : null}
+                  {!p.url ? p.initials : null}
                 </Avatar>
               ))}
               {participantsCount > participantAvatars.length && (
@@ -215,9 +218,9 @@ export default async function ActiveGroupDetail({
                 </Avatar>
               )}
             </Box>
-            <Button variant="contained" color="primary" fullWidth>
-              הצטרפות לקבוצה
-            </Button>
+            <JoinButton type="active-group" id={id} fullWidth>
+              הצטרף לקבוצה
+            </JoinButton>
           </Paper>
         </Box>
       </Box>
