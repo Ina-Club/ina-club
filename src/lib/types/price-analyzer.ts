@@ -13,7 +13,9 @@ export interface PriceResponse {
   category: string;
   estimatedPrice: number;
   groupDiscount: number; // אחוז הנחה בהתאם לקבוצת רכישה
-  finalPrice: number;
+  minGroupPrice: number;
+  averageGroupPrice: number;
+  maxGroupPrice: number;
   notes: string;
 }
 
