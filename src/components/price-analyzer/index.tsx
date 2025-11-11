@@ -40,8 +40,9 @@ export default function PriceAnalyzerComponent() {
   const minGroupPrice = priceResult ? Math.round((priceResult.minGroupPrice)) : 0;
   const averageGroupPrice = priceResult ? Math.round(priceResult.averageGroupPrice) : 0;
   const maxGroupPrice = priceResult ? Math.round((priceResult.maxGroupPrice)) : 0;
-  const maxVal = Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
-  const calculatePercentage = (v: number) => `${Math.max(5, Math.round((v / maxVal) * 100))}%`;
+  // Making sure to extract the maximum price for the chart
+  const highestPrice = Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
+  const calculateChartFillPercentage = (v: number) => `${Math.max(5, Math.round((v / highestPrice) * 100))}%`;
 
   const handleSearch = async () => {
     if (!searchText.trim()) {
@@ -406,7 +407,7 @@ export default function PriceAnalyzerComponent() {
                   מחיר מינימלי
                 </Typography>
                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
-                  <Box sx={{ width: calculatePercentage(minGroupPrice), height: "100%", backgroundColor: "#ffd700", borderRadius: 1 }} />
+                  <Box sx={{ width: calculateChartFillPercentage(minGroupPrice), height: "100%", backgroundColor: "#ffd700", borderRadius: 1 }} />
                 </Box>
                 <Typography variant="caption">₪{minGroupPrice.toLocaleString()}</Typography>
               </Box>
@@ -416,7 +417,7 @@ export default function PriceAnalyzerComponent() {
                   מחיר צפוי
                 </Typography>
                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
-                  <Box sx={{ width: calculatePercentage(averageGroupPrice), height: "100%", backgroundColor: "#4ade80", borderRadius: 1 }} />
+                  <Box sx={{ width: calculateChartFillPercentage(averageGroupPrice), height: "100%", backgroundColor: "#4ade80", borderRadius: 1 }} />
                 </Box>
                 <Typography variant="caption">₪{averageGroupPrice.toLocaleString()}</Typography>
               </Box>
@@ -426,7 +427,7 @@ export default function PriceAnalyzerComponent() {
                   מחיר מקסימלי
                 </Typography>
                 <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
-                  <Box sx={{ width: calculatePercentage(maxGroupPrice), height: "100%", backgroundColor: "#f87171", borderRadius: 1 }} />
+                  <Box sx={{ width: calculateChartFillPercentage(maxGroupPrice), height: "100%", backgroundColor: "#f87171", borderRadius: 1 }} />
                 </Box>
                 <Typography variant="caption">₪{maxGroupPrice.toLocaleString()}</Typography>
               </Box>
