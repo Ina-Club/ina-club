@@ -19,6 +19,7 @@ import {
   Search as SearchIcon,
   TrendingUp as TrendingUpIcon,
   LocalOffer as LocalOfferIcon,
+  InfoOutlined as InfoOutlinedIcon,
 } from "@mui/icons-material";
 import { SearchBar } from "@/components/search-bar";
 import { useTheme } from "@mui/material/styles";
@@ -464,6 +465,14 @@ export default function PriceAnalyzerComponent() {
             >
               צור קבוצת רכישה
             </Button>
+          </Box>
+
+          <Divider sx={{ mt: 3, mb: 1.5, bgcolor: "rgba(255, 255, 255, 0.3)" }} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <InfoOutlinedIcon sx={{ fontSize: 16, color: "rgba(255,255,255,0.85)" }} />
+            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.85)" }}>
+              מידע שנוצר על ידי בינה מלאכותית עלול להכיל אי־דיוקים והוא מיועד למטרות מידע בלבד. מומלץ לאמת פרטים ומחירים מול מקורות רשמיים.
+            </Typography>
           </Box>
         </Card>
       )}
