@@ -40,7 +40,7 @@ export default async function ActiveGroupDetail({
       company: {
         select: { id: true, title: true, logo: { select: { url: true } } },
       },
-      participants: {
+      participants: { //TODO: Fetch length instead
         select: {
           user: {
             select: {

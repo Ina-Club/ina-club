@@ -36,7 +36,7 @@ export async function GET(req: Request) {
         title: true,
         status: true,
         category: { select: { name: true } },
-        participants: {
+        participants: { //TODO: Fetch length instead
           select: {
             user: {
               select: {
@@ -70,6 +70,7 @@ export async function GET(req: Request) {
         image: p.user.profilePicture?.url ?? "",
         mail: p.user.email,
       })),
+      // TODO: Remove
       openedGroups: r.activeGroups.map((ag) => ({ id: ag.id })),
     }));
 

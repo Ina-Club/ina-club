@@ -5,8 +5,8 @@ export interface RequestGroup {
   images: string[];
   category: string;
   title: string;
-  participants: User[];
-  openedGroups: ActiveGroup[];
+  participants: User[]; //TODO: Length instead
+  openedGroups: ActiveGroup[]; //TODO: Remove
   status: GroupStatus;
   description?: string;
 }

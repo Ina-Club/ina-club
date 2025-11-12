@@ -42,7 +42,7 @@ export async function GET(req: Request) {
         basePrice: true,
         groupPrice: true,
         deadline: true,
-        participants: {
+        participants: { //TODO: Fetch length instead
           select: {
             user: {
               select: {

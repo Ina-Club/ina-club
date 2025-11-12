@@ -52,7 +52,7 @@ export async function GET() {
         requestGroups: {
           include: {
             category: true,
-            participants: true,
+            participants: true, //TODO: Fetch length instead
             images: {
               include: {
                 image: true
