@@ -10,7 +10,7 @@ const ai = new GoogleGenAI({
 export async function POST(req: Request) {
   const { prompt, schema } = await req.json();
   const resp = await ai.models.generateContent({
-    model: "gemini-2.5-flash", // TODO: replace the model with something updated. Currently Gemini free trial is up to date to 2024.
+    model: process.env.GEMINI_MODEL!, // TODO: replace the model with something updated. Currently Gemini free trial is up to date to 2024.
     contents: prompt,
     config: {
       responseMimeType: "application/json",   // force JSON
