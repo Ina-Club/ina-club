@@ -52,6 +52,7 @@ export async function GET() {
         requestGroups: {
           include: {
             category: true,
+            participants: true,
             images: {
               include: {
                 image: true
@@ -84,7 +85,9 @@ export async function GET() {
     }
 
     // Check if user has completed their profile (has name and password)
-    const hasCompleteProfile = user.name && user.password;
+    // TODO: fix this shit!
+    // const hasCompleteProfile = user.name && user.password;
+    const hasCompleteProfile = user.name;
 
     // If user doesn't have complete profile, return basic info without groups data
     if (!hasCompleteProfile) {
@@ -144,7 +147,9 @@ export async function GET() {
         category: group.category?.name,
         status: group.status,
         createdAt: group.createdAt,
-        images: group.images.map(img => img.image.url)
+        images: group.images.map(img => img.image.url),
+        participants: group.participants,
+        openedGroups: [] //TODO: Fix this shitty shit as well
       })),
       ownedActiveGroups: user.activeGroups.map(group => ({
         id: group.id,
