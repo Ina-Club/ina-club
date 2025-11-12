@@ -119,4 +119,33 @@ export async function POST(req: Request) {
   }
 }
 
+export async function PUT(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const idParam = searchParams.get('id');
+    if (!idParam) return NextResponse.json({ error: "No group was specified!" }, { status: 400 });
 
+    const exists = await prisma.requestGroup.findFirst({ where: { id: { equals: idParam, mode: 'insensitive' } }, select: { id: true } });
+    if (!exists) return NextResponse.json({ error: "The specified group doesn't exist!" }, { status: 400 });
+
+    const body = await req.json();
+    const { status } = body;
+    const dataToUpdate: any = {};
+    if (status) {
+      if (typeof status !=='string' || !((status.toUpperCase() as keyof typeof GroupStatus) in GroupStatus)) {
+        return NextResponse.json({ error: "Invalid status value!" }, { status: 400 });
+      }
+      dataToUpdate.status = status;
+    }
+
+    const updated = await prisma.requestGroup.update({
+      where: { id: idParam },
+      data: dataToUpdate
+    });
+    return NextResponse.json({ id: updated.id }, { status: 200 });
+  }
+  catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "שגיאה בעדכון בקשה!" }, { status: 500 });
+  }
+}
