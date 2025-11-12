@@ -36,7 +36,7 @@ export interface ActiveGroup {
 
 export interface Company {
   id: string;
-  logo: string;
+  logo: { id: string, url: string };
   title: string;
   subTitle: string;
   categories: string[];
