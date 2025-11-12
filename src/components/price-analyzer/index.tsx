@@ -335,7 +335,7 @@ export default function PriceAnalyzerComponent() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+              gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
               gap: 3,
               mb: 3,
             }}
