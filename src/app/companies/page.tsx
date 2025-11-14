@@ -1,23 +1,16 @@
 "use client";
 
-import { Suspense, useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Alert, Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
-import { GroupFilters } from "@/components/group-filters";
-import ActiveGroupCard from "@/components/card/active-group-card";
-import ActiveGroupCardSkeleton from "@/components/skeleton/active-group-card-skeleton";
-import { applyFilters } from "lib/filters";
-import { FilterState } from "@/components/group-filters/filters";
-import { ActiveGroup, Company } from "lib/dal";
-import { SearchBar } from "@/components/search-bar";
+import { Company } from "lib/dal";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import CompanyCardSkeleton from "@/components/skeleton/company-card-skeleton";
 import CompanyCard from "@/components/card/company-card";
 
 export default function Page() {
     const headerText = "חברות שותפות";
-    const descriptionText =
-        "גלה את החברות המובילות ";
+    const descriptionText = "גלו את השותפים העסקיים שלנו.";
 
     const [allCompanies, setAllCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +19,7 @@ export default function Page() {
     useEffect(() => {
         let active = true;
         setLoading(true);
-        fetch("/api/companieas")
+        fetch("/api/companies")
             .then((r) => r.json())
             .then((data) => {
                 if (active) setAllCompanies(data.companies ?? []);
@@ -82,16 +75,11 @@ export default function Page() {
                         ) : (
                             <Box
                                 sx={{
-                                    // position: "absolute",
-                                    // left: "50%",
                                     width: "100%",
-                                    // transform: "translateX(-50%)",
-                                    // mb: { xs: 4, md: 2 },
                                     display: "flex",
                                     justifyContent: "center",
                                     alignContent: "center",
                                     color: "text.secondary",
-                                    // textAlign: "center",
                                 }}
                             >
                                 לא נמצאו חברות
