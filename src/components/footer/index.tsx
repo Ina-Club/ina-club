@@ -29,8 +29,8 @@ export default function Footer() {
       sx={{
         background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
         color: "white",
-        py: 6,
-        mt: "auto",
+        py: { xs: 3, md: 6 },
+        mt: { xs: 4, md: 8 },
       }}
     >
       <Container maxWidth="lg">
