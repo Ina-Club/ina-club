@@ -101,7 +101,7 @@ export default function Footer() {
           </Box>
 
           {/* קישורים מהירים */}
-          <Box sx={{ flex: { xs: "none", md: 1 } }}>
+          <Box sx={{ flex: { xs: "none", md: 1 }, ml: {xs: "none", md: 5} }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               קישורים מהירים
             </Typography>
@@ -152,19 +152,20 @@ export default function Footer() {
                 </Typography>
               </Box>
             </Box>
+          </Box>
 
-            {/* לינקים משפטיים */}
-            <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
-              <Link href="/privacy" underline="hover" color="inherit" variant="body2">
-                מדיניות פרטיות
-              </Link>
-              <Link href="/terms" underline="hover" color="inherit" variant="body2">
-                תנאי שימוש
-              </Link>
-              <Link href="/contact" underline="hover" color="inherit" variant="body2">
-                צור קשר
-              </Link>
-            </Box>
+
+          {/* לינקים משפטיים */}
+          <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+            <Link href="/privacy" underline="hover" color="inherit" variant="body2">
+              מדיניות פרטיות
+            </Link>
+            <Link href="/terms" underline="hover" color="inherit" variant="body2">
+              תנאי שימוש
+            </Link>
+            <Link href="/contact" underline="hover" color="inherit" variant="body2">
+              צור קשר
+            </Link>
           </Box>
         </Box>
 
