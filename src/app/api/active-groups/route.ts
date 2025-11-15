@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
+import { validateSession } from "@/lib/auth";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -94,6 +95,9 @@ export async function GET(req: Request) {
 // POST /api/active-groups
 export async function POST(req: Request) {
   try {
+    const { response } = await validateSession();
+    if (response) return response;
+    
     const body = await req.json();
     const { title, description, categoryId, basePrice, groupPrice, deadline, imageUrls, minParticipants, maxParticipants } = body as {
       title: string;

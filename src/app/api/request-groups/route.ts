@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
+import { validateSession } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
@@ -83,6 +84,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const { response } = await validateSession();
+    if (response) return response;
+
     const body = await req.json();
     const { title, description, categoryId, imageUrls } = body as {
       title: string; description: string; categoryId: string; imageUrls: string[];
@@ -122,6 +126,9 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const { response } = await validateSession();
+    if (response) return response;
+
     const { searchParams } = new URL(req.url);
     const idParam = searchParams.get('id');
     if (!idParam) return NextResponse.json({ error: "No group was specified!" }, { status: 400 });
@@ -133,7 +140,7 @@ export async function PUT(req: Request) {
     const { status } = body;
     const dataToUpdate: any = {};
     if (status) {
-      if (typeof status !=='string' || !((status.toUpperCase() as keyof typeof GroupStatus) in GroupStatus)) {
+      if (typeof status !== 'string' || !((status.toUpperCase() as keyof typeof GroupStatus) in GroupStatus)) {
         return NextResponse.json({ error: "Invalid status value!" }, { status: 400 });
       }
       dataToUpdate.status = status;

@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "lib/prisma";
+import { validateSession } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user!.email! },
       include: {
         profilePicture: true,
         requestGroupMemberships: {
@@ -177,24 +174,22 @@ export async function GET() {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
 
     const { name, profilePictureUrl } = await req.json();
 
     const updatedUser = await prisma.user.update({
-      where: { email: session.user.email },
+      where: { email: session.user!.email! },
       data: {
         name,
         profilePicture: profilePictureUrl
           ? {
-              upsert: {
-                create: { url: profilePictureUrl },
-                update: { url: profilePictureUrl },
-              },
-            }
+            upsert: {
+              create: { url: profilePictureUrl },
+              update: { url: profilePictureUrl },
+            },
+          }
           : undefined,
       },
       include: {

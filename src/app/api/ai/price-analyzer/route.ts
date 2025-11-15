@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
+import { validateSession } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -9,6 +10,9 @@ const ai = new GoogleGenAI({
 
 export async function POST(req: Request) {
   try {
+    const { response } = await validateSession();
+    if (response) return response;
+
     const { searchQuery, context } = await req.json();
 
     if (!searchQuery || searchQuery.trim() === "") {
