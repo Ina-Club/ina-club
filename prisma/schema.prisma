@@ -160,7 +160,7 @@ model RequestGroupParticipant {
 model ActiveGroup {
   id                    String        @id @default(uuid())
   title                 String
-  description           String?
+  description           String
   status                GroupStatus   @default(OPEN)
   categoryId            String
   category              Category      @relation("ActiveGroupCategory", fields: [categoryId], references: [id], onDelete: Restrict)
@@ -172,10 +172,10 @@ model ActiveGroup {
   createdAt             DateTime      @default(now())
   requestGroupId        String?
   requestGroup          RequestGroup? @relation("RequestGroupToActiveGroup", fields: [requestGroupId], references: [id], onDelete: SetNull)
-  companyId             String?
-  company               Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  createdById           String?
-  createdBy             User?         @relation("ActiveGroupOwners", fields: [createdById], references: [id], onDelete: SetNull)
+  companyId             String
+  company               Company       @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  createdById           String
+  createdBy             User          @relation("ActiveGroupOwners", fields: [createdById], references: [id], onDelete: Restrict)
 
   // Relations
   participants          ActiveGroupParticipant[]
