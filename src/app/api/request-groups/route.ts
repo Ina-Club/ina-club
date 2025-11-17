@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 import { validateSession } from "@/lib/auth";
+import { getUserIdBySession } from "@/lib/user";
 
 export async function GET(req: Request) {
   try {
@@ -84,7 +85,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { response } = await validateSession();
+    const { session, response } = await validateSession();
     if (response) return response;
 
     const body = await req.json();
@@ -108,6 +109,7 @@ export async function POST(req: Request) {
         description,
         categoryId: categoryId,
         status: GroupStatus.PENDING,
+        createdById: await getUserIdBySession(session),
       },
     });
 

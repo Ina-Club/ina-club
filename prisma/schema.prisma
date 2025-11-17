@@ -128,13 +128,13 @@ model ActiveGroupImage {
 model RequestGroup {
   id               String        @id @default(uuid())
   title            String
-  description      String?
+  description      String
   status           GroupStatus   @default(OPEN)
   categoryId       String
   category         Category      @relation("RequestGroupCategory", fields: [categoryId], references: [id], onDelete: Restrict)
   createdAt        DateTime      @default(now())
-  createdById      String?
-  createdBy        User?         @relation("RequestGroupOwners", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById      String
+  createdBy        User          @relation("RequestGroupOwners", fields: [createdById], references: [id], onDelete: Restrict)
 
   // Relations
   participants     RequestGroupParticipant[]
