@@ -399,24 +399,24 @@ export default function Profile() {
               },
             }}
           >
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
             <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FoundationIcon />} label="סטטוס בקשות" iconPosition="start" />
+            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
+            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
           </Tabs>
 
           {/* Panels */}
           <Box sx={{ flex: 1 }}>
-            {/* Active Groups Tab */}
+            {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={0}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                קבוצות פעילות שאתה משתתף בהן ({profile.enrolledActiveGroups.length})
+                בקשות שאתה פתחת ({profile.ownedRequestGroups.length})
               </Typography>
-              {profile.enrolledActiveGroups.length === 0 ? (
-                <Alert severity="info">לא הצטרפת לקבוצות רכישה</Alert>
+              {profile.ownedRequestGroups.length === 0 ? (
+                <Alert severity="info">עדיין לא יצרת בקשות</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.enrolledActiveGroups.map((activeGroup, index) => (
-                    <ActiveGroupCard key={index} activeGroup={activeGroup} />
+                  {profile.ownedRequestGroups.map((requestGroup, index) => (
+                    <RequestGroupCard key={index} requestGroup={requestGroup} />
                   ))}
                 </Box>
               )}
@@ -438,17 +438,17 @@ export default function Profile() {
               )}
             </TabPanel>
 
-            {/* Owned Request Groups Tab */}
+            {/* Active Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שאתה פתחת ({profile.ownedRequestGroups.length})
+                קבוצות פעילות שאתה משתתף בהן ({profile.enrolledActiveGroups.length})
               </Typography>
-              {profile.ownedRequestGroups.length === 0 ? (
-                <Alert severity="info">עדיין לא יצרת בקשות</Alert>
+              {profile.enrolledActiveGroups.length === 0 ? (
+                <Alert severity="info">לא הצטרפת לקבוצות רכישה</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.ownedRequestGroups.map((requestGroup, index) => (
-                    <RequestGroupCard key={index} requestGroup={requestGroup} />
+                  {profile.enrolledActiveGroups.map((activeGroup, index) => (
+                    <ActiveGroupCard key={index} activeGroup={activeGroup} />
                   ))}
                 </Box>
               )}
