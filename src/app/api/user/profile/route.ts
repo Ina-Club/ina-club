@@ -62,6 +62,18 @@ export async function GET() {
                   orderBy: {
                     order: 'asc'
                   }
+                },
+                participants: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: { select: { url: true } }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -108,7 +120,19 @@ export async function GET() {
               orderBy: {
                 order: 'asc'
               }
-            }
+            },
+            participants: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    profilePicture: { select: { url: true } }
+                  }
+                }
+              }
+            },
           }
         }
       }
@@ -116,27 +140,6 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
-    }
-
-    // Check if user has completed their profile (has name and password)
-    const hasCompleteProfile = user.name && user.password;
-
-    // If user doesn't have complete profile, return basic info without groups data
-    if (!hasCompleteProfile) {
-      const basicProfile = {
-        id: user.id,
-        name: user.name || '',
-        email: user.email,
-        profilePicture: user.profilePicture?.url,
-        createdAt: user.createdAt,
-        emailVerified: user.emailVerified,
-        enrolledRequestGroups: [],
-        enrolledActiveGroups: [],
-        ownedRequestGroups: [],
-        ownedActiveGroups: [],
-        pendingRequestGroups: []
-      };
-      return NextResponse.json(basicProfile);
     }
 
     // Transform the data to match the expected format
@@ -174,6 +177,12 @@ export async function GET() {
         company: membership.activeGroup.company?.title,
         basePrice: membership.activeGroup.basePrice,
         groupPrice: membership.activeGroup.groupPrice,
+        participants: membership.activeGroup.participants.map(p => ({
+          id: p.user.id,
+          name: p.user.name || "",
+          image: p.user.profilePicture?.url || "",
+          mail: p.user.email
+        })),
         minParticipants: membership.activeGroup.minParticipants,
         maxParticipants: membership.activeGroup.maxParticipants,
         deadline: membership.activeGroup.deadline,

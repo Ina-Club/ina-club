@@ -16,6 +16,8 @@ import RequestGroupImages from "@/components/request-group/request-group-images"
 import NotFound from "app/not-found";
 import JoinButton from "@/components/join-button";
 import { getAvatarInitials } from "lib/utils/avatar";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export default async function ActiveGroupDetail({
   params,
@@ -23,6 +25,7 @@ export default async function ActiveGroupDetail({
   params: { id: string };
 }) {
   const { id } = params;
+  const session = await getServerSession(authOptions);
 
   const ag = await prisma.activeGroup.findUnique({
     where: { id },
@@ -77,6 +80,10 @@ export default async function ActiveGroupDetail({
     url: p.user.profilePicture?.url || undefined,
     initials: getAvatarInitials(p.user.name),
   }));
+  const viewerEmail = session?.user?.email;
+  const alreadyJoined = !!viewerEmail
+    ? ag.participants.some((p) => p.user.email === viewerEmail)
+    : false;
 
   // Similar ActiveGroups
   const similar = await prisma.activeGroup.findMany({
@@ -218,7 +225,12 @@ export default async function ActiveGroupDetail({
                 </Avatar>
               )}
             </Box>
-            <JoinButton type="active-group" id={id} fullWidth>
+            <JoinButton
+              type="active-group"
+              id={id}
+              fullWidth
+              isJoined={alreadyJoined}
+            >
               הצטרף לקבוצה
             </JoinButton>
           </Paper>

@@ -15,6 +15,8 @@ import RequestGroupImages from "@/components/request-group/request-group-images"
 import NotFound from "app/not-found";
 import JoinButton from "@/components/join-button";
 import { getAvatarInitials } from "lib/utils/avatar";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export default async function RequestGroupDetail({
   params,
@@ -22,6 +24,7 @@ export default async function RequestGroupDetail({
   params: { id: string };
 }) {
   const { id } = params;
+  const session = await getServerSession(authOptions);
 
   const rg = await prisma.requestGroup.findUnique({
     where: { id },
@@ -67,6 +70,10 @@ export default async function RequestGroupDetail({
     url: p.user.profilePicture?.url || undefined,
     initials: getAvatarInitials(p.user.name),
   }));
+  const viewerEmail = session?.user?.email;
+  const alreadyJoined = !!viewerEmail
+    ? rg.participants.some((p) => p.user.email === viewerEmail)
+    : false;
 
   // Similar items
   const similar = await prisma.requestGroup.findMany({
@@ -217,7 +224,12 @@ export default async function RequestGroupDetail({
                 </Avatar>
               )}
             </Box>
-            <JoinButton type="request-group" id={id} fullWidth>
+            <JoinButton
+              type="request-group"
+              id={id}
+              fullWidth
+              isJoined={alreadyJoined}
+            >
               הצטרף לבקשה
             </JoinButton>
           </Paper>

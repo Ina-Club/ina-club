@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button, CircularProgress } from "@mui/material";
@@ -11,6 +11,7 @@ interface JoinButtonProps {
   onJoinSuccess?: () => void;
   fullWidth?: boolean;
   children?: React.ReactNode;
+  isJoined?: boolean;
 }
 
 export default function JoinButton({
@@ -19,12 +20,22 @@ export default function JoinButton({
   onJoinSuccess,
   fullWidth = false,
   children,
+  isJoined = false,
 }: JoinButtonProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [hasJoined, setHasJoined] = useState(isJoined);
+
+  useEffect(() => {
+    setHasJoined(isJoined);
+  }, [isJoined]);
 
   const handleJoin = async () => {
+    if (hasJoined) {
+      return;
+    }
+
     // Check if user is authenticated
     if (status === "unauthenticated" || !session) {
       router.push("/auth/signin");
@@ -47,6 +58,7 @@ export default function JoinButton({
         throw new Error(data.error || "שגיאה בהצטרפות");
       }
 
+      setHasJoined(true);
       // Refresh the page to show updated participants
       if (onJoinSuccess) {
         onJoinSuccess();
@@ -67,12 +79,15 @@ export default function JoinButton({
       color="primary"
       fullWidth={fullWidth}
       onClick={handleJoin}
-      disabled={loading}
+      disabled={loading || hasJoined}
     >
       {loading ? (
         <CircularProgress size={20} color="inherit" />
       ) : (
-        children || (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
+        hasJoined
+          ? "כבר הצטרפת"
+          : children ||
+            (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
       )}
     </Button>
   );

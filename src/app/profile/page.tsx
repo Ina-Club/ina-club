@@ -27,31 +27,18 @@ import {
   Delete as DeleteIcon,
   Warning as WarningIcon,
 } from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useSession, signOut } from "next-auth/react";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "@/components/loading-circle";
 import RequestGroupCard from "@/components/card/request-group-card";
-import { ActiveGroup, RequestGroup } from "lib/dal";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import { getAvatarInitials } from "lib/utils/avatar";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  profilePicture?: string;
-  createdAt: string;
-  emailVerified?: string;
-  enrolledRequestGroups: Array<RequestGroup>;
-  enrolledActiveGroups: Array<ActiveGroup>;
-  ownedRequestGroups: Array<RequestGroup>;
-  pendingRequestGroups: Array<RequestGroup>;
-}
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   index: number;
   value: number;
 }
@@ -73,12 +60,12 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Profile() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { profile, loading: profileLoading, error: userError, refreshProfile } = useUserProfile();
+  const [pageError, setPageError] = useState<string | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editProfilePicture, setEditProfilePicture] = useState<File[]>([]);
@@ -89,45 +76,55 @@ export default function Profile() {
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    let isMounted = true;
+
+    const ensureFreshProfile = async () => {
+      if (status === 'loading') {
+        return;
+      }
+
+      if (status !== 'authenticated') {
+        if (isMounted) {
+          setPageError('עליך להתחבר כדי לצפות בפרופיל');
+          setPageLoading(false);
+        }
+        return;
+      }
+
+      setPageLoading(true);
       try {
-        const signal = AbortSignal.timeout(10000);
-        const response = await fetch('/api/user/profile', { signal });
-        if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error('UNAUTHORIZED');
-          }
-          throw new Error('Failed to fetch profile');
+        await refreshProfile({ force: true });
+        if (isMounted) {
+          setPageError(null);
         }
-        const data = await response.json();
-        setProfile(data);
-        setEditName(data.name || '');
       } catch (err) {
-        console.log(err);
-        if (err instanceof Error && err.name === 'TimeoutError') {
-          setError('שגיאה בטעינת הפרופיל');
-        } else if (err instanceof Error && err.message === 'UNAUTHORIZED') {
-          setError('עליך להתחבר כדי לצפות בפרופיל');
-        } else {
-          setError('שגיאה בטעינת הפרופיל');
+        if (!isMounted) {
+          return;
         }
-        console.error('Profile fetch error:', err);
+        if (err instanceof Error && err.message === 'UNAUTHORIZED') {
+          setPageError('עליך להתחבר כדי לצפות בפרופיל');
+        } else {
+          setPageError('שגיאה בטעינת הפרופיל');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setPageLoading(false);
+        }
       }
     };
 
-    if (status === 'loading') {
-      return; // Still loading session
-    }
+    ensureFreshProfile();
 
-    if (status === 'authenticated' && session) {
-      fetchProfile();
-    } else {
-      setError('עליך להתחבר כדי לצפות בפרופיל');
-      setLoading(false);
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshProfile, status]);
+
+  useEffect(() => {
+    if (profile?.name) {
+      setEditName(profile.name);
     }
-  }, [session, status]);
+  }, [profile?.name]);
 
   const handleEdit = () => {
     setEditing(true);
@@ -179,12 +176,13 @@ export default function Profile() {
         throw new Error('Failed to update profile');
       }
 
-      const updatedProfile = await response.json();
-      setProfile(prev => prev ? { ...prev, ...updatedProfile } : null);
+      await response.json();
+      await refreshProfile({ force: true });
+
       setEditing(false);
       setEditProfilePicture([]);
     } catch (err) {
-      setError('שגיאה בעדכון הפרופיל');
+      setPageError('שגיאה בעדכון הפרופיל');
       console.error('Profile update error:', err);
     } finally {
       setUpdateLoading(false);
@@ -201,7 +199,7 @@ export default function Profile() {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmation !== 'מחק את חשבוני') {
-      setError('אנא הקלד "מחק את חשבוני" כדי לאשר');
+      setPageError('אנא הקלד "מחק את חשבוני" כדי לאשר');
       return;
     }
 
@@ -221,7 +219,7 @@ export default function Profile() {
       // Sign out and redirect to home
       await signOut({ callbackUrl: '/' });
     } catch (err) {
-      setError('שגיאה במחיקת החשבון. אנא נסה שוב.');
+      setPageError('שגיאה במחיקת החשבון. אנא נסה שוב.');
       console.error('Delete account error:', err);
     } finally {
       setDeleteLoading(false);
@@ -230,7 +228,8 @@ export default function Profile() {
     }
   };
 
-  if (loading) {
+  const isLoading = status === 'loading' || pageLoading || (profileLoading && !profile);
+  if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
         <LoadingCircle loadingText={"טוען את הפרופיל שלך"} />
@@ -238,10 +237,11 @@ export default function Profile() {
     );
   }
 
-  if (error) {
+  const combinedError = pageError || userError;
+  if (combinedError) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error">{combinedError}</Alert>
       </Box>
     );
   }

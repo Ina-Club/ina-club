@@ -36,10 +36,11 @@ import {
   Logout as LogoutIcon,
   HowToReg as HowToRegIcon,
 } from "@mui/icons-material";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { getAvatarInitials } from "lib/utils/avatar";
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 const navigationItems = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
@@ -61,31 +62,13 @@ export default function Header() {
   );
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
+  const { profile } = useUserProfile();
 
   // NextAuth session
   const { data: session } = useSession();
   const loggedIn = !!session;
-
-  // Fetch user profile picture
-  useEffect(() => {
-    if (loggedIn && session?.user?.email) {
-      fetch('/api/user/profile')
-        .then(res => res.json())
-        .then(data => {
-          if (data.profilePicture) {
-            setProfilePicture(data.profilePicture);
-          }
-          if (data.name) {
-            setUserName(data.name);
-          }
-        })
-        .catch(() => {
-          // Ignore errors
-        });
-    }
-  }, [loggedIn, session]);
+  const profilePicture = profile?.profilePicture || session?.user?.image || null;
+  const userName = profile?.name || session?.user?.name || null;
 
   // Profile Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -298,7 +281,6 @@ export default function Header() {
                   sx={{
                     width: 40,
                     height: 40,
-                    border: '2px solid',
                     borderColor: 'primary.main',
                   }}
                 >
@@ -353,15 +335,14 @@ export default function Header() {
                 }
               }}
             >
-              {loggedIn && session?.user?.image ? (
+              {loggedIn && profilePicture ? (
                 <Image
-                  src={session.user.image}
+                  src={profilePicture}
                   alt="Avatar"
                   width={40}
                   height={40}
                   style={{
                     borderRadius: "50%",
-                    border: '2px solid transparent',
                     transition: 'border-color 0.2s',
                   }}
                 />
