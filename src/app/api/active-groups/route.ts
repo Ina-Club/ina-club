@@ -96,7 +96,7 @@ export async function GET(req: Request) {
 // POST /api/active-groups
 export async function POST(req: Request) {
   try {
-    const { response } = await validateSession();
+    const { session, response } = await validateSession();
     if (response) return response;
     
     const body = await req.json();
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
         groupPrice,
         deadline: new Date(deadline),
         status: GroupStatus.OPEN,
-        createdById: await getUserIdBySession()
+        createdById: await getUserIdBySession(session)
       },
     });
 
