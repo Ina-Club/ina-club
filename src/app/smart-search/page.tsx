@@ -154,7 +154,7 @@ export default function SmartSearchPage() {
                     startIcon={<SearchIcon />}
                     onClick={handleSmartSearch}
                     sx={{ ml: 1, whiteSpace: "nowrap" }}
-                    disabled={!searchText.trim() || loadingActive || loadingRequests}
+                    disabled={!searchText.trim() || loadingActive || loadingRequests || loadingSearch}
                 >
                     {(loadingActive || loadingRequests) ? <CircularProgress size={25} /> : 'חיפוש'}
                 </Button>
