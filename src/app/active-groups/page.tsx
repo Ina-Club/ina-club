@@ -13,7 +13,7 @@ import { SearchBar } from "@/components/search-bar";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 
 export default function Page() {
-  const headerText = "קבוצות הרכישה הפעילות";
+  const headerText = "כל הקבוצות";
   const descriptionText =
     "גלה את כל הקבוצות הפעילות, הצטרף לרכישות קבוצתיות וחסוך כסף יחד עם אחרים.";
 

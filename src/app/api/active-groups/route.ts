@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
+import { validateSession } from "@/lib/auth";
+import { getUserIdBySession } from "@/lib/user";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -42,7 +44,7 @@ export async function GET(req: Request) {
         basePrice: true,
         groupPrice: true,
         deadline: true,
-        participants: {
+        participants: { //TODO: Fetch length instead
           select: {
             user: {
               select: {
@@ -94,11 +96,15 @@ export async function GET(req: Request) {
 // POST /api/active-groups
 export async function POST(req: Request) {
   try {
+    const { session, response } = await validateSession();
+    if (response) return response;
+    
     const body = await req.json();
-    const { title, description, categoryId, basePrice, groupPrice, deadline, imageUrls, minParticipants, maxParticipants } = body as {
+    const { title, description, categoryId, companyId, basePrice, groupPrice, deadline, imageUrls, minParticipants, maxParticipants } = body as {
       title: string;
       description: string;
       categoryId: string;
+      companyId: string;
       basePrice: number;
       groupPrice: number;
       deadline: string;
@@ -110,6 +116,7 @@ export async function POST(req: Request) {
     if (!title) return NextResponse.json({ error: "כותרת חובה" }, { status: 400 });
     if (!description) return NextResponse.json({ error: "תיאור חובה" }, { status: 400 });
     if (!categoryId) return NextResponse.json({ error: "קטגוריה חובה" }, { status: 400 });
+    if (!companyId) return NextResponse.json({ error: "חברה חובה" }, { status: 400 });
     if (!basePrice) return NextResponse.json({ error: "מחיר בסיסי חובה" }, { status: 400 });
     if (!groupPrice) return NextResponse.json({ error: "מחיר קבוצה חובה" }, { status: 400 });
     if (!deadline) return NextResponse.json({ error: "תאריך יעד חובה" }, { status: 400 });
@@ -127,10 +134,12 @@ export async function POST(req: Request) {
         title,
         description,
         categoryId,
+        companyId,
         basePrice,
         groupPrice,
         deadline: new Date(deadline),
         status: GroupStatus.OPEN,
+        createdById: await getUserIdBySession(session)
       },
     });
 

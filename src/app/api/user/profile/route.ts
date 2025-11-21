@@ -1,18 +1,14 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user!.email! },
       include: {
         profilePicture: true,
         requestGroupMemberships: {
@@ -82,6 +78,7 @@ export async function GET() {
         requestGroups: {
           include: {
             category: true,
+            participants: true, //TODO: Fetch length instead
             images: {
               include: {
                 image: true
@@ -198,7 +195,9 @@ export async function GET() {
         category: group.category?.name,
         status: group.status,
         createdAt: group.createdAt,
-        images: group.images.map(img => img.image.url)
+        images: group.images.map(img => img.image.url),
+        participants: group.participants,
+        openedGroups: [] //TODO: Fix this shitty shit as well
       })),
       ownedActiveGroups: user.activeGroups.map(group => ({
         id: group.id,
@@ -244,24 +243,22 @@ export async function GET() {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
 
     const { name, profilePictureUrl } = await req.json();
 
     const updatedUser = await prisma.user.update({
-      where: { email: session.user.email },
+      where: { email: session.user!.email! },
       data: {
         name,
         profilePicture: profilePictureUrl
           ? {
-              upsert: {
-                create: { url: profilePictureUrl },
-                update: { url: profilePictureUrl },
-              },
-            }
+            upsert: {
+              create: { url: profilePictureUrl },
+              update: { url: profilePictureUrl },
+            },
+          }
           : undefined,
       },
       include: {

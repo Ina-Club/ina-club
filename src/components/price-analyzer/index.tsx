@@ -19,6 +19,7 @@ import {
   Search as SearchIcon,
   TrendingUp as TrendingUpIcon,
   LocalOffer as LocalOfferIcon,
+  InfoOutlined as InfoOutlinedIcon,
 } from "@mui/icons-material";
 import { SearchBar } from "@/components/search-bar";
 import { useTheme } from "@mui/material/styles";
@@ -32,13 +33,17 @@ export default function PriceAnalyzerComponent() {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dynamicSelects, setDynamicSelects] = useState<NeedMoreInfoResponse[]>(
-    []
-  );
-  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
-    {}
-  );
+  const [dynamicSelects, setDynamicSelects] = useState<NeedMoreInfoResponse[]>([]);
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
   const [priceResult, setPriceResult] = useState<PriceResponse | null>(null);
+
+  // Computed group price range values for the chart
+  const minGroupPrice = priceResult ? Math.round((priceResult.minGroupPrice)) : 0;
+  const averageGroupPrice = priceResult ? Math.round(priceResult.averageGroupPrice) : 0;
+  const maxGroupPrice = priceResult ? Math.round((priceResult.maxGroupPrice)) : 0;
+  // Making sure to extract the maximum price for the chart
+  const highestPrice = Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
+  const calculateChartFillPercentage = (v: number) => `${Math.max(5, Math.round((v / highestPrice) * 100))}%`;
 
   const handleSearch = async () => {
     if (!searchText.trim()) {
@@ -330,7 +335,7 @@ export default function PriceAnalyzerComponent() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+              gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
               gap: 3,
               mb: 3,
             }}
@@ -384,12 +389,51 @@ export default function PriceAnalyzerComponent() {
                 variant="h5"
                 sx={{ fontWeight: 600, color: "#4ade80" }}
               >
-                ₪{priceResult.finalPrice.toLocaleString()}
+                ₪{priceResult.averageGroupPrice.toLocaleString()}
               </Typography>
             </Box>
           </Box>
 
           <Divider sx={{ mb: 2, bgcolor: "rgba(255, 255, 255, 0.3)" }} />
+
+          {/* Expected Group Price Range */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+              טווח מחירים צפוי
+            </Typography>
+
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                <Typography variant="caption" sx={{ minWidth: 80, opacity: 0.9 }}>
+                  מחיר מינימלי
+                </Typography>
+                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
+                  <Box sx={{ width: calculateChartFillPercentage(minGroupPrice), height: "100%", backgroundColor: "#ffd700", borderRadius: 1 }} />
+                </Box>
+                <Typography variant="caption">₪{minGroupPrice.toLocaleString()}</Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                <Typography variant="caption" sx={{ minWidth: 80, opacity: 0.9 }}>
+                  מחיר צפוי
+                </Typography>
+                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
+                  <Box sx={{ width: calculateChartFillPercentage(averageGroupPrice), height: "100%", backgroundColor: "#4ade80", borderRadius: 1 }} />
+                </Box>
+                <Typography variant="caption">₪{averageGroupPrice.toLocaleString()}</Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="caption" sx={{ minWidth: 80, opacity: 0.9 }}>
+                  מחיר מקסימלי
+                </Typography>
+                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
+                  <Box sx={{ width: calculateChartFillPercentage(maxGroupPrice), height: "100%", backgroundColor: "#f87171", borderRadius: 1 }} />
+                </Box>
+                <Typography variant="caption">₪{maxGroupPrice.toLocaleString()}</Typography>
+              </Box>
+            </Box>
+          </Box>
 
           <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.6 }}>
             {priceResult.notes}
@@ -421,6 +465,14 @@ export default function PriceAnalyzerComponent() {
             >
               צור קבוצת רכישה
             </Button>
+          </Box>
+
+          <Divider sx={{ mt: 3, mb: 1.5, bgcolor: "rgba(255, 255, 255, 0.3)" }} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <InfoOutlinedIcon sx={{ fontSize: 16, color: "rgba(255,255,255,0.85)" }} />
+            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.85)" }}>
+              מידע שנוצר על ידי בינה מלאכותית עלול להכיל אי־דיוקים והוא מיועד למטרות מידע בלבד. מומלץ לאמת פרטים ומחירים מול מקורות רשמיים.
+            </Typography>
           </Box>
         </Card>
       )}

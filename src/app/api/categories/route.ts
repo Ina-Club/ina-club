@@ -13,5 +13,3 @@ export async function GET() {
     return NextResponse.json({ error: "שגיאה בשליפת קטגוריות" }, { status: 500 });
   }
 }
-
-

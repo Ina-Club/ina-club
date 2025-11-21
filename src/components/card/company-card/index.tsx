@@ -3,9 +3,7 @@
 import {
   Box,
   Card,
-  CardContent,
   CardMedia,
-  Chip,
   Typography,
   IconButton,
 } from "@mui/material";
@@ -46,7 +44,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
       >
         <CardMedia
           component="img"
-          image={company.logo}
+          image={company.logo?.url ?? "/public/InaClubLogo.png"}
           alt={company.title}
           sx={{
             width: 60,
@@ -60,11 +58,11 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
         <Typography variant="subtitle1" fontWeight={600}>
           {company.title}
         </Typography>
-        <Typography variant="body2" color="text.secondary" noWrap>
+        <Typography variant="body2" color="text.secondary">
           {company.subTitle}
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "row", mt: 0.5, gap: 1 }}>
-          <Typography variant="body2" color="text.secondary" noWrap>
+          <Typography variant="subtitle2" fontWeight={500}>
             {company.categories.join(", ")}
           </Typography>
         </Box>
@@ -80,7 +78,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
           gap: 0.5,
         }}
       >
-      <IconButton
+        <IconButton
           size="small"
           href={company.url}
           target="_blank"

@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+import { validateSession } from "@/lib/auth";
 
 export async function DELETE() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
 
-    const userEmail = session.user.email;
+    const userEmail = session.user!.email!;
 
     // Find the user
     const user = await prisma.user.findUnique({

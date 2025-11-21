@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "lib/prisma";
 import bcrypt from "bcrypt";
+import { validateSession } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "לא מורשה" }, { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
+
     const { name, password, imageUrl } = await req.json();
     if (!name || !password) {
       return NextResponse.json({ error: "שדות חסרים" }, { status: 400 });
@@ -17,17 +15,17 @@ export async function POST(req: Request) {
 
     const hashed = await bcrypt.hash(password, 10);
     await prisma.user.update({
-      where: { email: session.user.email },
+      where: { email: session.user!.email! },
       data: {
         name,
         password: hashed,
         profilePicture: imageUrl
           ? {
-              upsert: {
-                create: { url: imageUrl },
-                update: { url: imageUrl },
-              },
-            }
+            upsert: {
+              create: { url: imageUrl },
+              update: { url: imageUrl },
+            },
+          }
           : undefined,
       },
     });
