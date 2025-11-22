@@ -112,6 +112,7 @@ export default async function ActiveGroupDetail({
         mx: "auto",
         px: { xs: 2, md: 3 },
         py: { xs: 3, md: 5 },
+        overflowWrap: "anywhere",
       }}
     >
       <Box
