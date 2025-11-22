@@ -8,7 +8,8 @@ export default function ActiveGroupCardSkeleton() {
       sx={{
         borderRadius: 4,
         boxShadow: 3,
-        width: "100%",
+        width: 350,
+        height: 350,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",

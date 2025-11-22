@@ -27,7 +27,8 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
       sx={{
         borderRadius: 4,
         boxShadow: 3,
-        width: "100%",
+        width: 350,
+        height: 350,
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
         display: "flex",

@@ -59,7 +59,8 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       sx={{
         borderRadius: 4,
         boxShadow: !isOpen && !isPreview ? 1 : 3,
-        width: "100%",
+        width: 350,
+        height: 350,
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
         display: "flex",
@@ -213,7 +214,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         onClick={handleRequestGroupClick}
       >
         {/* Title */}
-        <Typography variant="h6" fontWeight={600} gutterBottom>
+        <Typography variant="h6" fontWeight={600} gutterBottom noWrap>
           {requestGroup.title}
         </Typography>
 
