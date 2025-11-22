@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Avatar,
   Button,
   TextField,
   Tabs,
@@ -34,7 +33,7 @@ import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "@/components/loading-circle";
 import RequestGroupCard from "@/components/card/request-group-card";
 import ActiveGroupCard from "@/components/card/active-group-card";
-import { getAvatarInitials } from "lib/utils/avatar";
+import UserAvatar from "@/components/user-avatar";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 interface TabPanelProps {
@@ -282,13 +281,12 @@ export default function Profile() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 1, md: 3 } }}>
-            <Avatar
+            <UserAvatar
+              name={profile.name}
+              identifier={profile.email}
+              imageUrl={profile.profilePicture}
               sx={{ width: { xs: 60, md: 80 }, height: { xs: 60, md: 80 } }}
-              src={profile.profilePicture}
-            >
-              {!profile.profilePicture ? getAvatarInitials(profile.name) : null}
-              {!profile.profilePicture && !profile.name && <PersonIcon sx={{ fontSize: 40 }} />}
-            </Avatar>
+            />
             <Box sx={{ flexGrow: 1 }}>
               <Typography
                 variant='h6'

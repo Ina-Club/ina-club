@@ -14,7 +14,7 @@ import { GroupStatus } from "lib/types/status";
 import RequestGroupImages from "@/components/request-group/request-group-images";
 import NotFound from "app/not-found";
 import JoinButton from "@/components/join-button";
-import { getAvatarInitials } from "lib/utils/avatar";
+import UserAvatar from "@/components/user-avatar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -66,9 +66,9 @@ export default async function RequestGroupDetail({
   const participantsCount = rg.participants.length;
   const participantAvatars = rg.participants.slice(0, 10).map((p) => ({
     id: p.user.id,
-    name: p.user.name || p.user.email,
-    url: p.user.profilePicture?.url || undefined,
-    initials: getAvatarInitials(p.user.name),
+    name: p.user.name,
+    email: p.user.email,
+    imageUrl: p.user.profilePicture?.url || undefined,
   }));
   const viewerEmail = session?.user?.email;
   const alreadyJoined = !!viewerEmail
@@ -202,14 +202,13 @@ export default async function RequestGroupDetail({
               }}
             >
               {participantAvatars.map((p) => (
-                <Avatar
+                <UserAvatar
                   key={p.id}
-                  src={p.url}
-                  alt={p.name}
+                  name={p.name || p.email}
+                  identifier={p.email || p.id}
+                  imageUrl={p.imageUrl}
                   sx={{ width: 36, height: 36 }}
-                >
-                  {!p.url ? p.initials : null}
-                </Avatar>
+                />
               ))}
               {participantsCount > participantAvatars.length && (
                 <Avatar
