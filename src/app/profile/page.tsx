@@ -443,10 +443,10 @@ export default function Profile() {
             {/* Pending Request Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות ממתינות לאישור ({profile.pendingRequestGroups.length})
+                קבוצות שאתה משתתף בהן ({profile.pendingRequestGroups.length})
               </Typography>
               {profile.pendingRequestGroups.length === 0 ? (
-                <Alert severity="info">אין לך בקשות ממתינות לאישור</Alert>
+                <Alert severity="info">לא הצטרפת לקבוצות</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
                   {profile.pendingRequestGroups.map((requestGroup, index) => (
