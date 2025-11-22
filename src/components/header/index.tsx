@@ -11,15 +11,14 @@ import {
   Drawer,
   List,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
+  ListItemIcon,
   Divider,
   Menu,
   MenuItem,
-  Avatar,
   Typography,
-  Paper,
 } from "@mui/material";
+
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -27,7 +26,6 @@ import {
   AccountCircle as AccountCircleIcon,
   Favorite as FavoriteIcon,
   Add as AddIcon,
-  ShoppingBag as ShoppingBagIcon,
   Group as GroupIcon,
   Search as SearchIcon,
   TrendingUp as TrendingUpIcon,
@@ -35,10 +33,14 @@ import {
   Login as LoginIcon,
   Logout as LogoutIcon,
   HowToReg as HowToRegIcon,
+  ShoppingBag as ShoppingBagIcon,
 } from "@mui/icons-material";
-import { useState } from "react";
+
+import { useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { useUserProfile } from "@/contexts/user-profile-context";
+import UserAvatar from "@/components/user-avatar";
 
 const navigationItems = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
@@ -47,162 +49,104 @@ const navigationItems = [
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
 ];
 
-const mobileNavigationItems = [
+const mobileNav = [
   ...navigationItems,
-  { title: "פרופיל", href: "/profile", icon: AccountCircleIcon },
+  { title: "פרופיל", href: "/profile", icon: PersonIcon },
   { title: "מועדפים", href: "/favorites", icon: FavoriteIcon },
 ];
 
 export default function Header() {
   const pathname = usePathname();
-  const currentTab = navigationItems.findIndex(
-    (item) => item.href === pathname
-  );
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const currentTab = navigationItems.findIndex((i) => i.href === pathname);
 
-  // NextAuth session
+  const { profile } = useUserProfile();
   const { data: session } = useSession();
+
   const loggedIn = !!session;
 
-  // Profile Menu
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const openMenu = Boolean(anchorEl);
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
+  // מייצב את הנתונים של המשתמש
+  const memoUserName = useMemo(
+    () => profile?.name || session?.user?.name || null,
+    [profile?.name, session?.user?.name]
+  );
 
-  const profileMenuItems = loggedIn
-    ? [
-        <MenuItem
-          key="profile"
-          onClick={() => {
-            handleMenuClose();
-            window.location.href = "/profile";
-          }}
-          sx={{
-            py: 1.5,
-            px: 2,
-            borderRadius: 1,
-            mx: 1,
-            mb: 0.5,
-            transition: 'all 0.2s',
-            '&:hover': {
-              backgroundColor: '#f8fafc',
-              color: '#1a2a5a',
-            },
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
-          <PersonIcon sx={{ fontSize: 20, color: '#64748b' }} />
-          <Typography sx={{ fontWeight: 500 }}>פרופיל</Typography>
-        </MenuItem>,
-        <MenuItem
-          key="signout"
-          onClick={() => {
-            handleMenuClose();
-            signOut();
-          }}
-          sx={{
-            py: 1.5,
-            px: 2,
-            borderRadius: 1,
-            mx: 1,
-            mb: 0.5,
-            transition: 'all 0.2s',
-            color: '#dc2626',
-            '&:hover': {
-              backgroundColor: '#fef2f2',
-              color: '#dc2626',
-            },
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
-          <LogoutIcon sx={{ fontSize: 20 }} />
-          <Typography sx={{ fontWeight: 500 }}>התנתק</Typography>
-        </MenuItem>,
-      ]
-    : [
-       
-        <MenuItem
-          key="signin"
-          onClick={() => {
-            handleMenuClose();
-            window.location.href = "/auth/signin";
-          }}
-          sx={{
-            py: 1.5,
-            px: 2,
-            borderRadius: 1,
-            mx: 1,
-            mb: 0.5,
-            transition: 'all 0.2s',
-            '&:hover': {
-              backgroundColor: '#f8fafc',
-              color: '#1a2a5a',
-            },
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
-          <LoginIcon sx={{ fontSize: 20, color: '#64748b' }} />
-          <Typography sx={{ fontWeight: 500 }}>התחברות</Typography>
-        </MenuItem>,
-        <MenuItem
-          key="signup"
-          onClick={() => {
-            handleMenuClose();
-            window.location.href = "/auth/signup";
-          }}
-          sx={{
-            py: 1.5,
-            px: 2,
-            borderRadius: 1,
-            mx: 1,
-            mb: 0.5,
-            transition: 'all 0.2s',
-            backgroundColor: '#1a2a5a',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: '#0f172a',
-              color: '#fff',
-            },
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
-          <HowToRegIcon sx={{ fontSize: 20 }} />
-          <Typography sx={{ fontWeight: 600 }}>הרשמה</Typography>
-        </MenuItem>,
+  const memoUserImage = useMemo(
+    () => profile?.profilePicture || session?.user?.image || null,
+    [profile?.profilePicture, session?.user?.image]
+  );
+
+  const memoUserIdentifier = useMemo(
+    () => session?.user?.email || null,
+    [session?.user?.email]
+  );
+
+  const avatarSx = useMemo(
+    () => ({
+      width: 40,
+      height: 40,
+      borderColor: "primary.main",
+    }),
+    []
+  );
+
+  // פרופיל תפריט — יציב ב־useMemo
+  const profileMenuItems = useMemo(() => {
+    if (loggedIn) {
+      return [
+        {
+          key: "profile",
+          href: "/profile",
+          label: "פרופיל",
+          icon: PersonIcon,
+          color: "#64748b",
+        },
+        {
+          key: "logout",
+          href: null,
+          label: "התנתק",
+          icon: LogoutIcon,
+          action: () => signOut(),
+          color: "#dc2626",
+        },
       ];
+    }
+    return [
+      {
+        key: "signin",
+        href: "/auth/signin",
+        label: "התחברות",
+        icon: LoginIcon,
+        color: "#64748b",
+      },
+      {
+        key: "signup",
+        href: "/auth/signup",
+        label: "הרשמה",
+        icon: HowToRegIcon,
+        color: "#fff",
+        bg: "#1a2a5a",
+      },
+    ];
+  }, [loggedIn]);
+
+  // anchor controlling menu
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+
+  const openMenu = Boolean(menuAnchor);
 
   return (
     <>
-      <AppBar
-        position="static"
-        sx={{ background: "#fff", boxShadow: "0px 3px 10px rgba(0,0,0,0.2)" }}
-      >
+      <AppBar position="static" sx={{ background: "#fff", boxShadow: "0 0 10px rgba(0,0,0,0.2)" }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           {/* Logo + Tabs */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Link href="/" style={{ display: "flex", alignItems: "center" }}>
-              <Image
-                src="/InaClubLogo.png"
-                alt="Ina Club Logo"
-                width={90}
-                height={60}
-              />
+            <Link href="/">
+              <Image src="/InaClubLogo.png" alt="Ina Club Logo" width={90} height={60} />
             </Link>
-            <Tabs
-              value={currentTab >= 0 ? currentTab : false}
-              sx={{ display: { xs: "none", md: "flex" } }}
-            >
-              {navigationItems.map((item, index) => (
+
+            <Tabs value={currentTab >= 0 ? currentTab : false} sx={{ display: { xs: "none", md: "flex" } }}>
+              {navigationItems.map((item, idx) => (
                 <Tab
                   key={item.title}
                   label={item.title}
@@ -214,228 +158,88 @@ export default function Header() {
                     textTransform: "none",
                     fontSize: "0.875rem",
                     fontWeight: 500,
-                    gap: 1,
                     px: 2,
-                    py: 1,
-                    borderRadius: "1rem",
-                    transition: "all 0.2s",
-                    color: index === currentTab ? "#1a2a5a" : "#64748b",
-                    "&:hover": { color: "#1a2a5a", backgroundColor: "#f8fafc" },
+                    borderRadius: "16px",
+                    color: idx === currentTab ? "#1a2a5a" : "#64748b",
                   }}
                 />
               ))}
             </Tabs>
           </Box>
 
-          {/* Desktop Right Side */}
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              gap: 1,
-              alignItems: "center",
-            }}
-          >
+          {/* Desktop Right */}
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
             <Button
               component={Link}
               href="/create"
               variant="outlined"
               sx={{
-                minWidth: 32,
-                height: 32,
+                borderRadius: "999px",
                 color: "#1a2a5a",
-                fontWeight: "bold",
-                textTransform: "none",
-                px: 2,
-                borderRadius: "24px",
-                backgroundColor: "#fff",
                 borderColor: "#1a2a5a",
+                px: 2,
+                fontWeight: 600,
               }}
             >
-              <AddIcon sx={{ ml: 1 }} /> צור בקשה
+              <AddIcon sx={{ ml: 1 }} />
+              צור בקשה
             </Button>
 
             <IconButton sx={{ color: "#64748b" }}>
               <FavoriteIcon />
             </IconButton>
 
-            <IconButton
-              onClick={handleMenuOpen}
-              sx={{
-                p: 0,
-                borderRadius: '50%',
-                transition: 'all 0.2s',
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                }
-              }}
-            >
-              {loggedIn && session?.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt="Avatar"
-                  width={40}
-                  height={40}
-                  style={{
-                    borderRadius: "50%",
-                    border: '2px solid transparent',
-                    transition: 'border-color 0.2s',
-                  }}
-                  unoptimized // optional: bypass optimization if needed
+            <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ p: 0 }}>
+              {loggedIn ? (
+                <UserAvatar
+                  name={memoUserName}
+                  identifier={memoUserIdentifier}
+                  imageUrl={memoUserImage}
+                  sx={avatarSx}
                 />
               ) : (
-                <AccountCircleIcon
-                  sx={{
-                    fontSize: 40,
-                    color: "#64748b",
-                    transition: 'color 0.2s',
-                    '&:hover': {
-                      color: '#1a2a5a',
-                    }
-                  }}
-                />
+                <AccountCircleIcon sx={{ color: "#64748b", fontSize: 40 }} />
               )}
             </IconButton>
 
-            <Menu
-              anchorEl={anchorEl}
-              open={openMenu}
-              onClose={handleMenuClose}
-              PaperProps={{
-                sx: {
-                  borderRadius: 2,
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                  border: '1px solid #e2e8f0',
-                  mt: 1,
-                  minWidth: 200,
-                }
-              }}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            >
-              {profileMenuItems}
+            <Menu anchorEl={menuAnchor} open={openMenu} onClose={() => setMenuAnchor(null)}>
+              {profileMenuItems.map((item) => (
+                <MenuItem
+                  key={item.key}
+                  onClick={() => {
+                    setMenuAnchor(null);
+                    item.action?.();
+                    if (item.href) window.location.href = item.href;
+                  }}
+                >
+                  <item.icon sx={{ mr: 1 }} />
+                  {item.label}
+                </MenuItem>
+              ))}
             </Menu>
           </Box>
 
-          {/* Mobile Right Side */}
+          {/* Mobile */}
           <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
-            <IconButton
-              onClick={handleMenuOpen}
-              sx={{
-                p: 0,
-                borderRadius: '50%',
-                transition: 'all 0.2s',
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                }
-              }}
-            >
-              {loggedIn && session?.user?.image ? (
-                <Image
-                  src={session.user.image}
-                  alt="Avatar"
-                  width={40}
-                  height={40}
-                  style={{
-                    borderRadius: "50%",
-                    border: '2px solid transparent',
-                    transition: 'border-color 0.2s',
-                  }}
+            <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ p: 0 }}>
+              {loggedIn ? (
+                <UserAvatar
+                  name={memoUserName}
+                  identifier={memoUserIdentifier}
+                  imageUrl={memoUserImage}
+                  sx={avatarSx}
                 />
               ) : (
-                <AccountCircleIcon
-                  sx={{
-                    fontSize: 40,
-                    color: "#64748b",
-                    transition: 'color 0.2s',
-                    '&:hover': {
-                      color: '#1a2a5a',
-                    }
-                  }}
-                />
+                <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
               )}
             </IconButton>
-            <IconButton
-              sx={{ color: "#1a2a5a" }}
-              onClick={() => setDrawerOpen(true)}
-            >
+
+            <IconButton onClick={() => setDrawer(true)}>
               <MenuIcon />
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
-
-      {/* Drawer for Mobile */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      >
-        <Box
-          sx={{
-            width: 250,
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-          }}
-        >
-          <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-            <Image
-              src="/InaClubLogo.png"
-              alt="Ina Club Logo"
-              width={100}
-              height={70}
-            />
-          </Box>
-
-          <Divider>
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <Button
-                variant="outlined"
-                fullWidth
-                sx={{
-                  color: "#1a2a5a",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  borderRadius: "24px",
-                  borderColor: "#1a2a5a",
-                }}
-                component={Link}
-                href="/create"
-              >
-                <AddIcon sx={{ ml: 1 }} /> צור בקשה
-              </Button>
-            </Box>
-          </Divider>
-
-          <List sx={{ flexGrow: 1 }}>
-            {mobileNavigationItems.map((item) => (
-              <ListItemButton
-                key={item.title}
-                component={Link}
-                href={item.href}
-                onClick={() => setDrawerOpen(false)}
-                sx={{
-                  color: item.href === pathname ? "#1a2a5a" : "#64748b",
-                  backgroundColor:
-                    item.href === pathname ? "#dbeafe" : "transparent",
-                  "&:hover": { backgroundColor: "#f8fafc" },
-                }}
-              >
-                <ListItemText
-                  dir="rtl"
-                  sx={{ textAlign: "start" }}
-                  primary={item.title}
-                />
-                <ListItemIcon dir="ltr">
-                  <item.icon />
-                </ListItemIcon>
-              </ListItemButton>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
     </>
   );
 }

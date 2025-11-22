@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
+import { GroupStatus } from "lib/types/status";
 import { validateSession } from "@/lib/auth";
 
 export async function GET() {
@@ -23,6 +24,23 @@ export async function GET() {
                   orderBy: {
                     order: 'asc'
                   }
+                },
+                participants: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: { select: { url: true } }
+                      }
+                    }
+                  }
+                },
+                activeGroups: {
+                  select: {
+                    id: true
+                  }
                 }
               }
             }
@@ -41,6 +59,18 @@ export async function GET() {
                   orderBy: {
                     order: 'asc'
                   }
+                },
+                participants: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        profilePicture: { select: { url: true } }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -57,6 +87,23 @@ export async function GET() {
               orderBy: {
                 order: 'asc'
               }
+            },
+            participants: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    profilePicture: { select: { url: true } }
+                  }
+                }
+              }
+            },
+            activeGroups: {
+              select: {
+                id: true
+              }
             }
           }
         },
@@ -71,7 +118,19 @@ export async function GET() {
               orderBy: {
                 order: 'asc'
               }
-            }
+            },
+            participants: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    profilePicture: { select: { url: true } }
+                  }
+                }
+              }
+            },
           }
         }
       }
@@ -79,28 +138,6 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
-    }
-
-    // Check if user has completed their profile (has name and password)
-    // TODO: fix this shit!
-    // const hasCompleteProfile = user.name && user.password;
-    const hasCompleteProfile = user.name;
-
-    // If user doesn't have complete profile, return basic info without groups data
-    if (!hasCompleteProfile) {
-      const basicProfile = {
-        id: user.id,
-        name: user.name || '',
-        email: user.email,
-        profilePicture: user.profilePicture?.url,
-        createdAt: user.createdAt,
-        emailVerified: user.emailVerified,
-        enrolledRequestGroups: [],
-        enrolledActiveGroups: [],
-        ownedRequestGroups: [],
-        ownedActiveGroups: []
-      };
-      return NextResponse.json(basicProfile);
     }
 
     // Transform the data to match the expected format
@@ -111,16 +148,25 @@ export async function GET() {
       profilePicture: user.profilePicture?.url,
       createdAt: user.createdAt,
       emailVerified: user.emailVerified,
-      enrolledRequestGroups: user.requestGroupMemberships.map(membership => ({
-        id: membership.requestGroup.id,
-        title: membership.requestGroup.title,
-        description: membership.requestGroup.description,
-        category: membership.requestGroup.category?.name,
-        status: membership.requestGroup.status,
-        createdAt: membership.requestGroup.createdAt,
-        joinedAt: membership.joinedAt,
-        images: membership.requestGroup.images.map(img => img.image.url)
-      })),
+      enrolledRequestGroups: user.requestGroupMemberships
+        .filter(membership => membership.requestGroup.status === GroupStatus.OPEN)
+        .map(membership => ({
+          id: membership.requestGroup.id,
+          title: membership.requestGroup.title,
+          description: membership.requestGroup.description,
+          category: membership.requestGroup.category?.name,
+          status: membership.requestGroup.status,
+          createdAt: membership.requestGroup.createdAt,
+          joinedAt: membership.joinedAt,
+          images: membership.requestGroup.images.length ? membership.requestGroup.images.map(img => img.image.url) : ["/InaClubLogo.png"],
+          participants: membership.requestGroup.participants.map(p => ({
+            id: p.user.id,
+            name: p.user.name || "",
+            image: p.user.profilePicture?.url || "",
+            mail: p.user.email
+          })),
+          openedGroups: membership.requestGroup.activeGroups.map(ag => ({ id: ag.id }))
+        })),
       enrolledActiveGroups: user.activeGroupMemberships.map(membership => ({
         id: membership.activeGroup.id,
         title: membership.activeGroup.title,
@@ -129,6 +175,12 @@ export async function GET() {
         company: membership.activeGroup.company?.title,
         basePrice: membership.activeGroup.basePrice,
         groupPrice: membership.activeGroup.groupPrice,
+        participants: membership.activeGroup.participants.map(p => ({
+          id: p.user.id,
+          name: p.user.name || "",
+          image: p.user.profilePicture?.url || "",
+          mail: p.user.email
+        })),
         minParticipants: membership.activeGroup.minParticipants,
         maxParticipants: membership.activeGroup.maxParticipants,
         deadline: membership.activeGroup.deadline,
@@ -162,7 +214,25 @@ export async function GET() {
         status: group.status,
         createdAt: group.createdAt,
         images: group.images.map(img => img.image.url)
-      }))
+      })),
+      pendingRequestGroups: user.requestGroups
+        .filter(group => group.status === GroupStatus.PENDING)
+        .map(group => ({
+          id: group.id,
+          title: group.title,
+          description: group.description,
+          category: group.category?.name || "",
+          status: group.status,
+          createdAt: group.createdAt,
+          images: group.images.length ? group.images.map(img => img.image.url) : ["/InaClubLogo.png"],
+          participants: group.participants.map(p => ({
+            id: p.user.id,
+            name: p.user.name || "",
+            image: p.user.profilePicture?.url || "",
+            mail: p.user.email
+          })),
+          openedGroups: group.activeGroups.map(ag => ({ id: ag.id }))
+        }))
     };
 
     return NextResponse.json(transformedUser);
