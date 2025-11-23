@@ -8,9 +8,9 @@ import { useState, useEffect } from "react";
 import { ActiveGroup } from "lib/dal";
 import ActiveGroupCardSkeleton from "../skeleton/active-group-card-skeleton";
 
-interface GroupSectionWrapperProps {}
+interface GroupSectionWrapperProps { }
 
-const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
+const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
   const [allOpenActiveGroupsWithParent, setAllOpenActiveGroupsWithParent] =
     useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,8 +46,8 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
                 key={i}
                 sx={{
                   display: "flex",
-                  width: "100%",
-                  height: "100%",
+                  minWidth: 300,
+                  minHeight: 300,
                 }}
               >
                 {" "}
@@ -60,8 +60,8 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
                 key={index}
                 sx={{
                   display: "flex",
-                  width: "100%",
-                  height: "100%",
+                  minWidth: 300,
+                  minHeight: 300,
                 }}
               >
                 <ActiveGroupCard activeGroup={activeGroup} />
