@@ -14,6 +14,10 @@ import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import RequestGroupImages from "@/components/request-group/request-group-images";
 import NotFound from "app/not-found";
+import JoinButton from "@/components/join-button";
+import UserAvatar from "@/components/user-avatar";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export default async function ActiveGroupDetail({
   params,
@@ -21,6 +25,7 @@ export default async function ActiveGroupDetail({
   params: { id: string };
 }) {
   const { id } = params;
+  const session = await getServerSession(authOptions);
 
   const ag = await prisma.activeGroup.findUnique({
     where: { id },
@@ -71,9 +76,14 @@ export default async function ActiveGroupDetail({
   const participantsCount = ag.participants.length;
   const participantAvatars = ag.participants.slice(0, 10).map((p) => ({
     id: p.user.id,
-    name: p.user.name || p.user.email,
-    url: p.user.profilePicture?.url || undefined,
+    name: p.user.name,
+    email: p.user.email,
+    imageUrl: p.user.profilePicture?.url || undefined,
   }));
+  const viewerEmail = session?.user?.email;
+  const alreadyJoined = !!viewerEmail
+    ? ag.participants.some((p) => p.user.email === viewerEmail)
+    : false;
 
   // Similar ActiveGroups
   const similar = await prisma.activeGroup.findMany({
@@ -193,14 +203,13 @@ export default async function ActiveGroupDetail({
               }}
             >
               {participantAvatars.map((p) => (
-                <Avatar
+                <UserAvatar
                   key={p.id}
-                  src={p.url}
-                  alt={p.name}
+                  name={p.name || p.email}
+                  identifier={p.email || p.id}
+                  imageUrl={p.imageUrl}
                   sx={{ width: 36, height: 36 }}
-                >
-                  {!p.url ? p.name.charAt(0) : null}
-                </Avatar>
+                />
               ))}
               {participantsCount > participantAvatars.length && (
                 <Avatar
@@ -215,9 +224,14 @@ export default async function ActiveGroupDetail({
                 </Avatar>
               )}
             </Box>
-            <Button variant="contained" color="primary" fullWidth>
-              הצטרפות לקבוצה
-            </Button>
+            <JoinButton
+              type="active-group"
+              id={id}
+              fullWidth
+              isJoined={alreadyJoined}
+            >
+              הצטרף לקבוצה
+            </JoinButton>
           </Paper>
         </Box>
       </Box>

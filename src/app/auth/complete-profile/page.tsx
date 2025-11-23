@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Box, Stack, TextField, Button, Typography, Alert, CircularProgress, Avatar } from "@mui/material";
+import { Box, Stack, TextField, Button, Typography, Alert, CircularProgress } from "@mui/material";
+import UserAvatar from "@/components/user-avatar";
 
 export default function CompleteProfilePage() {
   const { data: session, status } = useSession();
@@ -103,7 +104,12 @@ export default function CompleteProfilePage() {
 
       <Stack spacing={2} component="form" onSubmit={handleSave}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Avatar src={imageUrl || session?.user?.image || undefined} sx={{ width: 64, height: 64 }} />
+          <UserAvatar
+            name={name || session?.user?.name}
+            identifier={session?.user?.email}
+            imageUrl={imageUrl || session?.user?.image || undefined}
+            sx={{ width: 64, height: 64 }}
+          />
           <Button component="label" variant="outlined" disabled={uploading}>
             {uploading ? "מעלה..." : "העלה תמונה"}
             <input hidden type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
