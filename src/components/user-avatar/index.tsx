@@ -2,6 +2,7 @@
 
 import { forwardRef, useMemo } from "react";
 import Avatar, { type AvatarProps } from "@mui/material/Avatar";
+import { AccountCircle as AccountCircleIcon } from "@mui/icons-material";
 import { getAvatarInitials } from "lib/utils/avatar";
 import React from "react";
 

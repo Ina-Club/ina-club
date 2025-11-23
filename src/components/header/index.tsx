@@ -13,14 +13,18 @@ import {
   ListItemButton,
   ListItemText,
   ListItemIcon,
-  Divider,
   Menu,
   MenuItem,
-  Typography,
 } from "@mui/material";
 
 import Link from "next/link";
 import Image from "next/image";
+import { memo, useMemo, useCallback, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useUserProfile } from "@/contexts/user-profile-context";
+
+import UserAvatar from "@/components/user-avatar";
+
 import {
   Menu as MenuIcon,
   AccountCircle as AccountCircleIcon,
@@ -36,134 +40,134 @@ import {
   ShoppingBag as ShoppingBagIcon,
 } from "@mui/icons-material";
 
-import { useState, useMemo } from "react";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import { useUserProfile } from "@/contexts/user-profile-context";
-import UserAvatar from "@/components/user-avatar";
 
-const navigationItems = [
+// -----------------------------
+// STATIC — DOES NOT RECREATE
+// -----------------------------
+
+const NAV_ITEMS = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
   { title: "קבוצות פעילות", href: "/active-groups", icon: GroupIcon },
   { title: "חיפוש חכם", href: "/smart-search", icon: SearchIcon },
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
 ];
 
-const mobileNav = [
-  ...navigationItems,
+const MOBILE_ITEMS = [
+  ...NAV_ITEMS,
   { title: "פרופיל", href: "/profile", icon: PersonIcon },
   { title: "מועדפים", href: "/favorites", icon: FavoriteIcon },
 ];
 
-export default function Header() {
-  const pathname = usePathname();
+const LOGGED_IN_MENU = [
+  { key: "profile", href: "/profile", label: "פרופיל", icon: PersonIcon, color: "#64748b" },
+  { key: "logout", href: null, label: "התנתק", icon: LogoutIcon, color: "#dc2626", action: "logout" },
+];
 
-  const currentTab = navigationItems.findIndex((i) => i.href === pathname);
+const LOGGED_OUT_MENU = [
+  { key: "signin", href: "/auth/signin", label: "התחברות", icon: LoginIcon, color: "#64748b" },
+  { key: "signup", href: "/auth/signup", label: "הרשמה", icon: HowToRegIcon, color: "#fff", bg: "#1a2a5a" },
+];
+
+
+// -----------------------------
+// COMPONENT START
+// -----------------------------
+
+function Header() {
+  const pathname = usePathname();
+  const router = useRouter();
 
   const { profile } = useUserProfile();
-  const { data: session } = useSession();
+  const loggedIn = !!profile;
 
-  const loggedIn = !!session;
-
-  // מייצב את הנתונים של המשתמש
-  const memoUserName = useMemo(
-    () => profile?.name || session?.user?.name || null,
-    [profile?.name, session?.user?.name]
+  // compute selected tab
+  const currentTab = useMemo(
+    () => NAV_ITEMS.findIndex((i) => i.href === pathname),
+    [pathname]
   );
 
-  const memoUserImage = useMemo(
-    () => profile?.profilePicture || session?.user?.image || null,
-    [profile?.profilePicture, session?.user?.image]
-  );
-
-  const memoUserIdentifier = useMemo(
-    () => session?.user?.email || null,
-    [session?.user?.email]
-  );
+  // anchor states
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const avatarSx = useMemo(
-    () => ({
-      width: 40,
-      height: 40,
-      borderColor: "primary.main",
-    }),
+    () => ({ width: 40, height: 40, borderColor: "primary.main" }),
     []
   );
 
-  // פרופיל תפריט — יציב ב־useMemo
-  const profileMenuItems = useMemo(() => {
-    if (loggedIn) {
-      return [
-        {
-          key: "profile",
-          href: "/profile",
-          label: "פרופיל",
-          icon: PersonIcon,
-          color: "#64748b",
-        },
-        {
-          key: "logout",
-          href: null,
-          label: "התנתק",
-          icon: LogoutIcon,
-          action: () => signOut(),
-          color: "#dc2626",
-        },
-      ];
-    }
-    return [
-      {
-        key: "signin",
-        href: "/auth/signin",
-        label: "התחברות",
-        icon: LoginIcon,
-        color: "#64748b",
-      },
-      {
-        key: "signup",
-        href: "/auth/signup",
-        label: "הרשמה",
-        icon: HowToRegIcon,
-        color: "#fff",
-        bg: "#1a2a5a",
-      },
-    ];
-  }, [loggedIn]);
+  const menuItems = loggedIn ? LOGGED_IN_MENU : LOGGED_OUT_MENU;
 
-  // anchor controlling menu
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const handleMenuOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchor(e.currentTarget);
+  }, []);
 
-  const openMenu = Boolean(menuAnchor);
+  const handleMenuClose = useCallback(() => {
+    setMenuAnchor(null);
+  }, []);
+
+  const handleItemClick = useCallback(
+    (item) => {
+      handleMenuClose();
+
+      if (item.action === "logout") {
+        // NextAuth logout
+        import("next-auth/react").then((auth) => auth.signOut());
+        return;
+      }
+
+      if (item.href) router.push(item.href);
+    },
+    [handleMenuClose, router]
+  );
+
+  const memoUserName = profile?.name || "";
+  const memoUserIdentifier = profile?.email || "";
+  const memoUserImage = profile?.profilePicture || null;
 
   return (
     <>
-      <AppBar position="static" sx={{ background: "#fff", boxShadow: "0 0 10px rgba(0,0,0,0.2)" }}>
+      <AppBar
+        position="static"
+        sx={{ background: "#fff", boxShadow: "0 0 10px rgba(0,0,0,0.2)" }}
+      >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          
           {/* Logo + Tabs */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Link href="/">
-              <Image src="/InaClubLogo.png" alt="Ina Club Logo" width={90} height={60} />
+              <Image
+                src="/InaClubLogo.png"
+                alt="Ina Club Logo"
+                width={90}
+                height={60}
+              />
             </Link>
 
-            <Tabs value={currentTab >= 0 ? currentTab : false} sx={{ display: { xs: "none", md: "flex" } }}>
-              {navigationItems.map((item, idx) => (
-                <Tab
-                  key={item.title}
-                  label={item.title}
-                  icon={<item.icon />}
-                  iconPosition="start"
-                  component={Link}
-                  href={item.href}
-                  sx={{
-                    textTransform: "none",
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    px: 2,
-                    borderRadius: "16px",
-                    color: idx === currentTab ? "#1a2a5a" : "#64748b",
-                  }}
-                />
-              ))}
+            <Tabs
+              value={currentTab >= 0 ? currentTab : false}
+              sx={{ display: { xs: "none", md: "flex" } }}
+            >
+              {NAV_ITEMS.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <Tab
+                    key={item.title}
+                    label={item.title}
+                    icon={<Icon />}
+                    iconPosition="start"
+                    component={Link}
+                    href={item.href}
+                    sx={{
+                      textTransform: "none",
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      px: 2,
+                      borderRadius: "16px",
+                      color: idx === currentTab ? "#1a2a5a" : "#64748b",
+                    }}
+                  />
+                );
+              })}
             </Tabs>
           </Box>
 
@@ -189,7 +193,7 @@ export default function Header() {
               <FavoriteIcon />
             </IconButton>
 
-            <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ p: 0 }}>
+            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
               {loggedIn ? (
                 <UserAvatar
                   name={memoUserName}
@@ -202,26 +206,22 @@ export default function Header() {
               )}
             </IconButton>
 
-            <Menu anchorEl={menuAnchor} open={openMenu} onClose={() => setMenuAnchor(null)}>
-              {profileMenuItems.map((item) => (
-                <MenuItem
-                  key={item.key}
-                  onClick={() => {
-                    setMenuAnchor(null);
-                    item.action?.();
-                    if (item.href) window.location.href = item.href;
-                  }}
-                >
-                  <item.icon sx={{ mr: 1 }} />
-                  {item.label}
-                </MenuItem>
-              ))}
+            <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={handleMenuClose}>
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <MenuItem key={item.key} onClick={() => handleItemClick(item)}>
+                    <Icon sx={{ mr: 1 }} />
+                    {item.label}
+                  </MenuItem>
+                );
+              })}
             </Menu>
           </Box>
 
           {/* Mobile */}
           <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
-            <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ p: 0 }}>
+            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
               {loggedIn ? (
                 <UserAvatar
                   name={memoUserName}
@@ -234,12 +234,39 @@ export default function Header() {
               )}
             </IconButton>
 
-            <IconButton onClick={() => setDrawer(true)}>
+            <IconButton onClick={() => setDrawerOpen(true)}>
               <MenuIcon />
             </IconButton>
           </Box>
+
         </Toolbar>
       </AppBar>
+
+      {/* Mobile Drawer */}
+      <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+        <Box sx={{ width: 250, pt: 2 }}>
+          <List>
+            {MOBILE_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <ListItemButton
+                  key={item.title}
+                  component={Link}
+                  href={item.href}
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  <ListItemIcon>
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText primary={item.title} />
+                </ListItemButton>
+              );
+            })}
+          </List>
+        </Box>
+      </Drawer>
     </>
   );
 }
+
+export default memo(Header);

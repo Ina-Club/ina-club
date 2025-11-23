@@ -2,11 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import { Box } from "@mui/material";
+import { memo, useMemo } from "react";
 import Header from "@/components/header";
 
-export default function HeaderWrapper() {
+function HeaderWrapper() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = useMemo(() => pathname === "/", [pathname]);
 
   if (isHome) {
     // דף הבית → header סטיקי
@@ -20,3 +21,5 @@ export default function HeaderWrapper() {
   // שאר הדפים → header רגיל
   return <Header />;
 }
+
+export default memo(HeaderWrapper);
