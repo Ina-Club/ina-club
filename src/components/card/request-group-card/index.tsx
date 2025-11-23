@@ -20,6 +20,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import { useState } from "react";
+import { cardImageDimensions, groupCardDimensions } from "@/lib/consts";
 
 interface RequestGroupCardProps {
   requestGroup: RequestGroup;
@@ -59,8 +60,8 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       sx={{
         borderRadius: 4,
         boxShadow: !isOpen && !isPreview ? 1 : 3,
-        width: 350,
-        height: 350,
+        ...groupCardDimensions,
+        overflowWrap: "anywhere",
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
         display: "flex",
@@ -78,14 +79,15 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       }}
     >
       {/* Image Section */}
-      <Box sx={{ position: "relative" }}>
+      <Box sx={{ position: "relative", pt: "50%" }}>
         <CardMedia
           component="img"
           image={requestGroup.images[currentImage]}
           alt={requestGroup.title}
           sx={{
-            height: 150,
-            width: "100%",
+            position: "absolute",
+            inset: 0,
+            ...cardImageDimensions,
             objectFit: "cover",
             opacity: !isOpen && !isPreview ? 0.6 : 1,
           }}
