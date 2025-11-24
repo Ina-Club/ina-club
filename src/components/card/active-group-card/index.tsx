@@ -8,7 +8,6 @@ import { useState } from "react";
 import ParticipantsProgress from "./participations-progress-bar";
 import Countdown from "./countdown";
 import { useRouter } from "next/navigation";
-import { cardImageDimensions, groupCardDimensions } from "@/lib/consts";
 
 interface ActiveGroupCardProps {
   activeGroup: ActiveGroup;
@@ -28,7 +27,7 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
       sx={{
         borderRadius: 4,
         boxShadow: 3,
-        ...groupCardDimensions,
+        flex: 1,
         overflowWrap: "anywhere",
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
@@ -52,7 +51,8 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
           sx={{
             position: "absolute",
             inset: 0,
-            ...cardImageDimensions,
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
           }}
         />

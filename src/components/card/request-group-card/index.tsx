@@ -20,7 +20,6 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import { useState } from "react";
-import { cardImageDimensions, groupCardDimensions } from "@/lib/consts";
 
 interface RequestGroupCardProps {
   requestGroup: RequestGroup;
@@ -60,7 +59,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       sx={{
         borderRadius: 4,
         boxShadow: !isOpen && !isPreview ? 1 : 3,
-        ...groupCardDimensions,
+        flex: 1,
         overflowWrap: "anywhere",
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
@@ -87,7 +86,8 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
           sx={{
             position: "absolute",
             inset: 0,
-            ...cardImageDimensions,
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
             opacity: !isOpen && !isPreview ? 0.6 : 1,
           }}
@@ -226,7 +226,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         </Typography>
 
         {/* Participants */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
           <PeopleAltOutlinedIcon
             sx={{ fontSize: 18, mr: 0.5, color: "primary.main" }}
           />

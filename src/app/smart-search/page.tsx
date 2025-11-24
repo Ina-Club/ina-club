@@ -167,10 +167,8 @@ export default function SmartSearchPage() {
                 : (!loadingSearch ?
                     <SmartSearchComponent
                         errorActive={errorActive}
-                        loadingActive={loadingActive}
                         errorRequests={errorRequests}
                         errorAi={errorAi}
-                        loadingRequests={loadingRequests}
                         displayedActiveGroups={displayedActiveGroups}
                         displayedRequestGroups={displayedRequestGroups}
                     />
