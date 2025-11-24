@@ -93,7 +93,6 @@ export default function SmartSearchPage() {
                 .replace('{activeGroups}', JSON.stringify(toPublicGroups(activeGroups)))
                 .replace('{searchText}', searchText);
         try {
-            console.log(JSON.stringify(toPublicGroups(requestGroups)));
             const response: Response = await fetch("/api/ai/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
