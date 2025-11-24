@@ -3,10 +3,46 @@ import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 import { validateSession } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const view = searchParams.get("view");
+    const summaryOnly = view === "summary";
+
     const { session, response } = await validateSession();
     if (response) return response;
+
+    if (summaryOnly) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user!.email! },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          createdAt: true,
+          emailVerified: true,
+          profilePicture: {
+            select: { url: true },
+          },
+        },
+      });
+
+      if (!user) {
+        return NextResponse.json(
+          { error: "משתמש לא נמצא" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        emailVerified: user.emailVerified,
+        profilePicture: user.profilePicture?.url ?? null,
+      });
+    }
 
     const user = await prisma.user.findUnique({
       where: { email: session.user!.email! },
@@ -79,7 +115,6 @@ export async function GET() {
         requestGroups: {
           include: {
             category: true,
-            participants: true, //TODO: Fetch length instead
             images: {
               include: {
                 image: true
