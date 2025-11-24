@@ -28,7 +28,7 @@ export default function SmartSearchPage() {
     const [errorRequests, setErrorRequests] = useState<string | null>(null);
     const [errorAi, setErrorAi] = useState<string | null>(null);
 
-    const readyForSearch: boolean = !!searchText.trim() || !loadingActive || !loadingRequests || !loadingSearch;
+    const readyForSearch: boolean = !!searchText.trim() && !loadingActive && !loadingRequests && !loadingSearch;
 
     useEffect(() => {
         let active = true;
