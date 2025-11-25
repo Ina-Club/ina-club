@@ -28,6 +28,8 @@ export default function SmartSearchPage() {
     const [errorRequests, setErrorRequests] = useState<string | null>(null);
     const [errorAi, setErrorAi] = useState<string | null>(null);
 
+    const readyForSearch: boolean = !!searchText.trim() && !loadingActive && !loadingRequests && !loadingSearch;
+
     useEffect(() => {
         let active = true;
         setLoadingActive(true);
@@ -91,7 +93,6 @@ export default function SmartSearchPage() {
                 .replace('{activeGroups}', JSON.stringify(toPublicGroups(activeGroups)))
                 .replace('{searchText}', searchText);
         try {
-            console.log(JSON.stringify(toPublicGroups(requestGroups)));
             const response: Response = await fetch("/api/ai/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -140,7 +141,7 @@ export default function SmartSearchPage() {
                     "&:hover": { borderColor: "#1a2a5a" },
                 }}
                 onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSmartSearch();
+                    if (e.key === "Enter" && readyForSearch) handleSmartSearch();
                 }}
             >
                 <SearchBar
@@ -154,7 +155,7 @@ export default function SmartSearchPage() {
                     startIcon={<SearchIcon />}
                     onClick={handleSmartSearch}
                     sx={{ ml: 1, whiteSpace: "nowrap" }}
-                    disabled={!searchText.trim() || loadingActive || loadingRequests || loadingSearch}
+                    disabled={!readyForSearch}
                 >
                     {(loadingActive || loadingRequests) ? <CircularProgress size={25} /> : 'חיפוש'}
                 </Button>
@@ -165,10 +166,8 @@ export default function SmartSearchPage() {
                 : (!loadingSearch ?
                     <SmartSearchComponent
                         errorActive={errorActive}
-                        loadingActive={loadingActive}
                         errorRequests={errorRequests}
                         errorAi={errorAi}
-                        loadingRequests={loadingRequests}
                         displayedActiveGroups={displayedActiveGroups}
                         displayedRequestGroups={displayedRequestGroups}
                     />

@@ -8,9 +8,9 @@ import { useState, useEffect } from "react";
 import { ActiveGroup } from "lib/dal";
 import ActiveGroupCardSkeleton from "../skeleton/active-group-card-skeleton";
 
-interface GroupSectionWrapperProps {}
+interface GroupSectionWrapperProps { }
 
-const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
+const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
   const [allOpenActiveGroupsWithParent, setAllOpenActiveGroupsWithParent] =
     useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,17 +41,16 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
       >
         <ResponsiveHorizontalListWrapper gap="16px">
           {loading ? (
-            Array.from({ length: 6 }).map((_, i) => (
+            Array.from({ length: 6 }).map((_, index) => (
               <Box
-                key={i}
+                key={index}
                 sx={{
                   display: "flex",
-                  width: "100%",
-                  height: "100%",
+                  minWidth: 250,
+                  minHeight: 250
                 }}
               >
-                {" "}
-                <ActiveGroupCardSkeleton key={i} />
+                <ActiveGroupCardSkeleton />
               </Box>
             ))
           ) : allOpenActiveGroupsWithParent.length > 0 ? (
@@ -60,8 +59,8 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
                 key={index}
                 sx={{
                   display: "flex",
-                  width: "100%",
-                  height: "100%",
+                  minWidth: 250,
+                  minHeight: 250
                 }}
               >
                 <ActiveGroupCard activeGroup={activeGroup} />
@@ -84,7 +83,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({}) => {
             </Box>
           )}
         </ResponsiveHorizontalListWrapper>
-      </SectionWrapper>
+      </SectionWrapper >
     </>
   );
 };
