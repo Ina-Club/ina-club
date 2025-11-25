@@ -49,7 +49,7 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                         sx={{
                             display: "grid",
                             gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                            gap: { xs: 2, md: 2 },
+                            gap: { xs: 2, md: 4 },
                             mt: 1
                         }}
                     >
@@ -134,7 +134,7 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                         sx={{
                             display: "grid",
                             gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                            gap: { xs: 2, md: 2 },
+                            gap: { xs: 2, md: 4 },
                             mt: 1
                         }}
                     >
