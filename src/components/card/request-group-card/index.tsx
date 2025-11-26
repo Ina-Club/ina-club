@@ -250,7 +250,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             sx={{
               borderRadius: 2,
               px: 1.5,
-              py: "3px",
+              py: "3.3px", // This particular amount is to make the smart-search cards be the exact same size
               bgcolor: "#e3e7f5",
               color: "#1a2a5a",
               fontSize: "0.75rem",
@@ -278,7 +278,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
               },
               borderRadius: 2,
               px: 1.5,
-              py: "3px",
+              py: "3.3px",
             }}
           >
             <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#ff8c42" }}>
