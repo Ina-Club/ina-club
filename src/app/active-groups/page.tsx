@@ -11,6 +11,7 @@ import { FilterState } from "@/components/group-filters/filters";
 import { ActiveGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
+import { DEFAULT_PAGINATION } from "../config/pagination";
 
 export default function Page() {
   const headerText = "כל הקבוצות";
@@ -26,14 +27,24 @@ export default function Page() {
     popularities: [],
     priceRange: [0, 10_000],
   });
+  const [cursor, setCursor] = useState<string | null>(null);
 
   useEffect(() => {
+    const params = new URLSearchParams({
+      status: "open",
+      limit: DEFAULT_PAGINATION.toString(),
+    });
+    if (cursor) params.set("cursor", cursor);
+
     let active = true;
     setLoading(true);
-    fetch("/api/active-groups/?status=open")
+    fetch("/api/active-groups/?" + params.toString())
       .then((r) => r.json())
       .then((data) => {
-        if (active) setAllActiveGroups(data.activeGroups ?? []);
+        if (active) {
+          setAllActiveGroups(data.activeGroups ?? []);
+          setCursor(data.nextCursor ?? null);
+        }
       })
       .catch(() => setAllActiveGroups([]))
       .finally(() => {
