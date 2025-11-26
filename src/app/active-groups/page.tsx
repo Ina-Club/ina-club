@@ -11,7 +11,7 @@ import { FilterState } from "@/components/group-filters/filters";
 import { ActiveGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
-import { DEFAULT_PAGINATION } from "../config/pagination";
+import { MAX_PAGINATION_LIMIT } from "../config/pagination";
 
 export default function Page() {
   const headerText = "כל הקבוצות";
@@ -32,7 +32,7 @@ export default function Page() {
   useEffect(() => {
     const params = new URLSearchParams({
       status: "open",
-      limit: DEFAULT_PAGINATION.toString(),
+      limit: MAX_PAGINATION_LIMIT.toString(),
     });
     if (cursor) params.set("cursor", cursor);
 
