@@ -30,7 +30,7 @@ export default function SmartSearchPage() {
 
     const readyForSearch: boolean = !!searchText.trim() && !loadingActive && !loadingRequests && !loadingSearch;
 
-    useEffect(() => {
+    const loadActiveGroups = () => {
         let active = true;
         setLoadingActive(true);
         setErrorActive(null);
@@ -48,9 +48,9 @@ export default function SmartSearchPage() {
         return () => {
             active = false;
         };
-    }, []);
+    }
 
-    useEffect(() => {
+    const loadRequestGroups = () => {
         let active = true;
         setLoadingRequests(true);
         setErrorRequests(null);
@@ -68,6 +68,11 @@ export default function SmartSearchPage() {
         return () => {
             active = false;
         };
+    }
+
+    useEffect(() => {
+        loadActiveGroups();
+        loadRequestGroups();
     }, []);
 
     // Currently we dont wait for this to end when we call this, we can change this is the future if required.
