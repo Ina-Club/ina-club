@@ -169,7 +169,7 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         </Box>
 
         {/* Countdown */}
-        <Countdown deadline={activeGroup.deadline} />
+        <Countdown deadline={activeGroup.deadline} sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", m: 0 }} />
 
         {/* Participants */}
         <Box>

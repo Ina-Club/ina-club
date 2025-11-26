@@ -68,7 +68,7 @@ export default function ActiveGroupCardSkeleton() {
 
         {/* Price Section */}
         <Skeleton variant="text" width="20%" height={18} sx={{ mb: 1 }} />
-        <Skeleton variant="text" width="25%" height={24} sx={{ mb: 2 }} />
+        <Skeleton variant="text" width="25%" height={24} sx={{ mb: 1 }} />
 
         {/* Countdown */}
         <Skeleton variant="text" width="20%" height={18} sx={{ mb: 1 }} />

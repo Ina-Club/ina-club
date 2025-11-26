@@ -34,8 +34,8 @@ export default function RequestGroupCardSkeleton() {
       <CardContent sx={{ p: 2 }}>
         <Skeleton variant="text" width="60%" height={35} sx={{ mb: 1 }} />
         <Skeleton variant="text" width="40%" height={16} sx={{ mb: 2 }} />
-        <Skeleton variant="text" width="30%" height={16} sx={{ mb: 2 }} />
-        <Skeleton variant="rounded" height={40} />
+        <Skeleton variant="text" width="30%" height={16} sx={{ mb: 3 }} />
+        <Skeleton variant="rounded" height={50} />
       </CardContent>
     </Card>
   );
