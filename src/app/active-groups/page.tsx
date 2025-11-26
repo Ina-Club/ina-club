@@ -30,14 +30,18 @@ export default function Page() {
   const [cursor, setCursor] = useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+
     const params = new URLSearchParams({
       status: "open",
       limit: MAX_PAGINATION_LIMIT.toString(),
     });
     if (cursor) params.set("cursor", cursor);
 
-    let active = true;
-    setLoading(true);
+    // TODO: Move filters to db fetch to handle combination of filters and pagination.
+    // This can happen when there is a load of groups being fetched each time.
+    // logic already implemented in smart-search screen.
     fetch("/api/active-groups/?" + params.toString())
       .then((r) => r.json())
       .then((data) => {
