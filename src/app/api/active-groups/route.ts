@@ -3,6 +3,7 @@ import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 import { validateSession } from "@/lib/auth";
 import { getUserIdBySession } from "@/lib/user";
+import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -11,6 +12,11 @@ export async function GET(req: Request) {
     const titleParam = searchParams.get('title');
     const statusParam = searchParams.get('status');
     const lastWeekParam = searchParams.get('lastWeek');
+
+    const cursor = searchParams.get("cursor") || undefined;
+    const rawLimit: number = Number(searchParams.get('limit')) || DEFAULT_PAGINATION;
+    const limit: number = Math.min(rawLimit, MAX_PAGINATION_LIMIT);
+
     const where: any = {};
     if (titleParam) {
       const exists = await prisma.activeGroup.findFirst({
@@ -36,6 +42,7 @@ export async function GET(req: Request) {
 
     // Get all active groups
     const rows = await prisma.activeGroup.findMany({
+      take: limit + 1,
       select: {
         id: true,
         title: true,
@@ -65,7 +72,15 @@ export async function GET(req: Request) {
       },
       where,
       orderBy: { createdAt: "desc" },
+      ...(cursor && { cursor: { id: cursor } }),
     });
+
+    let nextCursor: string | null = null;
+
+    if (rows.length > limit) {
+      const nextItem = rows.pop()!; // remove the extra one
+      nextCursor = nextItem.id;
+    }
 
     const data = rows.map((r) => ({
       id: r.id,
@@ -86,7 +101,7 @@ export async function GET(req: Request) {
       maxParticipants: r.maxParticipants
     }));
 
-    return NextResponse.json({ activeGroups: data });
+    return NextResponse.json({ activeGroups: data, nextCursor });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "שגיאה בשליפת קבוצות פעילות" }, { status: 500 });
@@ -98,7 +113,7 @@ export async function POST(req: Request) {
   try {
     const { session, response } = await validateSession();
     if (response) return response;
-    
+
     const body = await req.json();
     const { title, description, categoryId, companyId, basePrice, groupPrice, deadline, imageUrls, minParticipants, maxParticipants } = body as {
       title: string;
