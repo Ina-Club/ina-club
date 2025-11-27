@@ -1,1 +1,1 @@
-export const SMART_SEARCH_GROUP_AMOUNT: number = 2;
+export const SMART_SEARCH_GROUP_AMOUNT: number = 4;
