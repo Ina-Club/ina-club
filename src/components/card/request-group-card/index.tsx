@@ -244,7 +244,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         </Box>
 
         {/* Groups Info */}
-        {requestGroup.openedGroups.length ? (
+        {requestGroup.openedGroups?.length ? (
           <Alert
             severity="success"
             sx={{
