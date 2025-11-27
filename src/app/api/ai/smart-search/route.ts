@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { validateSession } from "@/lib/auth";
-import { fetchAllActiveGroups, fetchAllRequestGroups } from "@/lib/groups";
+import { fetchActiveGroups, fetchRequestGroups } from "@/lib/groups";
 import { aiFilteredGroups } from "@/lib/ai/smart-search";
 import { ActiveGroup, RequestGroup } from "@/lib/dal";
+import { GroupStatus } from "@/lib/types/status";
 
 // TODO: Add pagination in the future (if necessary).
 export async function POST(req: Request) {
@@ -14,8 +15,8 @@ export async function POST(req: Request) {
         const { searchText } = body as { searchText: string };
         if (!searchText) return NextResponse.json({ error: "טקסט לחיפוש חובה" }, { status: 400 });
 
-        const activeGroups: ActiveGroup[] = await fetchAllActiveGroups();
-        const requestGroups: RequestGroup[] = await fetchAllRequestGroups();
+        const activeGroups: ActiveGroup[] = await fetchActiveGroups({ status: GroupStatus.OPEN });
+        const requestGroups: RequestGroup[] = await fetchRequestGroups({ status: GroupStatus.OPEN });
         const { relevantActiveGroups, relevantRequestGroups } = await aiFilteredGroups(activeGroups, requestGroups, searchText);
         console.log(relevantActiveGroups, relevantRequestGroups);
 
