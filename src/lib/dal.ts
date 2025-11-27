@@ -6,7 +6,7 @@ export interface RequestGroup {
   category: string;
   title: string;
   participants: User[]; //TODO: Length instead
-  openedGroups: ActiveGroup[]; //TODO: Remove
+  openedGroups?: string[]; //TODO: Remove
   status: GroupStatus;
   description?: string;
 }
@@ -28,7 +28,7 @@ export interface ActiveGroup {
   minParticipants?: number;
   maxParticipants?: number;
   deadline: Date;
-  createdAt: Date;
+  createdAt?: Date;
   company?: Company;
   participants: User[];
   images: string[];

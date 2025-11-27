@@ -11,6 +11,7 @@ import { FilterState } from "@/components/group-filters/filters";
 import { ActiveGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
+import { MAX_PAGINATION_LIMIT } from "../config/pagination";
 
 export default function Page() {
   const headerText = "כל הקבוצות";
@@ -26,14 +27,28 @@ export default function Page() {
     popularities: [],
     priceRange: [0, 10_000],
   });
+  const [cursor, setCursor] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetch("/api/active-groups/?status=open")
+
+    const params = new URLSearchParams({
+      status: "open",
+      limit: MAX_PAGINATION_LIMIT.toString(),
+    });
+    if (cursor) params.set("cursor", cursor);
+
+    // TODO: Move filters to db fetch to handle combination of filters and pagination.
+    // This can happen when there is a load of groups being fetched each time.
+    // logic already implemented in smart-search screen.
+    fetch("/api/active-groups/?" + params.toString())
       .then((r) => r.json())
       .then((data) => {
-        if (active) setAllActiveGroups(data.activeGroups ?? []);
+        if (active) {
+          setAllActiveGroups(data.activeGroups ?? []);
+          setCursor(data.nextCursor ?? null);
+        }
       })
       .catch(() => setAllActiveGroups([]))
       .finally(() => {
