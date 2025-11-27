@@ -19,11 +19,13 @@ export default function SmartSearchPage() {
     const [displayHelper, setDisplayHelper] = useState(true);
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [errorAi, setErrorAi] = useState<string | null>(null);
+    const [filterAi, setFilterAi] = useState(false);
 
     const readyForSearch: boolean = !!searchText.trim() && !loadingSearch;
     // Currently we dont wait for this to end when we call this, we can change this is the future if required.
     const handleSmartSearch = async () => {
         setErrorAi(null);
+        setFilterAi(false);
         setLoadingSearch(true);
         setDisplayHelper(false);
         await handleAISearch();
@@ -36,14 +38,17 @@ export default function SmartSearchPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ searchText }),
             });
-            if (!response.ok) throw new Error(`${response.status}`);
             const data = await response.json();
+            if (!response.ok || data.requestGroups == undefined || data.activeGroups == undefined || data.filtered == undefined) {
+                throw new Error(`${response.status}`);
+            }
+            if (data.filtered) setFilterAi(true);
             setDisplayedRequestGroups(data.requestGroups);
             setDisplayedActiveGroups(data.activeGroups);
         }
         catch (err) {
             console.log("Failed Sending the request to AI!", err);
-            setErrorAi("שגיאה בשליפת הנתונים מAI, אנא נסו שנית מאוחר יותר.")
+            setErrorAi("שגיאה בשליפת הנתונים מAI, אנא נסו שנית מאוחר יותר.");
         }
         finally {
             setLoadingSearch(false);
@@ -95,6 +100,7 @@ export default function SmartSearchPage() {
                 <SmartSearchHelper />
                 : (!loadingSearch ?
                     <SmartSearchComponent
+                        filterAi={filterAi}
                         errorAi={errorAi}
                         displayedActiveGroups={displayedActiveGroups}
                         displayedRequestGroups={displayedRequestGroups}

@@ -35,6 +35,9 @@ export const SmartSearchHelper = () => {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                     טיפ: ניתן גם ללחוץ Enter כדי לבצע חיפוש.
                 </Typography>
+                <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, textDecoration: "underline", fontWeight: "bold" }}>
+                    שימו לב: החיפוש החכם יציג את 4 הקבוצות/הבקשות הרלוונטיות ביותר בהתאם לטקסט המבוקש.
+                </Typography>
             </Card>
         </Container>
     );

@@ -17,10 +17,10 @@ export async function POST(req: Request) {
 
         const activeGroups: ActiveGroup[] = await fetchActiveGroups({ status: GroupStatus.OPEN });
         const requestGroups: RequestGroup[] = await fetchRequestGroups({ status: GroupStatus.OPEN });
-        const { relevantActiveGroups, relevantRequestGroups } = await aiFilteredGroups(activeGroups, requestGroups, searchText);
+        const { relevantActiveGroups, relevantRequestGroups, filtered } = await aiFilteredGroups(activeGroups, requestGroups, searchText);
         console.log(relevantActiveGroups, relevantRequestGroups);
 
-        return NextResponse.json({ activeGroups: relevantActiveGroups, requestGroups: relevantRequestGroups });
+        return NextResponse.json({ activeGroups: relevantActiveGroups, requestGroups: relevantRequestGroups, filtered });
     } catch (e) {
         console.error(e);
         return NextResponse.json({ error: "שגיאה בשליפת נתונים מAI" }, { status: 500 });

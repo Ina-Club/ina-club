@@ -6,17 +6,20 @@ import ActiveGroupCard from "../card/active-group-card"
 import { ActiveGroup, RequestGroup } from "@/lib/dal"
 
 interface SmartSearchComponentProps {
+    filterAi: boolean;
     errorAi: string | null;
     displayedActiveGroups: ActiveGroup[];
     displayedRequestGroups: RequestGroup[];
 }
 
 export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
-    errorAi, displayedActiveGroups, displayedRequestGroups
+    filterAi, errorAi, displayedActiveGroups, displayedRequestGroups
 }) => {
+    const filterAiText: string = "AI השמיט תוצאות פחות רלוונטיות, נסו למקד את החיפוש.";
     return (
         // Two-column results: left Active, right Requests
         <Container maxWidth="lg" sx={{ mb: 6 }}>
+            {filterAi && <Alert severity="info" sx={{ mb: 2 }}>{filterAiText}</Alert>}
             {errorAi && <Alert severity="error" sx={{ mb: 2 }}>{errorAi}</Alert>}
             <Box
                 sx={{
