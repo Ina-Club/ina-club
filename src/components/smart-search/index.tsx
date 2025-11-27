@@ -1,4 +1,4 @@
-import { Alert, Box, Card, Container, Typography } from "@mui/material"
+import { Alert, Box, Container, Typography } from "@mui/material"
 import { Suspense } from "react"
 import GroupSectionSkeleton from "../skeleton/group-section-skeleton"
 import RequestGroupCard from "../card/request-group-card"
@@ -6,15 +6,13 @@ import ActiveGroupCard from "../card/active-group-card"
 import { ActiveGroup, RequestGroup } from "@/lib/dal"
 
 interface SmartSearchComponentProps {
-    errorActive: string | null;
-    errorRequests: string | null;
     errorAi: string | null;
     displayedActiveGroups: ActiveGroup[];
     displayedRequestGroups: RequestGroup[];
 }
 
 export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
-    errorActive, errorRequests, errorAi, displayedActiveGroups, displayedRequestGroups
+    errorAi, displayedActiveGroups, displayedRequestGroups
 }) => {
     return (
         // Two-column results: left Active, right Requests
@@ -40,11 +38,6 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                     >
                         קבוצות מתאימות
                     </Typography>
-                    {errorActive && (
-                        <Card sx={{ p: 2, mb: 2, bgcolor: "#fff7f7", color: "#b71c1c" }}>
-                            <Typography variant="body2">{errorActive}</Typography>
-                        </Card>
-                    )}
                     <Box
                         sx={{
                             display: "grid",
@@ -54,7 +47,7 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                         }}
                     >
                         <Suspense fallback={<GroupSectionSkeleton />}>
-                            {displayedActiveGroups.length > 0 ? (
+                            {displayedActiveGroups?.length > 0 ? (
                                 displayedActiveGroups.map((ag, i) => (
                                     <ActiveGroupCard key={i} activeGroup={ag} />
                                 ))
@@ -125,11 +118,6 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                     >
                         בקשות מתאימות
                     </Typography>
-                    {errorRequests && (
-                        <Card sx={{ p: 2, mb: 2, bgcolor: "#fff7f7", color: "#b71c1c" }}>
-                            <Typography variant="body2">{errorRequests}</Typography>
-                        </Card>
-                    )}
                     <Box
                         sx={{
                             display: "grid",
@@ -139,7 +127,7 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                         }}
                     >
                         <Suspense fallback={<GroupSectionSkeleton />}>
-                            {displayedRequestGroups.length > 0 ? (
+                            {displayedRequestGroups?.length > 0 ? (
                                 displayedRequestGroups.map((rg, i) => (
                                     <RequestGroupCard key={i} requestGroup={rg} />
                                 ))
