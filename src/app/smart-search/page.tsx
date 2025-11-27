@@ -11,6 +11,7 @@ import { LoadingCircle } from "@/components/loading-circle";
 import { SMART_SEARCH_PROMPT } from "ai/prompts";
 import { SmartSearchHelper } from "@/components/smart-search/helper";
 import { SmartSearchComponent } from "@/components/smart-search";
+import { DEFAULT_PAGINATION } from "../config/pagination";
 
 export default function SmartSearchPage() {
     const headerText: string = "חיפוש חכם";
@@ -18,56 +19,45 @@ export default function SmartSearchPage() {
     const [searchText, setSearchText] = useState("");
     const [activeGroups, setActiveGroups] = useState<ActiveGroup[]>([]);
     const [displayedActiveGroups, setDisplayedActiveGroups] = useState<ActiveGroup[]>([]);
+    const [loadingActive, setLoadingActive] = useState(true);
+    const [errorActive, setErrorActive] = useState<string | null>(null);
+    const [activeCursor, setActiveCursor] = useState<string | null>(null);
     const [requestGroups, setRequestGroups] = useState<RequestGroup[]>([]);
     const [displayedRequestGroups, setDisplayedRequestGroups] = useState<RequestGroup[]>([]);
-    const [loadingActive, setLoadingActive] = useState(true);
     const [loadingRequests, setLoadingRequests] = useState(true);
+    const [errorRequests, setErrorRequests] = useState<string | null>(null);
+    const [requestsCursor, setRequestsCursor] = useState<string | null>(null);
     const [displayHelper, setDisplayHelper] = useState(true);
     const [loadingSearch, setLoadingSearch] = useState(false);
-    const [errorActive, setErrorActive] = useState<string | null>(null);
-    const [errorRequests, setErrorRequests] = useState<string | null>(null);
     const [errorAi, setErrorAi] = useState<string | null>(null);
 
     const readyForSearch: boolean = !!searchText.trim() && !loadingActive && !loadingRequests && !loadingSearch;
 
+    const params = new URLSearchParams({
+        status: "open",
+        limit: DEFAULT_PAGINATION.toString(),
+    });
+
     const loadActiveGroups = () => {
-        let active = true;
         setLoadingActive(true);
         setErrorActive(null);
-        fetch("/api/active-groups/?status=open")
+        if (activeCursor) params.set("cursor", activeCursor);
+        fetch("/api/active-groups/?" + params.toString())
             .then((r) => r.json())
-            .then((data) => {
-                if (active) setActiveGroups(data.activeGroups ?? []);
-            })
-            .catch(() => {
-                if (active) setErrorActive("שגיאה בטעינת קבוצות פעילות");
-            })
-            .finally(() => {
-                if (active) setLoadingActive(false);
-            });
-        return () => {
-            active = false;
-        };
+            .then((data) => { setActiveGroups(data.activeGroups ?? []); })
+            .catch(() => { setErrorActive("שגיאה בטעינת קבוצות פעילות"); })
+            .finally(() => { setLoadingActive(false); });
     }
 
     const loadRequestGroups = () => {
-        let active = true;
         setLoadingRequests(true);
         setErrorRequests(null);
-        fetch("/api/request-groups/?status=open")
+        if (requestsCursor) params.set("cursor", requestsCursor);
+        fetch("/api/request-groups/?" + params.toString())
             .then((r) => r.json())
-            .then((data) => {
-                if (active) setRequestGroups(data.requestGroups ?? []);
-            })
-            .catch(() => {
-                if (active) setErrorRequests("שגיאה בטעינת בקשות");
-            })
-            .finally(() => {
-                if (active) setLoadingRequests(false);
-            });
-        return () => {
-            active = false;
-        };
+            .then((data) => { setRequestGroups(data.requestGroups ?? []); })
+            .catch(() => { setErrorRequests("שגיאה בטעינת בקשות"); })
+            .finally(() => { setLoadingRequests(false); });
     }
 
     useEffect(() => {
