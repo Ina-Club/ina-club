@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateSession } from "@/lib/auth";
-import { sendRequestToAi } from "@/lib/ai";
+import { sendRequestToAi } from "@/lib/ai/ai";
 
 export async function POST(req: Request) {
   try {
