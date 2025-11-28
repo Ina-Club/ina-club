@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Skeleton,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -62,7 +63,15 @@ export default function Profile() {
   const { status } = useSession();
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
-  const { profile, loading: profileLoading, error: userError, refreshProfile } = useUserProfile();
+  const {
+    profile: profileSummary,
+    fullProfile,
+    loading: profileLoading,
+    fullLoading,
+    error: userError,
+    fullError,
+    loadFullProfile,
+  } = useUserProfile();
   const [pageError, setPageError] = useState<string | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -92,7 +101,7 @@ export default function Profile() {
 
       setPageLoading(true);
       try {
-        await refreshProfile({ force: true });
+        await loadFullProfile({ force: true });
         if (isMounted) {
           setPageError(null);
         }
@@ -117,29 +126,29 @@ export default function Profile() {
     return () => {
       isMounted = false;
     };
-  }, [refreshProfile, status]);
+  }, [loadFullProfile, status]);
 
   useEffect(() => {
-    if (profile?.name) {
-      setEditName(profile.name);
+    if (profileSummary?.name) {
+      setEditName(profileSummary.name);
     }
-  }, [profile?.name]);
+  }, [profileSummary?.name]);
 
   const handleEdit = () => {
     setEditing(true);
-    setEditName(profile?.name || '');
+    setEditName(profileSummary?.name || '');
   };
 
   const handleCancel = () => {
     setEditing(false);
-    setEditName(profile?.name || '');
+    setEditName(profileSummary?.name || '');
     setEditProfilePicture([]);
   };
 
   const handleSave = async () => {
     setUpdateLoading(true);
     try {
-      let profilePictureUrl = profile?.profilePicture;
+      let profilePictureUrl = profileSummary?.profilePicture;
       // If new profile picture uploaded, handle it here
       if (editProfilePicture.length > 0) {
         // Upload to Cloudinary
@@ -176,7 +185,7 @@ export default function Profile() {
       }
 
       await response.json();
-      await refreshProfile({ force: true });
+      await loadFullProfile({ force: true });
 
       setEditing(false);
       setEditProfilePicture([]);
@@ -227,16 +236,8 @@ export default function Profile() {
     }
   };
 
-  const isLoading = status === 'loading' || pageLoading || (profileLoading && !profile);
-  if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <LoadingCircle loadingText={"טוען את הפרופיל שלך"} />
-      </Box>
-    );
-  }
-
-  const combinedError = pageError || userError;
+  const summaryLoading = status === 'loading' || (profileLoading && !profileSummary);
+  const combinedError = pageError || userError || fullError;
   if (combinedError) {
     return (
       <Box sx={{ p: 3 }}>
@@ -245,7 +246,37 @@ export default function Profile() {
     );
   }
 
-  if (!profile) {
+  if (summaryLoading || !profileSummary) {
+    return (
+      <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 2, md: 3 } }}>
+              <Skeleton variant="circular" width={80} height={80} />
+              <Box sx={{ flexGrow: 1, width: '100%' }}>
+                <Skeleton variant="text" width="40%" height={32} />
+                <Skeleton variant="text" width="60%" />
+                <Skeleton variant="text" width="50%" />
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', md: 'auto' } }}>
+                <Skeleton variant="rectangular" height={40} sx={{ flex: 1, borderRadius: 2 }} />
+                <Skeleton variant="rectangular" height={40} sx={{ flex: 1, borderRadius: 2 }} />
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card>
+          <Box sx={{ p: 3 }}>
+            {[...Array(3)].map((_, idx) => (
+              <Skeleton key={idx} variant="rectangular" height={120} sx={{ borderRadius: 2, mb: 2 }} />
+            ))}
+          </Box>
+        </Card>
+      </Box>
+    );
+  }
+
+  if (!profileSummary) {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="warning">לא נמצא פרופיל משתמש</Alert>
@@ -254,7 +285,25 @@ export default function Profile() {
   }
 
   // Check if user has incomplete profile (no name or password)
-  const hasIncompleteProfile = !profile.name || profile.name.trim() === '';
+  const detailProfile = fullProfile;
+  const detailLoading = pageLoading || fullLoading || !detailProfile;
+
+  const hasIncompleteProfile =
+    !profileSummary.name || profileSummary.name.trim() === '';
+
+  const renderTabSkeleton = () => (
+    <Box>
+      <Skeleton variant="text" width="60%" height={28} sx={{ mb: 2 }} />
+      {[...Array(3)].map((_, idx) => (
+        <Skeleton
+          key={idx}
+          variant="rectangular"
+          height={isMdUp ? 140 : 120}
+          sx={{ borderRadius: 2, mb: 2 }}
+        />
+      ))}
+    </Box>
+  );
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
@@ -282,9 +331,9 @@ export default function Profile() {
         <CardContent>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 1, md: 3 } }}>
             <UserAvatar
-              name={profile.name}
-              identifier={profile.email}
-              imageUrl={profile.profilePicture}
+              name={profileSummary.name}
+              identifier={profileSummary.email}
+              imageUrl={profileSummary.profilePicture}
               sx={{ width: { xs: 60, md: 80 }, height: { xs: 60, md: 80 } }}
             />
             <Box sx={{ flexGrow: 1 }}>
@@ -295,15 +344,15 @@ export default function Profile() {
                   textAlign: { xs: 'center', md: 'inherit' }
                 }}
               >
-                {profile.name}
+                {profileSummary.name}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 <EmailIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
-                {profile.email}
+                {profileSummary.email}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 <CalendarIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
-                הצטרף ב-{formatDate(profile.createdAt)}
+                הצטרף ב-{formatDate(profileSummary.createdAt)}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1, marginTop: 2 }}>
@@ -410,50 +459,59 @@ export default function Profile() {
             {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={0}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שאתה פתחת ({profile.ownedRequestGroups.length})
+                בקשות שאתה פתחת ({detailProfile?.ownedRequestGroups.length ?? 0})
               </Typography>
-              {profile.ownedRequestGroups.length === 0 ? (
-                <Alert severity="info">עדיין לא יצרת בקשות</Alert>
-              ) : (
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.ownedRequestGroups.map((requestGroup, index) => (
-                    <RequestGroupCard key={index} requestGroup={requestGroup} />
-                  ))}
-                </Box>
-              )}
+              {detailLoading
+                ? renderTabSkeleton()
+                : detailProfile!.ownedRequestGroups.length === 0
+                  ? (
+                    <Alert severity="info">עדיין לא יצרת בקשות</Alert>
+                  ) : (
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                      {detailProfile!.ownedRequestGroups.map((requestGroup, index) => (
+                        <RequestGroupCard key={index} requestGroup={requestGroup} />
+                      ))}
+                    </Box>
+                  )}
             </TabPanel>
 
             {/* Request Groups Tab */}
             <TabPanel value={tabValue} index={1}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שאתה משתתף בהן ({profile.enrolledRequestGroups.length})
+                בקשות שאתה משתתף בהן ({detailProfile?.enrolledRequestGroups.length ?? 0})
               </Typography>
-              {profile.enrolledRequestGroups.length === 0 ? (
-                <Alert severity="info">לא הצטרפת לבקשות</Alert>
-              ) : (
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.enrolledRequestGroups.map((requestGroup, index) => (
-                    <RequestGroupCard key={index} requestGroup={requestGroup} />
-                  ))}
-                </Box>
-              )}
+              {detailLoading
+                ? renderTabSkeleton()
+                : detailProfile!.enrolledRequestGroups.length === 0
+                  ? (
+                    <Alert severity="info">לא הצטרפת לבקשות</Alert>
+                  ) : (
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                      {detailProfile!.enrolledRequestGroups.map((requestGroup, index) => (
+                        <RequestGroupCard key={index} requestGroup={requestGroup} />
+                      ))}
+                    </Box>
+                  )}
             </TabPanel>
 
             {/* Active Groups Tab */}
             {/* Pending Request Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                קבוצות שאתה משתתף בהן ({profile.pendingRequestGroups.length})
+                בקשות ממתינות לאישור ({detailProfile?.pendingRequestGroups.length ?? 0})
               </Typography>
-              {profile.pendingRequestGroups.length === 0 ? (
-                <Alert severity="info">לא הצטרפת לקבוצות</Alert>
-              ) : (
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {profile.pendingRequestGroups.map((requestGroup, index) => (
-                    <RequestGroupCard key={index} requestGroup={requestGroup} />
-                  ))}
-                </Box>
-              )}
+              {detailLoading
+                ? renderTabSkeleton()
+                : detailProfile!.pendingRequestGroups.length === 0
+                  ? (
+                    <Alert severity="info">אין לך בקשות ממתינות לאישור</Alert>
+                  ) : (
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                      {detailProfile!.pendingRequestGroups.map((requestGroup, index) => (
+                        <RequestGroupCard key={index} requestGroup={requestGroup} />
+                      ))}
+                    </Box>
+                  )}
             </TabPanel>
           </Box>
         </Box>

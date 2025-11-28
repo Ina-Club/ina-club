@@ -21,6 +21,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { memo, useMemo, useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 import UserAvatar from "@/components/user-avatar";
@@ -45,6 +46,16 @@ import {
 // STATIC — DOES NOT RECREATE
 // -----------------------------
 
+type MenuItemConfig = {
+  key: string;
+  href: string | null;
+  label: string;
+  icon: typeof PersonIcon;
+  color?: string;
+  bg?: string;
+  action?: "logout";
+};
+
 const NAV_ITEMS = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
   { title: "קבוצות פעילות", href: "/active-groups", icon: GroupIcon },
@@ -58,12 +69,12 @@ const MOBILE_ITEMS = [
   { title: "מועדפים", href: "/favorites", icon: FavoriteIcon },
 ];
 
-const LOGGED_IN_MENU = [
+const LOGGED_IN_MENU: MenuItemConfig[] = [
   { key: "profile", href: "/profile", label: "פרופיל", icon: PersonIcon, color: "#64748b" },
   { key: "logout", href: null, label: "התנתק", icon: LogoutIcon, color: "#dc2626", action: "logout" },
 ];
 
-const LOGGED_OUT_MENU = [
+const LOGGED_OUT_MENU: MenuItemConfig[] = [
   { key: "signin", href: "/auth/signin", label: "התחברות", icon: LoginIcon, color: "#64748b" },
   { key: "signup", href: "/auth/signup", label: "הרשמה", icon: HowToRegIcon, color: "#fff", bg: "#1a2a5a" },
 ];
@@ -77,8 +88,8 @@ function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const { data: session, status } = useSession();
   const { profile } = useUserProfile();
-  const loggedIn = !!profile;
 
   // compute selected tab
   const currentTab = useMemo(
@@ -95,7 +106,6 @@ function Header() {
     []
   );
 
-  const menuItems = loggedIn ? LOGGED_IN_MENU : LOGGED_OUT_MENU;
 
   const handleMenuOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(e.currentTarget);
@@ -106,7 +116,7 @@ function Header() {
   }, []);
 
   const handleItemClick = useCallback(
-    (item) => {
+    (item: MenuItemConfig) => {
       handleMenuClose();
 
       if (item.action === "logout") {
@@ -120,9 +130,11 @@ function Header() {
     [handleMenuClose, router]
   );
 
-  const memoUserName = profile?.name || "";
-  const memoUserIdentifier = profile?.email || "";
-  const memoUserImage = profile?.profilePicture || null;
+  const memoUserName = profile?.name || session?.user?.name || "";
+  const memoUserIdentifier = profile?.email || session?.user?.email || "";
+  const memoUserImage = profile?.profilePicture || session?.user?.image || null;
+  const loggedIn = status === "authenticated" && !!profile;
+  const menuItems: MenuItemConfig[] = loggedIn ? LOGGED_IN_MENU : LOGGED_OUT_MENU;
 
   return (
     <>
