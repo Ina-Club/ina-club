@@ -1,11 +1,12 @@
-import { Typography } from "@mui/material";
+import { SxProps, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 interface CountdownProps {
   deadline: Date;
+  sx?: SxProps;
 }
 
-const Countdown: React.FC<CountdownProps> = ({ deadline }) => {
+const Countdown: React.FC<CountdownProps> = ({ deadline, sx }) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   useEffect(() => {
@@ -38,7 +39,7 @@ const Countdown: React.FC<CountdownProps> = ({ deadline }) => {
   }, [deadline]);
 
   return (
-    <Typography variant="body2" color="text.secondary" gutterBottom>
+    <Typography variant="body2" color="text.secondary" gutterBottom sx={{...sx}}>
       {timeLeft}
     </Typography>
   );

@@ -15,9 +15,13 @@ Instructions:
 - Output MUST follow the provided response schema exactly and be valid JSON only (no extra text):
   {
     "requestGroups": string[],
-    "activeGroups": string[]
+    "activeGroups": string[],
+    "filtered": boolean
   }
 - For each relevant item, include ONLY its id property (as if you could access it via Object.id) inside the corresponding array.
+- filtered property is false by default.
+- Each array can be consisted of {groupAmount} IDs at most.
+- If any of the arrays is longer than {groupAmount}, filter out the less relevant items, leave only the {groupAmount} most relevant and set filtered property to true.
 - If no items are relevant, return both arrays as empty arrays.
 - Never return an empty object. Always include both keys as arrays.
 `;

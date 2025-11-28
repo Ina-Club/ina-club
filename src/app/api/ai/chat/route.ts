@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
-import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { validateSession } from "@/lib/auth";
-
-export const runtime = "nodejs";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!, // keep it server-side
-});
+import { sendRequestToAi } from "@/lib/ai/ai";
 
 export async function POST(req: Request) {
   try {
@@ -14,24 +8,8 @@ export async function POST(req: Request) {
     if (response) return response;
 
     const { prompt, schema } = await req.json();
-    const resp = await ai.models.generateContent({
-      model: process.env.GEMINI_MODEL!, // TODO: replace the model with something updated. Currently Gemini free trial is up to date to 2024.
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",   // force JSON
-        responseSchema: { schema },
-        safetySettings: [
-          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-        ],
-      },
-    });
-    console.log(resp.text);
-    return new NextResponse(resp.text);
-
+    const aiResponse: string | undefined = await sendRequestToAi(prompt, schema);
+    return new NextResponse(aiResponse);
   }
   catch (e) {
     console.error(e);

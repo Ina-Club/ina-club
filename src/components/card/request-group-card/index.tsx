@@ -59,7 +59,8 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       sx={{
         borderRadius: 4,
         boxShadow: !isOpen && !isPreview ? 1 : 3,
-        width: "100%",
+        flex: 1,
+        overflowWrap: "anywhere",
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
         display: "flex",
@@ -77,14 +78,16 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       }}
     >
       {/* Image Section */}
-      <Box sx={{ position: "relative" }}>
+      <Box sx={{ position: "relative", pt: "50%" }}>
         <CardMedia
           component="img"
           image={requestGroup.images[currentImage]}
           alt={requestGroup.title}
           sx={{
-            height: 150,
+            position: "absolute",
+            inset: 0,
             width: "100%",
+            height: "100%",
             objectFit: "cover",
             opacity: !isOpen && !isPreview ? 0.6 : 1,
           }}
@@ -213,7 +216,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         onClick={handleRequestGroupClick}
       >
         {/* Title */}
-        <Typography variant="h6" fontWeight={600} gutterBottom>
+        <Typography variant="h6" fontWeight={600} gutterBottom noWrap>
           {requestGroup.title}
         </Typography>
 
@@ -223,7 +226,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         </Typography>
 
         {/* Participants */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
           <PeopleAltOutlinedIcon
             sx={{ fontSize: 18, mr: 0.5, color: "primary.main" }}
           />
@@ -241,13 +244,13 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         </Box>
 
         {/* Groups Info */}
-        {requestGroup.openedGroups.length ? (
+        {requestGroup.openedGroups?.length ? (
           <Alert
             severity="success"
             sx={{
               borderRadius: 2,
               px: 1.5,
-              py: "2px",
+              py: "3.3px", // This particular amount is to make the smart-search cards be the exact same size
               bgcolor: "#e3e7f5",
               color: "#1a2a5a",
               fontSize: "0.75rem",
@@ -275,7 +278,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
               },
               borderRadius: 2,
               px: 1.5,
-              py: "2px",
+              py: "3.3px",
             }}
           >
             <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#ff8c42" }}>

@@ -27,7 +27,8 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
       sx={{
         borderRadius: 4,
         boxShadow: 3,
-        width: "100%",
+        flex: 1,
+        overflowWrap: "anywhere",
         overflow: "hidden",
         transition: "transform 0.25s, box-shadow 0.25s",
         display: "flex",
@@ -42,14 +43,16 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
       onClick={goToActiveGroup}
     >
       {/* Image Section */}
-      <Box sx={{ position: "relative" }}>
+      <Box sx={{ position: "relative", pt: "50%" }}>
         <CardMedia
           component="img"
           image={activeGroup.images[currentImage]}
           alt={activeGroup.title}
           sx={{
-            height: 150,
+            position: "absolute",
+            inset: 0,
             width: "100%",
+            height: "100%",
             objectFit: "cover",
           }}
         />
@@ -166,10 +169,10 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         </Box>
 
         {/* Countdown */}
-        <Countdown deadline={activeGroup.deadline} />
+        <Countdown deadline={activeGroup.deadline} sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", m: 0 }} />
 
         {/* Participants */}
-        <Box sx={{ mb: 2 }}>
+        <Box>
           <ParticipantsProgress
             current={activeGroup.participants.length}
             min={activeGroup.minParticipants}

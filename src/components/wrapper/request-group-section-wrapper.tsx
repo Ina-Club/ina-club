@@ -47,11 +47,10 @@ const RequestGroupSectionWrapper: React.FC<
               key={i}
               sx={{
                 display: "flex",
-                width: "100%",
-                height: "100%",
+                minWidth: 250,
+                minHeight: 250
               }}
             >
-              {" "}
               <RequestGroupCardSkeleton key={i} />
             </Box>
           ))
@@ -61,8 +60,8 @@ const RequestGroupSectionWrapper: React.FC<
               key={index}
               sx={{
                 display: "flex",
-                width: "100%",
-                height: "100%",
+                minWidth: 250,
+                minHeight: 250
               }}
             >
               <RequestGroupCard requestGroup={requestGroup} />

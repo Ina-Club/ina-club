@@ -12,8 +12,9 @@ const ParticipantsProgress: React.FC<ParticipantsProgressProps> = ({ current, mi
     return max ? Math.min((current / max) * 100, 100) : 100
   };
   const createBarTitle = () => {
-    let title = `${current} משתתפים`;
-    if (max) title += (` מתוך ${max}`);
+    let title: string = `${current}`;
+    if (max) title += (`/${max}`);
+    title += ' משתתפים';
     if (min) title += (`, מינימום  ${min}`);
     return title += '.';
   }

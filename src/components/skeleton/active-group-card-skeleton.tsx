@@ -8,7 +8,7 @@ export default function ActiveGroupCardSkeleton() {
       sx={{
         borderRadius: 4,
         boxShadow: 3,
-        width: "100%",
+        flex: 1,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -64,16 +64,20 @@ export default function ActiveGroupCardSkeleton() {
       {/* Content Section */}
       <CardContent sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
         {/* Title */}
-        <Skeleton variant="text" width="60%" height={28} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="60%" height={35} sx={{ mb: 1 }} />
 
         {/* Price Section */}
-        <Skeleton variant="text" width="40%" height={24} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="20%" height={18} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="25%" height={24} sx={{ mb: 1 }} />
 
         {/* Countdown */}
-        <Skeleton variant="text" width="30%" height={20} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="20%" height={18} sx={{ mb: 1 }} />
 
         {/* Participants */}
-        <Skeleton variant="rounded" height={40} />
+        <Skeleton variant="text" width="30%" height={18} sx={{ mb: 1 }} />
+
+        {/* Gauge */}
+        <Skeleton variant="rounded" height={10} />
       </CardContent>
     </Card>
   );

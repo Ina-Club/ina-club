@@ -239,9 +239,10 @@ export default function CreateRequestGroupPage() {
                     value={title}
                     onChange={(e) => handleTitleChange(e.target.value)}
                     error={!!validationErrors.title || !!validationErrors.duplicate}
-                    helperText={validationErrors.title || validationErrors.duplicate}
+                    helperText={validationErrors.title || validationErrors.duplicate || `${title.length}/30 תווים`}
                     required
                     fullWidth
+                    slotProps={{ htmlInput: { maxLength: 30 } }}
                   />
                   <Tooltip
                     title="תיאור מפורט משפר את סיכויי האישור"
@@ -253,11 +254,12 @@ export default function CreateRequestGroupPage() {
                       value={description}
                       onChange={(e) => handleDescriptionChange(e.target.value)}
                       error={!!validationErrors.description}
-                      helperText={validationErrors.description}
+                      helperText={validationErrors.description || `${description.length}/250 תווים`}
                       multiline
                       minRows={5}
                       required
                       fullWidth
+                      slotProps={{ htmlInput: { maxLength: 250 } }}
                     />
                   </Tooltip>
                   <TextField
