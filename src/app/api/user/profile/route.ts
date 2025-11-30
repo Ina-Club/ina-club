@@ -65,9 +65,9 @@ export async function GET(request: Request) {
                   include: {
                     user: {
                       select: {
-                        id: true,
+                        // id: true,
                         name: true,
-                        email: true,
+                        // email: true,
                         profilePicture: { select: { url: true } }
                       }
                     }
@@ -100,9 +100,9 @@ export async function GET(request: Request) {
                   include: {
                     user: {
                       select: {
-                        id: true,
+                        // id: true,
                         name: true,
-                        email: true,
+                        // email: true,
                         profilePicture: { select: { url: true } }
                       }
                     }
@@ -127,9 +127,9 @@ export async function GET(request: Request) {
               include: {
                 user: {
                   select: {
-                    id: true,
+                    // id: true,
                     name: true,
-                    email: true,
+                    // email: true,
                     profilePicture: { select: { url: true } }
                   }
                 }
@@ -158,9 +158,9 @@ export async function GET(request: Request) {
               include: {
                 user: {
                   select: {
-                    id: true,
+                    // id: true,
                     name: true,
-                    email: true,
+                    // email: true,
                     profilePicture: { select: { url: true } }
                   }
                 }
@@ -195,10 +195,10 @@ export async function GET(request: Request) {
           joinedAt: membership.joinedAt,
           images: membership.requestGroup.images.length ? membership.requestGroup.images.map(img => img.image.url) : ["/InaClubLogo.png"],
           participants: membership.requestGroup.participants.map(p => ({
-            id: p.user.id,
+            // id: p.user.id,
             name: p.user.name || "",
             image: p.user.profilePicture?.url || "",
-            mail: p.user.email
+            // mail: p.user.email
           })),
           openedGroups: membership.requestGroup.activeGroups.map(ag => ({ id: ag.id }))
         })),
@@ -211,10 +211,10 @@ export async function GET(request: Request) {
         basePrice: membership.activeGroup.basePrice,
         groupPrice: membership.activeGroup.groupPrice,
         participants: membership.activeGroup.participants.map(p => ({
-          id: p.user.id,
+          // id: p.user.id,
           name: p.user.name || "",
           image: p.user.profilePicture?.url || "",
-          mail: p.user.email
+          // mail: p.user.email
         })),
         minParticipants: membership.activeGroup.minParticipants,
         maxParticipants: membership.activeGroup.maxParticipants,
@@ -261,10 +261,10 @@ export async function GET(request: Request) {
           createdAt: group.createdAt,
           images: group.images.length ? group.images.map(img => img.image.url) : ["/InaClubLogo.png"],
           participants: group.participants.map(p => ({
-            id: p.user.id,
+            // id: p.user.id,
             name: p.user.name || "",
             image: p.user.profilePicture?.url || "",
-            mail: p.user.email
+            // mail: p.user.email
           })),
           openedGroups: group.activeGroups.map(ag => ({ id: ag.id }))
         }))

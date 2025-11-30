@@ -49,9 +49,9 @@ export default async function ActiveGroupDetail({
         select: {
           user: {
             select: {
-              id: true,
+              // id: true,
               name: true,
-              email: true,
+              // email: true,
               profilePicture: { select: { url: true } },
             },
           },

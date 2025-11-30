@@ -14,9 +14,9 @@ export const fetchRequestGroups = async (whereData: object) => {
                 select: {
                     user: {
                         select: {
-                            id: true,
+                            // id: true,
                             name: true,
-                            email: true,
+                            // email: true,
                             profilePicture: { select: { url: true } },
                         },
                     },
@@ -38,10 +38,10 @@ export const fetchRequestGroups = async (whereData: object) => {
         category: r.category?.name ?? "",
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
-            id: p.user.id,
+            // id: p.user.id,
             name: p.user.name ?? "",
             image: p.user.profilePicture?.url ?? "",
-            mail: p.user.email,
+            // mail: p.user.email,
         })),
         // TODO: Remove
         // openedGroups: r.activeGroups.map((ag) => ({ id: ag.id })),
@@ -65,9 +65,9 @@ export const fetchActiveGroups = async (whereData: object) => {
                 select: {
                     user: {
                         select: {
-                            id: true,
+                            // id: true,
                             name: true,
-                            email: true,
+                            // email: true,
                             profilePicture: { select: { url: true } },
                         },
                     },
@@ -94,10 +94,10 @@ export const fetchActiveGroups = async (whereData: object) => {
         deadline: r.deadline,
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
-            id: p.user.id,
+            // id: p.user.id,
             name: p.user.name ?? "",
             image: p.user.profilePicture?.url ?? "",
-            mail: p.user.email,
+            // mail: p.user.email,
         })),
         minParticipants: r.minParticipants,
         maxParticipants: r.maxParticipants

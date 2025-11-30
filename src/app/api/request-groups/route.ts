@@ -57,9 +57,9 @@ export async function GET(req: Request) {
           select: {
             user: {
               select: {
-                id: true,
+                // id: true,
                 name: true,
-                email: true,
+                // email: true,
                 profilePicture: { select: { url: true } },
               },
             },
@@ -92,10 +92,10 @@ export async function GET(req: Request) {
         ? r.images.map((ri) => ri.image.url)
         : ["/InaClubLogo.png"],
       participants: r.participants.map((p) => ({
-        id: p.user.id,
+        // id: p.user.id,
         name: p.user.name ?? "",
         image: p.user.profilePicture?.url ?? "",
-        mail: p.user.email,
+        // mail: p.user.email,
       })),
       // TODO: Remove
       openedGroups: r.activeGroups.map((ag) => ({ id: ag.id })),
