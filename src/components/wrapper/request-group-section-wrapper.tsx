@@ -16,7 +16,7 @@ const RequestGroupSectionWrapper: React.FC<
 > = () => {
   const [allOpenRequestGroupsWithParent, setAllOpenRequestGroupsWithParent] =
     useState<RequestGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -25,10 +25,10 @@ const RequestGroupSectionWrapper: React.FC<
     const append = opts?.append ?? false;
     const nextCursor = opts?.cursor ?? null;
     if (append) {
-      if (!nextCursor || loadingMore || loading) return;
+      if (!nextCursor || loadingMore || initialLoading) return;
       setLoadingMore(true);
     } else {
-      setLoading(true);
+      setInitialLoading(true);
     }
 
     const params = new URLSearchParams({
@@ -55,7 +55,7 @@ const RequestGroupSectionWrapper: React.FC<
       if (!append) setAllOpenRequestGroupsWithParent([]);
     } finally {
       if (append) setLoadingMore(false);
-      else setLoading(false);
+      else setInitialLoading(false);
     }
   };
 
@@ -76,7 +76,7 @@ const RequestGroupSectionWrapper: React.FC<
         loadingMore={loadingMore}
         onLoadMore={() => fetchPage({ cursor, append: true })}
       >
-        {loading ? (
+        {initialLoading ? (
           Array.from({ length: 6 }).map((_, i) => (
             <Box
               key={i}
