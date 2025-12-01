@@ -77,7 +77,8 @@ const ResponsiveHorizontalListWrapper: React.FC<{
     ? children.map((child, i) =>
         cloneElement(child as React.ReactElement, {
           key: i,
-          style: { ...(child as any).props.style, flex: `0 0 ${itemWidth}px` },
+          style: { ...(child as any).props.style,
+          flex: `0 0 ${itemWidth}px` },
         })
       )
     : children;
