@@ -2,6 +2,7 @@
 
 import {
   Box,
+  CircularProgress,
   TabScrollButton,
   debounce,
   ownerWindow,
@@ -15,7 +16,10 @@ import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 const ResponsiveHorizontalListWrapper: React.FC<{
   children: React.ReactNode;
   gap?: string;
-}> = ({ children, gap }) => {
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  loadingMore?: boolean;
+}> = ({ children, gap, onLoadMore, hasMore = false, loadingMore = false }) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const {
@@ -27,6 +31,35 @@ const ResponsiveHorizontalListWrapper: React.FC<{
   } = useHorizontalNavigationWrapper();
 
   const [itemWidth, setItemWidth] = useState<number>();
+
+  const maybeLoadMore = useCallback(() => {
+    if (!onLoadMore || !hasMore || loadingMore) return;
+    const el = wrapperRef.current;
+    if (!el) return;
+    const threshold = 40;
+    const distanceToEnd = el.scrollWidth - el.clientWidth - el.scrollLeft;
+    if (distanceToEnd <= threshold) {
+      onLoadMore();
+    }
+  }, [hasMore, loadingMore, onLoadMore, wrapperRef]);
+
+  const triggerLoadMore = useCallback(() => {
+    if (!onLoadMore || !hasMore || loadingMore) return;
+    onLoadMore();
+  }, [hasMore, loadingMore, onLoadMore]);
+
+  const onScrollDesktop = useCallback(() => {
+    handleTabsScroll();
+    maybeLoadMore();
+  }, [handleTabsScroll, maybeLoadMore]);
+
+  const onEndClick = useCallback(() => {
+    handleEndScrollClick();
+    setTimeout(() => {
+      maybeLoadMore();
+      triggerLoadMore();
+    }, 0);
+  }, [handleEndScrollClick, maybeLoadMore, triggerLoadMore]);
 
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -60,17 +93,20 @@ const ResponsiveHorizontalListWrapper: React.FC<{
         padding: 1,
         overflowX: "auto", // fixed horizontal scroll for mobile
       }}
+      onScroll={maybeLoadMore}
     >
       {styledChildren}
     </Box>
   ) : (
     <HorizontalNavigationWrapper
       handleStartScrollClick={handleStartScrollClick}
-      handleEndScrollClick={handleEndScrollClick}
+      handleEndScrollClick={onEndClick}
       displayScroll={displayScroll}
+      loadingMore={loadingMore}
+      hasMore={hasMore}
     >
       <Box
-        onScroll={handleTabsScroll}
+        onScroll={onScrollDesktop}
         ref={wrapperRef}
         sx={{
           display: "flex",
@@ -104,46 +140,56 @@ const HorizontalNavigationWrapper: React.FC<{
   handleStartScrollClick: () => void;
   handleEndScrollClick: () => void;
   displayScroll: any;
+  loadingMore?: boolean;
+  hasMore?: boolean;
 }> = ({
   children,
   handleStartScrollClick,
   handleEndScrollClick,
   displayScroll,
+  loadingMore = false,
+  hasMore = false,
 }) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "flex-start",
-      width: "100%",
-      height: "100%",
-      position: "relative",
-    }}
-  >
-    <StyledTabScrollButton
-      orientation="horizontal"
-      direction="right"
-      onClick={handleStartScrollClick}
-      disabled={!displayScroll.start}
+    <Box
       sx={{
-        left: "-20px",
-        zIndex: 2,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        width: "100%",
+        height: "100%",
+        position: "relative",
       }}
-    />
-    {children}
-    <StyledTabScrollButton
-      orientation="horizontal"
-      direction="left"
-      onClick={handleEndScrollClick}
-      disabled={!displayScroll.end}
-      sx={{
-        right: "-20px",
-        zIndex: 2,
-      }}
-    />
-  </Box>
-);
+    >
+      <StyledTabScrollButton
+        orientation="horizontal"
+        direction="right"
+        onClick={handleStartScrollClick}
+        disabled={!displayScroll.start}
+        sx={{
+          left: "-20px",
+          zIndex: 2,
+        }}
+      />
+      {children}
+
+      {loadingMore && hasMore ? (
+        <CircularProgress size={20} sx={{
+          left: "-20px",
+          zIndex: 2,
+        }} />
+      ) : <StyledTabScrollButton
+        orientation="horizontal"
+        direction="left"
+        onClick={handleEndScrollClick}
+        disabled={!displayScroll.end && !loadingMore}
+        sx={{
+          right: "-20px",
+          zIndex: 2,
+        }}
+      />}
+    </Box>
+  );
 
 const useHorizontalNavigationWrapper = () => {
   const [displayScroll, setDisplayScroll] = useState({
@@ -256,7 +302,7 @@ function animate(
   element: any,
   to: any,
   options = {},
-  cb: any = () => {}
+  cb: any = () => { }
 ) {
   const {
     ease = easeInOutSin,

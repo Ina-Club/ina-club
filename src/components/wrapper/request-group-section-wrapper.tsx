@@ -7,6 +7,7 @@ import SectionWrapper from "./section-wrapper";
 import { RequestGroup } from "lib/dal";
 import { useState, useEffect } from "react";
 import RequestGroupCardSkeleton from "../skeleton/request-group-card-skeleton";
+import { DEFAULT_PAGINATION } from "@/app/config/pagination";
 
 interface RequestGroupSectionWrapperProps {}
 
@@ -16,21 +17,50 @@ const RequestGroupSectionWrapper: React.FC<
   const [allOpenRequestGroupsWithParent, setAllOpenRequestGroupsWithParent] =
     useState<RequestGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchPage = async (opts?: { cursor?: string | null; append?: boolean }) => {
+    const append = opts?.append ?? false;
+    const nextCursor = opts?.cursor ?? null;
+    if (append) {
+      if (!nextCursor || loadingMore || loading) return;
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
+    const params = new URLSearchParams({
+      status: "open",
+      lastWeek: "true",
+      // limit: DEFAULT_PAGINATION.toString(),
+      limit: '4'
+    });
+    if (nextCursor) params.set("cursor", nextCursor);
+
+    try {
+      const res = await fetch("/api/request-groups/?" + params.toString());
+      const data = await res.json();
+      const incoming: RequestGroup[] = data.requestGroups ?? [];
+      setCursor(data.nextCursor ?? null);
+      setHasMore(!!data.nextCursor);
+      setAllOpenRequestGroupsWithParent((prev) => {
+        if (!append) return incoming;
+        const seen = new Set(prev.map((r) => r.id));
+        const filtered = incoming.filter((r) => !seen.has(r.id));
+        return [...prev, ...filtered];
+      });
+    } catch {
+      if (!append) setAllOpenRequestGroupsWithParent([]);
+    } finally {
+      if (append) setLoadingMore(false);
+      else setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let active = true;
-    fetch("/api/request-groups/?status=open&lastWeek=true")
-      .then((r) => r.json())
-      .then((data) => {
-        if (active) setAllOpenRequestGroupsWithParent(data.requestGroups ?? []);
-      })
-      .catch(() => setAllOpenRequestGroupsWithParent([]))
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+    fetchPage();
   }, []);
 
   return (
@@ -40,7 +70,12 @@ const RequestGroupSectionWrapper: React.FC<
       linkLabel="צפה בכל הבקשות"
       linkUrl="/request-groups"
     >
-      <ResponsiveHorizontalListWrapper gap="16px">
+      <ResponsiveHorizontalListWrapper
+        gap="16px"
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+        onLoadMore={() => fetchPage({ cursor, append: true })}
+      >
         {loading ? (
           Array.from({ length: 6 }).map((_, i) => (
             <Box
