@@ -7,6 +7,7 @@ import ActiveGroupCard from "../card/active-group-card";
 import { useState, useEffect } from "react";
 import { ActiveGroup } from "lib/dal";
 import ActiveGroupCardSkeleton from "../skeleton/active-group-card-skeleton";
+import { DEFAULT_PAGINATION } from "@/app/config/pagination";
 
 interface GroupSectionWrapperProps { }
 
@@ -14,21 +15,50 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
   const [allOpenActiveGroupsWithParent, setAllOpenActiveGroupsWithParent] =
     useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchPage = async (opts?: { cursor?: string | null; append?: boolean }) => {
+    const append = opts?.append ?? false;
+    const nextCursor = opts?.cursor ?? null;
+    if (append) {
+      if (!nextCursor || loadingMore || loading) return;
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
+    const params = new URLSearchParams({
+      status: "open",
+      lastWeek: "true",
+      // limit: DEFAULT_PAGINATION.toString(),
+      limit: '4'
+    });
+    if (nextCursor) params.set("cursor", nextCursor);
+
+    try {
+      const res = await fetch("/api/active-groups/?" + params.toString());
+      const data = await res.json();
+      const incoming: ActiveGroup[] = data.activeGroups ?? [];
+      setCursor(data.nextCursor ?? null);
+      setHasMore(!!data.nextCursor);
+      setAllOpenActiveGroupsWithParent((prev) => {
+        if (!append) return incoming;
+        const seen = new Set(prev.map((r) => r.id));
+        const filtered = incoming.filter((r) => !seen.has(r.id));
+        return [...prev, ...filtered];
+      });
+    } catch {
+      if (!append) setAllOpenActiveGroupsWithParent([]);
+    } finally {
+      if (append) setLoadingMore(false);
+      else setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let active = true;
-    fetch("/api/active-groups/?status=open&lastWeek=true")
-      .then((r) => r.json())
-      .then((data) => {
-        if (active) setAllOpenActiveGroupsWithParent(data.activeGroups ?? []);
-      })
-      .catch(() => setAllOpenActiveGroupsWithParent([]))
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+    fetchPage();
   }, []);
 
   return (
@@ -39,7 +69,12 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
         linkLabel={`צפה בכל הקבוצות`}
         linkUrl={`/activeGroups`}
       >
-        <ResponsiveHorizontalListWrapper gap="16px">
+        <ResponsiveHorizontalListWrapper
+          gap="16px"
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          onLoadMore={() => fetchPage({ cursor, append: true })}
+        >
           {loading ? (
             Array.from({ length: 6 }).map((_, index) => (
               <Box
