@@ -7,6 +7,7 @@ import { Company } from "lib/dal";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import CompanyCardSkeleton from "@/components/skeleton/company-card-skeleton";
 import CompanyCard from "@/components/card/company-card";
+import { MAX_PAGINATION_LIMIT } from "../config/pagination";
 
 export default function Page() {
     const headerText = "חברות שותפות";
@@ -19,7 +20,8 @@ export default function Page() {
     useEffect(() => {
         let active = true;
         setLoading(true);
-        fetch("/api/companies")
+        // TODO: We don't want to paginate the companies page, keep it like this until needed
+        fetch(`/api/companies?limit=${MAX_PAGINATION_LIMIT.toString()}`)
             .then((r) => r.json())
             .then((data) => {
                 if (active) setAllCompanies(data.companies ?? []);
