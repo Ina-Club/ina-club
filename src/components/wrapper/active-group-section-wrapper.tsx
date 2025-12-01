@@ -32,8 +32,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
     const params = new URLSearchParams({
       status: "open",
       lastWeek: "true",
-      // limit: DEFAULT_PAGINATION.toString(),
-      limit: '4'
+      limit: DEFAULT_PAGINATION.toString()
     });
     if (nextCursor) params.set("cursor", nextCursor);
 
