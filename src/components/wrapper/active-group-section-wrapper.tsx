@@ -14,7 +14,7 @@ interface GroupSectionWrapperProps { }
 const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
   const [allOpenActiveGroupsWithParent, setAllOpenActiveGroupsWithParent] =
     useState<ActiveGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -23,10 +23,10 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
     const append = opts?.append ?? false;
     const nextCursor = opts?.cursor ?? null;
     if (append) {
-      if (!nextCursor || loadingMore || loading) return;
+      if (!nextCursor || loadingMore || initialLoading) return;
       setLoadingMore(true);
     } else {
-      setLoading(true);
+      setInitialLoading(true);
     }
 
     const params = new URLSearchParams({
@@ -53,7 +53,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
       if (!append) setAllOpenActiveGroupsWithParent([]);
     } finally {
       if (append) setLoadingMore(false);
-      else setLoading(false);
+      else setInitialLoading(false);
     }
   };
 
@@ -75,7 +75,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
           loadingMore={loadingMore}
           onLoadMore={() => fetchPage({ cursor, append: true })}
         >
-          {loading ? (
+          {initialLoading ? (
             Array.from({ length: 6 }).map((_, index) => (
               <Box
                 key={index}
