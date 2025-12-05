@@ -36,9 +36,9 @@ const ResponsiveHorizontalListWrapper: React.FC<{
     if (!onLoadMore || !hasMore || loadingMore) return;
     const el = wrapperRef.current;
     if (!el) return;
-    const threshold = 40;
-    const distanceToEnd = el.scrollWidth - el.clientWidth - el.scrollLeft;
-    if (distanceToEnd <= threshold) {
+    const fetchThreshold = 40; // When 40px from the end of the list, attempt to fetch more
+    const distanceToEnd = el.scrollWidth - (el.clientWidth - el.scrollLeft);
+    if (distanceToEnd <= fetchThreshold) {
       onLoadMore();
     }
   }, [hasMore, loadingMore, onLoadMore, wrapperRef]);
