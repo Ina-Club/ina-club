@@ -3,6 +3,7 @@
 import useHorizontalNavigationWrapper from "@/hooks/use-horizontal-navigation-wrapper";
 import {
   Box,
+  CircularProgress,
   ownerWindow,
   useMediaQuery,
   useTheme,
@@ -33,8 +34,8 @@ const ResponsiveHorizontalListWrapper: React.FC<{
     if (!onLoadMore || !hasMore || loadingMore) return;
     const el = wrapperRef.current;
     if (!el) return;
-    const fetchThreshold = 40; // When 40px from the end of the list, attempt to fetch more
-    const distanceToEnd = el.scrollWidth - (el.clientWidth - el.scrollLeft);
+    const fetchThreshold: number = 40; // When 40px from the end of the list, attempt to fetch more
+    const distanceToEnd: number = el.scrollWidth - (el.clientWidth - el.scrollLeft);
     if (distanceToEnd <= fetchThreshold) {
       onLoadMore();
     }
@@ -83,19 +84,27 @@ const ResponsiveHorizontalListWrapper: React.FC<{
     : children;
 
   return !isDesktop ? (
-    <Box
-      ref={wrapperRef}
-      sx={{
-        display: "flex",
-        justifyContent: "flex-start",
-        width: "100%",
-        gap: gap || "10px",
-        padding: 1,
-        overflowX: "auto", // fixed horizontal scroll for mobile
-      }}
-      onScroll={maybeLoadMore}
-    >
-      {styledChildren}
+    <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+      <Box
+        ref={wrapperRef}
+        sx={{
+          display: "flex",
+          justifyContent: "flex-start",
+          width: "100%",
+          gap: gap || "10px",
+          padding: 1,
+          overflowX: "auto", // fixed horizontal scroll for mobile
+        }}
+        onScroll={maybeLoadMore}
+      >
+        {styledChildren}
+      </Box>
+      {loadingMore && hasMore && (
+        <CircularProgress size={30} sx={{
+          left: "-30px",
+          zIndex: 2,
+        }} />
+      )}
     </Box>
   ) : (
     <HorizontalNavigationWrapper
