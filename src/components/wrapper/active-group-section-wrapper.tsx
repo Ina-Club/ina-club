@@ -66,7 +66,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
         title={`הקבוצות הפופולריות`}
         subTitle={`קבוצות הרכישה החמות של השבוע האחרון`}
         linkLabel={`צפה בכל הקבוצות`}
-        linkUrl={`/activeGroups`}
+        linkUrl={`/active-groups`}
       >
         <ResponsiveHorizontalListWrapper
           gap="16px"
