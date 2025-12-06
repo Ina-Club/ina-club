@@ -12,5 +12,6 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
     return () => clearTimeout(handle);
   }, [value, delay]);
 
+  // This is being returned only AFTER delay time has passed without change to the debounced value.
   return debounced;
 }

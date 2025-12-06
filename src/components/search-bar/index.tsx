@@ -6,7 +6,7 @@ import { Dispatch, SetStateAction } from 'react';
 interface SearchBarProps {
     searchText: string;
     placeholderText?: string;
-    handleSearchTextChange: Dispatch<SetStateAction<string>>;
+    handleSearchTextChange: (value: string) => void;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({ searchText, placeholderText = "", handleSearchTextChange }) => {

@@ -15,11 +15,11 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
-  const debounceDelay: number = 500; //Time in milliseconds
+  const debounceDelay: number = 400; //Time in milliseconds
   const [openRequestGroups, setOpenRequestGroups] = useState<RequestGroup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({
+    searchText: "",
     categories: [],
     locations: [],
     popularities: []
@@ -32,21 +32,28 @@ export default function Page() {
       status: "open",
       limit: MAX_PAGINATION_LIMIT.toString(),
     });
-    const trimmedSearch = searchText.trim();
+    const trimmedSearch = filterState.searchText.trim();
     if (cursor) params.set("cursor", cursor);
     if (trimmedSearch) params.set("search", trimmedSearch);
     debouncedParams.categories.forEach((category) => params.append("category", category));
     return params.toString();
   }
 
+  const handleSearchTextChange = (newText: string) => {
+    setFilterState((prev) => ({ ...prev, searchText: newText }));
+  }
+
   useEffect(() => {
     setLoading(true);
     const controller = new AbortController();
     const urlParams: string = buildParams();
-    
+
     fetch('/api/request-groups/?' + urlParams, { signal: controller.signal })
       .then(r => r.json())
-      .then(data => { setOpenRequestGroups(data.requestGroups ?? []) })
+      .then(data => {
+        setOpenRequestGroups(data.requestGroups ?? []);
+        setCursor(data.nextCursor ?? null);
+      })
       .catch((err) => {
         if (err?.name === "AbortError") return;
         setOpenRequestGroups([]);
@@ -78,7 +85,7 @@ export default function Page() {
           }
         }}
       >
-        <SearchBar searchText={searchText} placeholderText="חיפוש בקשות..." handleSearchTextChange={setSearchText} />
+        <SearchBar searchText={filterState.searchText} placeholderText="חיפוש בקשות..." handleSearchTextChange={handleSearchTextChange} />
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
