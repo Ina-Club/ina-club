@@ -1,6 +1,6 @@
 "use client";
 
-import useHorizontalNavigationWrapper from "@/hooks/use-horizontal-navigation-wrapper";
+import useHorizontalNavigationWrapper from "@/hooks/useHorizontalNavigationWrapper";
 import {
   Box,
   CircularProgress,

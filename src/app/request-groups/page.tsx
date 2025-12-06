@@ -1,20 +1,21 @@
 'use client';
-import { Suspense, useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
-import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
 import { RequestGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
 import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-skeleton";
 import { MAX_PAGINATION_LIMIT } from "../config/pagination";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
+  const debounceDelay: number = 500; //Time in milliseconds
   const [openRequestGroups, setOpenRequestGroups] = useState<RequestGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
@@ -24,37 +25,35 @@ export default function Page() {
     popularities: []
   });
   const [cursor, setCursor] = useState<string | null>(null);
+  const debouncedParams: FilterState = useDebouncedValue(filterState, debounceDelay);
 
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-
+  const buildParams = () => {
     const params = new URLSearchParams({
       status: "open",
       limit: MAX_PAGINATION_LIMIT.toString(),
     });
+    const trimmedSearch = searchText.trim();
     if (cursor) params.set("cursor", cursor);
+    if (trimmedSearch) params.set("search", trimmedSearch);
+    debouncedParams.categories.forEach((category) => params.append("category", category));
+    return params.toString();
+  }
 
-        // TODO: Move filters to db fetch to handle combination of filters and pagination.
-    // This can happen when there is a load of groups being fetched each time.
-    // logic already implemented in smart-search screen.
-    fetch('/api/request-groups/?' + params.toString())
+  useEffect(() => {
+    setLoading(true);
+    const controller = new AbortController();
+    const urlParams: string = buildParams();
+    
+    fetch('/api/request-groups/?' + urlParams, { signal: controller.signal })
       .then(r => r.json())
-      .then(data => {
-        if (active) {
-          setOpenRequestGroups(data.requestGroups ?? []);
-          setCursor(data.nextCursor ?? null);
-        }
+      .then(data => { setOpenRequestGroups(data.requestGroups ?? []) })
+      .catch((err) => {
+        if (err?.name === "AbortError") return;
+        setOpenRequestGroups([]);
       })
-      .catch(() => setOpenRequestGroups([]))
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, []);
-
-  // Apply all filters (text + categories + future filters)
-  const filteredRequestGroups = useMemo(() => {
-    return applyFilters(openRequestGroups, searchText, filterState);
-  }, [openRequestGroups, searchText, filterState]);
+      .finally(() => { setLoading(false) });
+    return () => controller.abort();
+  }, [debouncedParams]);
 
   return (
     <>
@@ -125,8 +124,8 @@ export default function Page() {
           <Suspense fallback={<GroupSectionSkeleton />}>
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => <RequestGroupCardSkeleton key={i} />)
-            ) : filteredRequestGroups.length > 0 ? (
-              filteredRequestGroups.map((requestGroup, index) => (
+            ) : openRequestGroups.length > 0 ? (
+              openRequestGroups.map((requestGroup, index) => (
                 <RequestGroupCard key={index} requestGroup={requestGroup} />
               ))
             ) : (
