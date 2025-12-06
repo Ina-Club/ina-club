@@ -1,67 +1,74 @@
 "use client";
 
-import { Suspense, useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import ActiveGroupCardSkeleton from "@/components/skeleton/active-group-card-skeleton";
-import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
 import { ActiveGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import { MAX_PAGINATION_LIMIT } from "../config/pagination";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export default function Page() {
   const headerText = "כל הקבוצות";
   const descriptionText =
     "גלה את כל הקבוצות הפעילות, הצטרף לרכישות קבוצתיות וחסוך כסף יחד עם אחרים.";
-
-  const [allActiveGroups, setAllActiveGroups] = useState<ActiveGroup[]>([]);
+  const debounceDelay: number = 400; //Time in milliseconds
+  const [activeGroups, setActiveGroups] = useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
   const [filterState, setFilterState] = useState<FilterState>({
+    searchText: "",
     categories: [],
     locations: [],
     popularities: [],
-    priceRange: [0, 10_000],
+    priceRange: [0, 10_000], //TODO: Change this to the price of highest active group
   });
   const [cursor, setCursor] = useState<string | null>(null);
+  const debouncedParams: FilterState = useDebouncedValue(filterState, debounceDelay);
 
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-
+  const buildParams = () => {
     const params = new URLSearchParams({
       status: "open",
       limit: MAX_PAGINATION_LIMIT.toString(),
     });
+    const trimmedSearch = filterState.searchText.trim();
     if (cursor) params.set("cursor", cursor);
+    if (trimmedSearch) params.set("search", trimmedSearch);
+    debouncedParams.categories.forEach((category) => params.append("category", category));
+    if (debouncedParams.priceRange) {
+      const [minPrice, maxPrice] = debouncedParams.priceRange;
+      if (minPrice > 0) params.set("minPrice", minPrice.toString());
+      if (maxPrice < 10_000) params.set("maxPrice", maxPrice.toString());
+    }
+    return params.toString();
+  };
 
-    // TODO: Move filters to db fetch to handle combination of filters and pagination.
-    // This can happen when there is a load of groups being fetched each time.
-    // logic already implemented in smart-search screen.
-    fetch("/api/active-groups/?" + params.toString())
+  const handleSearchTextChange = (newText: string) => {
+    setFilterState((prev) => ({ ...prev, searchText: newText }));
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    const controller = new AbortController();
+    const urlParams: string = buildParams();
+
+    fetch("/api/active-groups/?" + urlParams, { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
-        if (active) {
-          setAllActiveGroups(data.activeGroups ?? []);
-          setCursor(data.nextCursor ?? null);
-        }
+        setActiveGroups(data.activeGroups ?? []);
+        setCursor(data.nextCursor ?? null);
       })
-      .catch(() => setAllActiveGroups([]))
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const filteredActiveGroups = useMemo(() => {
-    return applyFilters(allActiveGroups, searchText, filterState);
-  }, [allActiveGroups, searchText, filterState]);
+      .catch((err) => {
+        if (err?.name === "AbortError") return;
+        setActiveGroups([]);
+      })
+      .finally(() => { setLoading(false); });
+    return () => controller.abort();
+  }, [debouncedParams]);
 
   return (
     <>
@@ -86,9 +93,9 @@ export default function Page() {
         }}
       >
         <SearchBar
-          searchText={searchText}
+          searchText={filterState.searchText}
           placeholderText="חיפוש קבוצות..."
-          handleSearchTextChange={setSearchText}
+          handleSearchTextChange={handleSearchTextChange}
         />
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
           <GroupFilters
@@ -147,8 +154,8 @@ export default function Page() {
               Array.from({ length: 6 }).map((_, i) => (
                 <ActiveGroupCardSkeleton key={i} />
               ))
-            ) : filteredActiveGroups.length > 0 ? (
-              filteredActiveGroups.map((activeGroup, index) => (
+            ) : activeGroups.length > 0 ? (
+              activeGroups.map((activeGroup, index) => (
                 <ActiveGroupCard key={index} activeGroup={activeGroup} />
               ))
             ) : (
