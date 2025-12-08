@@ -1,6 +1,6 @@
 "use client";
 
-import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
+import ResponsiveHorizontalCardWrapper from "./responsive-horizontal-card-wrapper";
 import { Box } from "@mui/material";
 import RequestGroupCard from "../card/request-group-card";
 import SectionWrapper from "./section-wrapper";
@@ -69,7 +69,7 @@ const RequestGroupSectionWrapper: React.FC<
       linkLabel="צפה בכל הבקשות"
       linkUrl="/request-groups"
     >
-      <ResponsiveHorizontalListWrapper
+      <ResponsiveHorizontalCardWrapper
         gap="16px"
         hasMore={hasMore}
         loadingMore={loadingMore}
@@ -117,7 +117,7 @@ const RequestGroupSectionWrapper: React.FC<
             לא נמצאו בקשות מהשבוע האחרון
           </Box>
         )}
-      </ResponsiveHorizontalListWrapper>
+      </ResponsiveHorizontalCardWrapper>
     </SectionWrapper>
   );
 };

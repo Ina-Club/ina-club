@@ -1,7 +1,7 @@
 "use client";
 
 import SectionWrapper from "./section-wrapper";
-import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
+import ResponsiveHorizontalCardWrapper from "./responsive-horizontal-card-wrapper";
 import { Box } from "@mui/material";
 import ActiveGroupCard from "../card/active-group-card";
 import { useState, useEffect } from "react";
@@ -68,7 +68,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
         linkLabel={`צפה בכל הקבוצות`}
         linkUrl={`/active-groups`}
       >
-        <ResponsiveHorizontalListWrapper
+        <ResponsiveHorizontalCardWrapper
           gap="16px"
           hasMore={hasMore}
           loadingMore={loadingMore}
@@ -116,7 +116,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
               לא נמצאו קבוצות מהשבוע האחרון
             </Box>
           )}
-        </ResponsiveHorizontalListWrapper>
+        </ResponsiveHorizontalCardWrapper>
       </SectionWrapper >
     </>
   );

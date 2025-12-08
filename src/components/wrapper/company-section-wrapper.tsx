@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import SectionWrapper from "./section-wrapper";
-import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
+import ResponsiveHorizontalCardWrapper from "./responsive-horizontal-card-wrapper";
 import CompanyCard from "../card/company-card";
 import { Company } from "lib/dal";
 import { useState, useEffect } from "react";
@@ -64,7 +64,7 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
       linkLabel={`צפה בכל החברות`}
       linkUrl={`/companies`}
     >
-      <ResponsiveHorizontalListWrapper
+      <ResponsiveHorizontalCardWrapper
         gap="16px"
         hasMore={hasMore}
         loadingMore={loadingMore}
@@ -114,7 +114,7 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
             לא נמצאו חברות
           </Box>
         )}
-      </ResponsiveHorizontalListWrapper>
+      </ResponsiveHorizontalCardWrapper>
     </SectionWrapper>
   );
 };
