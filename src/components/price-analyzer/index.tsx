@@ -485,8 +485,7 @@ export default function PriceAnalyzerComponent() {
       )}
 
       {/* Welcome Section - מוצג רק כשאין חיפוש פעיל */}
-      {!searchText &&
-        !loading &&
+      {!loading &&
         dynamicSelects.length === 0 &&
         !priceResult && (
           <Card
