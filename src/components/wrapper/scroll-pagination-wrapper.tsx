@@ -48,7 +48,7 @@ const ScrollPaginationWrapper: React.FC<ScrollPaginationWrapperProps> = ({
     if (orientation === "horizontal") {
       const el = wrapperRef.current;
       if (!el) return;
-      const distanceToEnd = el.scrollWidth - (el.clientWidth + el.scrollLeft);
+      const distanceToEnd = el.scrollWidth - (el.clientWidth - el.scrollLeft);
       if (distanceToEnd <= distanceThreshold) runLoadMore();
     }
   }, [canLoadMore, distanceThreshold, orientation, runLoadMore, wrapperRef]);

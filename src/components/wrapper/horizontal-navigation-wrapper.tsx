@@ -56,7 +56,7 @@ const HorizontalNavigationWrapper: React.FC<{
             {children}
 
             {loadingMore && hasMore ? (
-                <CircularProgress size={25} sx={{
+                <CircularProgress size={30} sx={{
                     left: "-20px",
                     zIndex: 2,
                 }} />
