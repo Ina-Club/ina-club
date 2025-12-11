@@ -6,17 +6,17 @@ type Orientation = "horizontal" | "vertical";
 
 interface ScrollPaginationWrapperProps {
   children: (args: {
-    wrapperRef: React.RefObject<HTMLElement>;
+    wrapperRef: React.RefObject<HTMLElement | null>;
     onScroll: () => void;
     triggerLoadMore: (opts?: { force?: boolean }) => void;
-    sentinelRef: React.RefObject<HTMLDivElement>;
+    sentinelRef: React.RefObject<HTMLDivElement | null>;
   }) => React.ReactNode;
   orientation: Orientation;
   onLoadMore: () => void;
   hasMore?: boolean;
   loadingMore?: boolean;
   fetchThreshold?: number;
-  scrollRef?: React.RefObject<HTMLElement>;
+  scrollRef?: React.RefObject<HTMLElement | null>;
 }
 
 const ScrollPaginationWrapper: React.FC<ScrollPaginationWrapperProps> = ({

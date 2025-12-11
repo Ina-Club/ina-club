@@ -12,6 +12,10 @@ import { cloneElement, useEffect, useState } from "react";
 import HorizontalNavigationWrapper from "./horizontal-navigation-wrapper";
 import ScrollPaginationWrapper from "./scroll-pagination-wrapper";
 
+type StylableProps = {
+  style?: React.CSSProperties;
+};
+
 const ResponsiveHorizontalCardWrapper: React.FC<{
   children: React.ReactNode;
   gap?: string;
@@ -45,7 +49,7 @@ const ResponsiveHorizontalCardWrapper: React.FC<{
   // apply calculated width to children
   const styledChildren = Array.isArray(children)
     ? children.map((child, i) =>
-      cloneElement(child as React.ReactElement, {
+      cloneElement(child as React.ReactElement<StylableProps>, {
         key: i,
         style: {
           ...(child as any).props.style,
