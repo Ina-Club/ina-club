@@ -57,6 +57,7 @@ export async function GET(req: Request) {
           { title: { contains: searchText, mode: "insensitive" } },
           { description: { contains: searchText, mode: "insensitive" } },
           { category: { name: { contains: searchText, mode: "insensitive" } } },
+          // TODO: Add price search filtering (prisma don't support native numeric.contains method)
         ],
       });
     }
