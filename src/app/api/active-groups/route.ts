@@ -12,12 +12,16 @@ export async function GET(req: Request) {
     const titleParam = searchParams.get('title');
     const statusParam = searchParams.get('status');
     const lastWeekParam = searchParams.get('lastWeek');
+    const searchParam = searchParams.get("search");
+    const categoryParams = searchParams.getAll("category").filter(Boolean);
+    const minPriceParam = searchParams.get("minPrice");
+    const maxPriceParam = searchParams.get("maxPrice");
 
     const cursor = searchParams.get("cursor") || undefined;
     const rawLimit: number = Number(searchParams.get('limit')) || DEFAULT_PAGINATION;
     const limit: number = Math.min(rawLimit, MAX_PAGINATION_LIMIT);
 
-    const where: any = {};
+    const filters: any[] = [];
     if (titleParam) {
       const exists = await prisma.activeGroup.findFirst({
         where: { title: { equals: titleParam, mode: "insensitive" } },
@@ -30,15 +34,47 @@ export async function GET(req: Request) {
       if (!status) {
         return NextResponse.json({ error: "Incorrect status provided!" }, { status: 400 });
       }
-      where.status = status;
+      filters.push({ status });
     }
     if (lastWeekParam === 'true') {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      where.createdAt = {
-        gte: oneWeekAgo
-      };
+      filters.push({
+        createdAt: {
+          gte: oneWeekAgo
+        }
+      });
     }
+    if (categoryParams.length > 0) {
+      filters.push({
+        category: { name: { in: categoryParams } },
+      });
+    }
+    if (searchParam?.trim()) {
+      const searchText = searchParam.trim();
+      filters.push({
+        OR: [
+          { title: { contains: searchText, mode: "insensitive" } },
+          { description: { contains: searchText, mode: "insensitive" } },
+          { category: { name: { contains: searchText, mode: "insensitive" } } },
+          // TODO: Add price search filtering (prisma don't support native numeric.contains method)
+        ],
+      });
+    }
+    const minPrice = minPriceParam !== null ? Number(minPriceParam) : undefined;
+    const maxPrice = maxPriceParam !== null ? Number(maxPriceParam) : undefined;
+    const hasMinPrice = minPriceParam !== null && !Number.isNaN(minPrice);
+    const hasMaxPrice = maxPriceParam !== null && !Number.isNaN(maxPrice);
+    if (hasMinPrice || hasMaxPrice) {
+      filters.push({
+        groupPrice: {
+          ...(hasMinPrice ? { gte: minPrice } : {}),
+          ...(hasMaxPrice ? { lte: maxPrice } : {}),
+        },
+      });
+    }
+
+    const where = filters.length ? { AND: filters } : {};
 
     // Get all active groups
     const rows = await prisma.activeGroup.findMany({

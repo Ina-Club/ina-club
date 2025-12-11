@@ -1,60 +1,105 @@
 'use client';
-import { Suspense, useState, useEffect, useMemo } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupFilters } from "@/components/group-filters";
 import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import RequestGroupCard from "@/components/card/request-group-card";
-import { applyFilters } from "lib/filters";
 import { FilterState } from "@/components/group-filters/filters";
 import { RequestGroup } from "lib/dal";
 import { SearchBar } from "@/components/search-bar";
 import RequestGroupCardSkeleton from "@/components/skeleton/request-group-card-skeleton";
-import { MAX_PAGINATION_LIMIT } from "../config/pagination";
+import { DEFAULT_PAGINATION } from "../config/pagination";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import ResponsiveVerticalCardWrapper from "@/components/wrapper/responsive-vertical-card-wrapper";
 
 export default function Page() {
   const headerText: string = "כל הבקשות";
   const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
+  const debounceDelay: number = 400; //Time in milliseconds
   const [openRequestGroups, setOpenRequestGroups] = useState<RequestGroup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const loadingRef = useRef(false);
+  const loadingMoreRef = useRef(false);
   const [filterState, setFilterState] = useState<FilterState>({
+    searchText: "",
     categories: [],
     locations: [],
     popularities: []
   });
   const [cursor, setCursor] = useState<string | null>(null);
+  const debouncedParams: FilterState = useDebouncedValue(filterState, debounceDelay);
 
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-
+  const buildParams = useCallback((nextCursor?: string | null) => {
     const params = new URLSearchParams({
       status: "open",
-      limit: MAX_PAGINATION_LIMIT.toString(),
+      limit: DEFAULT_PAGINATION.toString(),
     });
-    if (cursor) params.set("cursor", cursor);
+    const trimmedSearch = debouncedParams.searchText.trim();
+    if (nextCursor) params.set("cursor", nextCursor);
+    if (trimmedSearch) params.set("search", trimmedSearch);
+    debouncedParams.categories.forEach((category) => params.append("category", category));
+    return params.toString();
+  }, [debouncedParams]);
 
-        // TODO: Move filters to db fetch to handle combination of filters and pagination.
-    // This can happen when there is a load of groups being fetched each time.
-    // logic already implemented in smart-search screen.
-    fetch('/api/request-groups/?' + params.toString())
-      .then(r => r.json())
-      .then(data => {
-        if (active) {
-          setOpenRequestGroups(data.requestGroups ?? []);
-          setCursor(data.nextCursor ?? null);
-        }
-      })
-      .catch(() => setOpenRequestGroups([]))
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, []);
+  const handleSearchTextChange = (newText: string) => {
+    setFilterState((prev) => ({ ...prev, searchText: newText }));
+  }
 
-  // Apply all filters (text + categories + future filters)
-  const filteredRequestGroups = useMemo(() => {
-    return applyFilters(openRequestGroups, searchText, filterState);
-  }, [openRequestGroups, searchText, filterState]);
+  const fetchPage = useCallback(async (opts?: { cursor?: string | null; append?: boolean; signal?: AbortSignal }) => {
+    const append = opts?.append ?? false;
+    const nextCursor = opts?.cursor ?? null;
+    if (append) {
+      if (!nextCursor || loadingMoreRef.current || loadingRef.current) return;
+      loadingMoreRef.current = true;
+      setLoadingMore(true);
+    } else {
+      loadingRef.current = true;
+      setLoading(true);
+    }
+
+    const urlParams: string = buildParams(nextCursor);
+
+    try {
+      const res = await fetch('/api/request-groups/?' + urlParams, { signal: opts?.signal });
+      const data = await res.json();
+      const incoming: RequestGroup[] = data.requestGroups ?? [];
+      setCursor(data.nextCursor ?? null);
+      setHasMore(!!data.nextCursor);
+      setOpenRequestGroups((prev) => {
+        if (!append) return incoming;
+        const seen = new Set(prev.map((r) => r.id));
+        const filtered = incoming.filter((r) => !seen.has(r.id));
+        return [...prev, ...filtered];
+      });
+    } catch (err: any) {
+      if (err?.name === "AbortError") return;
+      if (!append) setOpenRequestGroups([]);
+    } finally {
+      if (append) {
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      } else {
+        loadingRef.current = false;
+        setLoading(false);
+      }
+    }
+  }, [buildParams]);
+
+  useEffect(() => {
+    setCursor(null);
+    setHasMore(true);
+    const controller = new AbortController();
+    fetchPage({ append: false, cursor: null, signal: controller.signal });
+    return () => controller.abort();
+  }, [debouncedParams, fetchPage]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!cursor || !hasMore) return;
+    fetchPage({ cursor, append: true });
+  }, [cursor, fetchPage, hasMore]);
 
   return (
     <>
@@ -79,7 +124,7 @@ export default function Page() {
           }
         }}
       >
-        <SearchBar searchText={searchText} placeholderText="חיפוש בקשות..." handleSearchTextChange={setSearchText} />
+        <SearchBar searchText={filterState.searchText} placeholderText="חיפוש בקשות..." handleSearchTextChange={handleSearchTextChange} />
 
         {/* Mobile filters trigger (inside the same row as search) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
@@ -111,22 +156,27 @@ export default function Page() {
         </Box>
 
         {/* Cards grid */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, // mobile - 1 column, desktop - 3 columns
-            flex: 1,
-            px: { xs: 2, md: 2 },
-            justifyContent: "center",
-            alignItems: "center",
-            gap: { xs: 3, md: 2 },
-          }}
+        <ResponsiveVerticalCardWrapper
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          onLoadMore={handleLoadMore}
         >
-          <Suspense fallback={<GroupSectionSkeleton />}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, // mobile - 1 column, desktop - 3 columns
+              flex: 1,
+              px: { xs: 2, md: 2 },
+              justifyContent: "center",
+              alignItems: "center",
+              gap: { xs: 3, md: 2 },
+            }}
+          >
+            <Suspense fallback={<GroupSectionSkeleton />}>
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => <RequestGroupCardSkeleton key={i} />)
-            ) : filteredRequestGroups.length > 0 ? (
-              filteredRequestGroups.map((requestGroup, index) => (
+            ) : openRequestGroups.length > 0 ? (
+              openRequestGroups.map((requestGroup, index) => (
                 <RequestGroupCard key={index} requestGroup={requestGroup} />
               ))
             ) : (
@@ -146,8 +196,9 @@ export default function Page() {
                 לא נמצאו בקשות התואמות לחיפוש שלך
               </Box>
             )}
-          </Suspense>
-        </Box>
+            </Suspense>
+          </Box>
+        </ResponsiveVerticalCardWrapper>
       </Box>
     </>
   );

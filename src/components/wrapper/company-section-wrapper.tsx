@@ -2,34 +2,59 @@
 
 import { Box } from "@mui/material";
 import SectionWrapper from "./section-wrapper";
-import ResponsiveHorizontalListWrapper from "./responsive-horizontal-wrapper";
+import ResponsiveHorizontalCardWrapper from "./responsive-horizontal-card-wrapper";
 import CompanyCard from "../card/company-card";
 import { Company } from "lib/dal";
 import { useState, useEffect } from "react";
-import { LoadingCircle } from "../loading-circle";
 import CompanyCardSkeleton from "../skeleton/company-card-skeleton";
+import { DEFAULT_PAGINATION } from "@/app/config/pagination";
 
-interface CompanySectionWrapperProps {}
+interface CompanySectionWrapperProps { }
 
-const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({}) => {
+const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
   const [allCompanies, setAllCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchPage = async (opts?: { cursor?: string | null; append?: boolean }) => {
+    const append = opts?.append ?? false;
+    const nextCursor = opts?.cursor ?? null;
+    if (append) {
+      if (!nextCursor || loadingMore || initialLoading) return;
+      setLoadingMore(true);
+    } else {
+      setInitialLoading(true);
+    }
+
+    const params = new URLSearchParams({
+      limit: DEFAULT_PAGINATION.toString(),
+    });
+    if (nextCursor) params.set("cursor", nextCursor);
+
+    try {
+      const res = await fetch("/api/companies/?" + params.toString());
+      const data = await res.json();
+      const incoming: Company[] = data.companies ?? [];
+      setCursor(data.nextCursor ?? null);
+      setHasMore(!!data.nextCursor);
+      setAllCompanies((prev) => {
+        if (!append) return incoming;
+        const seen = new Set(prev.map((c) => c.id));
+        const filtered = incoming.filter((c) => !seen.has(c.id));
+        return [...prev, ...filtered];
+      });
+    } catch {
+      if (!append) setAllCompanies([]);
+    } finally {
+      if (append) setLoadingMore(false);
+      else setInitialLoading(false);
+    }
+  }
 
   useEffect(() => {
-    let active = true;
-    setLoading(true);
-    fetch("/api/companies")
-      .then((r) => r.json())
-      .then((data) => {
-        if (active) setAllCompanies(data.companies ?? []);
-      })
-      .catch(() => setAllCompanies([]))
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+    fetchPage();
   }, []);
 
   return (
@@ -39,8 +64,13 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({}) => {
       linkLabel={`צפה בכל החברות`}
       linkUrl={`/companies`}
     >
-      <ResponsiveHorizontalListWrapper gap="16px">
-        {loading ? (
+      <ResponsiveHorizontalCardWrapper
+        gap="16px"
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+        onLoadMore={() => fetchPage({ cursor, append: true })}
+      >
+        {initialLoading ? (
           Array.from({ length: 6 }).map((_, i) => (
             <Box
               key={i}
@@ -84,7 +114,7 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({}) => {
             לא נמצאו חברות
           </Box>
         )}
-      </ResponsiveHorizontalListWrapper>
+      </ResponsiveHorizontalCardWrapper>
     </SectionWrapper>
   );
 };

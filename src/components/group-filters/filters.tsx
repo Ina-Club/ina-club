@@ -68,6 +68,7 @@ export function toggleVariable<T>(
 }
 
 export interface FilterState {
+  searchText: string;
   categories: string[];
   locations: string[];
   popularities: string[];
@@ -84,6 +85,15 @@ export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterCh
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const locationList: string[] = ["צפון", "מרכז", "דרום"];
   const popularityList: string[] = ["פופולרי", "חדש"];
+  const [internalFilterState, setInternalFilterState] = useState<FilterState>({
+    searchText: "", //This is part of the FilterState interface. It is required, but won't be changed in this component.
+    categories: [],
+    locations: [],
+    popularities: [],
+    ...(group === "active" ? { priceRange: [0, 10_000] } : {})
+  });
+
+  const effectiveFilterState = filterState ?? internalFilterState;
 
   useEffect(() => {
     let active = true;
@@ -97,15 +107,6 @@ export const Filters: React.FC<FiltersProps> = ({ group, filterState, onFilterCh
       .catch(() => setCategoryList([]));
     return () => { active = false; };
   }, []);
-  
-  const [internalFilterState, setInternalFilterState] = useState<FilterState>({
-    categories: [],
-    locations: [],
-    popularities: [],
-    ...(group === "active" ? { priceRange: [0, 10_000] } : {})
-  });
-
-  const effectiveFilterState = filterState ?? internalFilterState;
 
   const updateFilter = (updates: Partial<FilterState>) => {
     const newState = { ...effectiveFilterState, ...updates };

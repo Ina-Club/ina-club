@@ -12,12 +12,14 @@ export async function GET(req: Request) {
     const titleParam = searchParams.get("title");
     const statusParam = searchParams.get("status");
     const lastWeekParam = searchParams.get("lastWeek");
+    const searchParam = searchParams.get("search");
+    const categoryParams = searchParams.getAll("category").filter(Boolean);
     
     const cursor = searchParams.get("cursor") || undefined;
     const rawLimit: number = Number(searchParams.get("limit")) || DEFAULT_PAGINATION;
     const limit: number = Math.min(rawLimit, MAX_PAGINATION_LIMIT);
     
-    const where: any = {};
+    const filters: any[] = [];
     if (titleParam) {
       const exists = await prisma.requestGroup.findFirst({
         where: { title: { equals: titleParam, mode: "insensitive" } },
@@ -34,15 +36,34 @@ export async function GET(req: Request) {
           { status: 400 }
         );
       }
-      where.status = status;
+      filters.push({ status });
     }
     if (lastWeekParam === "true") {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      where.createdAt = {
-        gte: oneWeekAgo,
-      };
+      filters.push({
+        createdAt: {
+          gte: oneWeekAgo,
+        },
+      });
     }
+    if (categoryParams.length > 0) {
+      filters.push({
+        category: { name: { in: categoryParams } },
+      });
+    }
+    if (searchParam?.trim()) {
+      const searchText = searchParam.trim();
+      filters.push({
+        OR: [
+          { title: { contains: searchText, mode: "insensitive" } },
+          { description: { contains: searchText, mode: "insensitive" } },
+          { category: { name: { contains: searchText, mode: "insensitive" } } },
+        ],
+      });
+    }
+
+    const where = filters.length ? { AND: filters } : {};
 
     // This represents GET all request groups.
     const rows = await prisma.requestGroup.findMany({
