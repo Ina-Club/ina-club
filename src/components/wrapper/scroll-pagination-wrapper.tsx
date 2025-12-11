@@ -31,6 +31,7 @@ const ScrollPaginationWrapper: React.FC<ScrollPaginationWrapperProps> = ({
   const internalWrapperRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const wrapperRef = scrollRef ?? internalWrapperRef;
+  //TODO: Fix bug in mobile phones - the spinner appears before reaching the end of the list
   const distanceThreshold: number = fetchThreshold ?? (orientation === "vertical" ? 200 : 40);
 
   const canLoadMore = useCallback(() =>
