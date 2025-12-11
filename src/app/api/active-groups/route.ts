@@ -190,7 +190,9 @@ export async function POST(req: Request) {
         groupPrice,
         deadline: new Date(deadline),
         status: GroupStatus.OPEN,
-        createdById: await getUserIdBySession(session)
+        createdById: await getUserIdBySession(session),
+        minParticipants,
+        maxParticipants
       },
     });
 
