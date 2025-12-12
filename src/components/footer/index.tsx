@@ -157,7 +157,11 @@ export default function Footer() {
 
           {/* לינקים משפטיים */}
           <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
-            <Link href="/privacy" underline="hover" color="inherit" variant="body2">
+          <Link href="/about" underline="hover" color="inherit" variant="body2">
+              מי אנחנו
+            </Link>
+
+            <Link href="/privacy-policy" underline="hover" color="inherit" variant="body2">
               מדיניות פרטיות
             </Link>
             <Link href="/terms" underline="hover" color="inherit" variant="body2">

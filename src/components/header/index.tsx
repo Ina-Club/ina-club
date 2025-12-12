@@ -39,8 +39,8 @@ import {
   Logout as LogoutIcon,
   HowToReg as HowToRegIcon,
   ShoppingBag as ShoppingBagIcon,
+  ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
-
 
 // -----------------------------
 // STATIC — DOES NOT RECREATE
@@ -56,29 +56,81 @@ type MenuItemConfig = {
   action?: "logout";
 };
 
-const NAV_ITEMS = [
+type NavLinkItem = {
+  title: string;
+  href: string;
+  icon: typeof PersonIcon;
+  menuItems?: undefined;
+};
+
+type NavDropdownItem = {
+  title: string;
+  href?: null;
+  icon: typeof PersonIcon;
+  menuItems: { label: string; href: string }[];
+};
+
+type NavItem = NavLinkItem | NavDropdownItem;
+
+const NAV_ITEMS: (NavLinkItem | NavDropdownItem)[] = [
   { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
   { title: "קבוצות פעילות", href: "/active-groups", icon: GroupIcon },
   { title: "חיפוש חכם", href: "/smart-search", icon: SearchIcon },
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
+  {
+    title: "עוד",
+    href: null,
+    icon: ExpandMoreIcon,
+    menuItems: [
+      { label: "מי אנחנו", href: "/about" },
+      { label: "מדיניות פרטיות", href: "/privacy-policy" },
+      { label: "תנאי שימוש", href: "/terms" },
+      { label: "צור קשר", href: "/contact" },
+    ],
+  },
 ];
 
 const MOBILE_ITEMS = [
   ...NAV_ITEMS,
   { title: "פרופיל", href: "/profile", icon: PersonIcon },
-  { title: "מועדפים", href: "/favorites", icon: FavoriteIcon },
+  { title: "מועדפים", href: "/profile?tab=liked", icon: FavoriteIcon },
 ];
 
 const LOGGED_IN_MENU: MenuItemConfig[] = [
-  { key: "profile", href: "/profile", label: "פרופיל", icon: PersonIcon, color: "#64748b" },
-  { key: "logout", href: null, label: "התנתק", icon: LogoutIcon, color: "#dc2626", action: "logout" },
+  {
+    key: "profile",
+    href: "/profile",
+    label: "פרופיל",
+    icon: PersonIcon,
+    color: "#64748b",
+  },
+  {
+    key: "logout",
+    href: null,
+    label: "התנתק",
+    icon: LogoutIcon,
+    color: "#dc2626",
+    action: "logout",
+  },
 ];
 
 const LOGGED_OUT_MENU: MenuItemConfig[] = [
-  { key: "signin", href: "/auth/signin", label: "התחברות", icon: LoginIcon, color: "#64748b" },
-  { key: "signup", href: "/auth/signup", label: "הרשמה", icon: HowToRegIcon, color: "#fff", bg: "#1a2a5a" },
+  {
+    key: "signin",
+    href: "/auth/signin",
+    label: "התחברות",
+    icon: LoginIcon,
+    color: "#64748b",
+  },
+  {
+    key: "signup",
+    href: "/auth/signup",
+    label: "הרשמה",
+    icon: HowToRegIcon,
+    color: "#fff",
+    bg: "#1a2a5a",
+  },
 ];
-
 
 // -----------------------------
 // COMPONENT START
@@ -99,13 +151,13 @@ function Header() {
 
   // anchor states
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const avatarSx = useMemo(
     () => ({ width: 40, height: 40, borderColor: "primary.main" }),
     []
   );
-
 
   const handleMenuOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(e.currentTarget);
@@ -114,6 +166,12 @@ function Header() {
   const handleMenuClose = useCallback(() => {
     setMenuAnchor(null);
   }, []);
+
+  const handleMoreOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    setMoreAnchor(e.currentTarget);
+  }, []);
+
+  const handleMoreClose = useCallback(() => setMoreAnchor(null), []);
 
   const handleItemClick = useCallback(
     (item: MenuItemConfig) => {
@@ -134,16 +192,25 @@ function Header() {
   const memoUserIdentifier = profile?.email || session?.user?.email || "";
   const memoUserImage = profile?.profilePicture || session?.user?.image || null;
   const loggedIn = status === "authenticated" && !!profile;
-  const menuItems: MenuItemConfig[] = loggedIn ? LOGGED_IN_MENU : LOGGED_OUT_MENU;
+  const menuItems: MenuItemConfig[] = loggedIn
+    ? LOGGED_IN_MENU
+    : LOGGED_OUT_MENU;
+  const goToFavorites = useCallback(() => {
+    router.push("/profile?tab=liked");
+  }, [router]);
 
-  return (  
+  return (
     <>
       <AppBar
         position="sticky"
-        sx={{ background: "#fff", boxShadow: "0 0 10px rgba(0,0,0,0.2)", zIndex: 1000, top: 0 }}
+        sx={{
+          background: "#fff",
+          boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+          zIndex: 1000,
+          top: 0,
+        }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          
           {/* Logo + Tabs */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Link href="/">
@@ -161,6 +228,34 @@ function Header() {
             >
               {NAV_ITEMS.map((item, idx) => {
                 const Icon = item.icon;
+
+                // special case for dropdown "עוד"
+                if (item.menuItems) {
+                  return (
+                    <Tab
+                      key={item.title}
+                      label={item.title}
+                      icon={<Icon />}
+                      iconPosition="start"
+                      onClick={handleMoreOpen}
+                      sx={{
+                        textTransform: "none",
+                        fontSize: "0.875rem",
+                        fontWeight: 500,
+                        px: 2,
+                        justifyContent: "flex-end",
+                        borderRadius: "16px",
+                        color: "#64748b",
+                        flexDirection: "row-reverse",
+                        ".MuiTab-iconWrapper": {
+                          marginLeft: "8px",
+                          marginRight: 0,
+                        },
+                      }}
+                    />
+                  );
+                }
+
                 return (
                   <Tab
                     key={item.title}
@@ -175,12 +270,38 @@ function Header() {
                       fontWeight: 500,
                       px: 2,
                       borderRadius: "16px",
+                      flexDirection: "row-reverse",
+                      ".MuiTab-iconWrapper": {
+                        marginLeft: "8px",
+                        marginRight: 0,
+                      },
                       color: idx === currentTab ? "#1a2a5a" : "#64748b",
                     }}
                   />
                 );
               })}
             </Tabs>
+
+            <Menu
+              anchorEl={moreAnchor}
+              open={!!moreAnchor}
+              onClose={handleMoreClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+            >
+              {NAV_ITEMS.find(
+                (i): i is NavDropdownItem => "menuItems" in i
+              )?.menuItems?.map((sub) => (
+                <MenuItem
+                  key={sub.href}
+                  component={Link}
+                  href={sub.href}
+                  onClick={handleMoreClose}
+                >
+                  {sub.label}
+                </MenuItem>
+              ))}
+            </Menu>
           </Box>
 
           {/* Desktop Right */}
@@ -201,7 +322,7 @@ function Header() {
               צור בקשה
             </Button>
 
-            <IconButton sx={{ color: "#64748b" }}>
+            <IconButton sx={{ color: "#64748b" }} onClick={goToFavorites}>
               <FavoriteIcon />
             </IconButton>
 
@@ -218,11 +339,18 @@ function Header() {
               )}
             </IconButton>
 
-            <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={handleMenuClose}>
+            <Menu
+              anchorEl={menuAnchor}
+              open={!!menuAnchor}
+              onClose={handleMenuClose}
+            >
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <MenuItem key={item.key} onClick={() => handleItemClick(item)}>
+                  <MenuItem
+                    key={item.key}
+                    onClick={() => handleItemClick(item)}
+                  >
                     <Icon sx={{ mr: 1 }} />
                     {item.label}
                   </MenuItem>
@@ -250,16 +378,46 @@ function Header() {
               <MenuIcon />
             </IconButton>
           </Box>
-
         </Toolbar>
       </AppBar>
 
       {/* Mobile Drawer */}
-      <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
         <Box sx={{ width: 250, pt: 2 }}>
           <List>
             {MOBILE_ITEMS.map((item) => {
               const Icon = item.icon;
+
+              // mobile sub-menu for "עוד"
+              if ("menuItems" in item) {
+                const subItems = item.menuItems ?? [];
+                return (
+                  <Box key={item.title}>
+                    <ListItemButton disabled>
+                      <ListItemIcon>
+                        <Icon />
+                      </ListItemIcon>
+                      <ListItemText primary={item.title} />
+                    </ListItemButton>
+                    {subItems.map((sub) => (
+                      <ListItemButton
+                        key={sub.href}
+                        component={Link}
+                        href={sub.href}
+                        onClick={() => setDrawerOpen(false)}
+                        sx={{ pl: 6 }}
+                      >
+                        <ListItemText primary={sub.label} />
+                      </ListItemButton>
+                    ))}
+                  </Box>
+                );
+              }
+
               return (
                 <ListItemButton
                   key={item.title}
