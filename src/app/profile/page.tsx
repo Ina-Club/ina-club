@@ -481,16 +481,16 @@ export default function Profile() {
             {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={0}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות ממתינות לאישור ({detailProfile?.ownedRequestGroups.length ?? 0})
+                בקשות ממתינות לאישור ({detailProfile?.pendingRequestGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
-                : detailProfile!.ownedRequestGroups.length === 0
+                : detailProfile!.pendingRequestGroups.length === 0
                   ? (
                     <Alert severity="info">עדיין לא יצרת בקשות</Alert>
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                      {detailProfile!.ownedRequestGroups.map((requestGroup, index) => (
+                      {detailProfile!.pendingRequestGroups.map((requestGroup, index) => (
                         <RequestGroupCard key={index} requestGroup={requestGroup} />
                       ))}
                     </Box>
@@ -520,17 +520,17 @@ export default function Profile() {
             {/* Pending Request Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                קבוצות פעילות שנרשמת להן ({detailProfile?.pendingRequestGroups.length ?? 0})
+                קבוצות פעילות שנרשמת להן ({detailProfile?.enrolledActiveGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
-                : detailProfile!.pendingRequestGroups.length === 0
+                : detailProfile!.enrolledActiveGroups.length === 0
                   ? (
-                    <Alert severity="info">אין לך בקשות ממתינות לאישור</Alert>
+                    <Alert severity="info">לא הצטרפת לקבוצות</Alert>
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                      {detailProfile!.pendingRequestGroups.map((requestGroup, index) => (
-                        <RequestGroupCard key={index} requestGroup={requestGroup} />
+                      {detailProfile!.enrolledActiveGroups.map((activeGroup, index) => (
+                        <ActiveGroupCard key={index} activeGroup={activeGroup} />
                       ))}
                     </Box>
                   )}

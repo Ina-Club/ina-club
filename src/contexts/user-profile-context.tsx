@@ -25,8 +25,6 @@ export interface UserProfileSummary {
 export interface UserProfile extends UserProfileSummary {
   enrolledRequestGroups: Array<RequestGroup>;
   enrolledActiveGroups: Array<ActiveGroup>;
-  ownedRequestGroups: Array<RequestGroup>;
-  ownedActiveGroups: Array<ActiveGroup>;
   pendingRequestGroups: Array<RequestGroup>;
 }
 

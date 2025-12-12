@@ -65,9 +65,7 @@ export async function GET(request: Request) {
                   include: {
                     user: {
                       select: {
-                        // id: true,
                         name: true,
-                        // email: true,
                         profilePicture: { select: { url: true } }
                       }
                     }
@@ -100,9 +98,7 @@ export async function GET(request: Request) {
                   include: {
                     user: {
                       select: {
-                        // id: true,
                         name: true,
-                        // email: true,
                         profilePicture: { select: { url: true } }
                       }
                     }
@@ -127,9 +123,7 @@ export async function GET(request: Request) {
               include: {
                 user: {
                   select: {
-                    // id: true,
                     name: true,
-                    // email: true,
                     profilePicture: { select: { url: true } }
                   }
                 }
@@ -158,9 +152,7 @@ export async function GET(request: Request) {
               include: {
                 user: {
                   select: {
-                    // id: true,
                     name: true,
-                    // email: true,
                     profilePicture: { select: { url: true } }
                   }
                 }
@@ -195,10 +187,8 @@ export async function GET(request: Request) {
           joinedAt: membership.joinedAt,
           images: membership.requestGroup.images.length ? membership.requestGroup.images.map(img => img.image.url) : ["/InaClubLogo.png"],
           participants: membership.requestGroup.participants.map(p => ({
-            // id: p.user.id,
             name: p.user.name || "",
             image: p.user.profilePicture?.url || "",
-            // mail: p.user.email
           })),
           openedGroups: membership.requestGroup.activeGroups.map(ag => ({ id: ag.id }))
         })),
@@ -211,10 +201,8 @@ export async function GET(request: Request) {
         basePrice: membership.activeGroup.basePrice,
         groupPrice: membership.activeGroup.groupPrice,
         participants: membership.activeGroup.participants.map(p => ({
-          // id: p.user.id,
           name: p.user.name || "",
           image: p.user.profilePicture?.url || "",
-          // mail: p.user.email
         })),
         minParticipants: membership.activeGroup.minParticipants,
         maxParticipants: membership.activeGroup.maxParticipants,
@@ -223,32 +211,6 @@ export async function GET(request: Request) {
         createdAt: membership.activeGroup.createdAt,
         joinedAt: membership.joinedAt,
         images: membership.activeGroup.images.map(img => img.image.url)
-      })),
-      ownedRequestGroups: user.requestGroups.map(group => ({
-        id: group.id,
-        title: group.title,
-        description: group.description,
-        category: group.category?.name,
-        status: group.status,
-        createdAt: group.createdAt,
-        images: group.images.map(img => img.image.url),
-        participants: group.participants,
-        openedGroups: [] //TODO: Fix this shitty shit as well
-      })),
-      ownedActiveGroups: user.activeGroups.map(group => ({
-        id: group.id,
-        title: group.title,
-        description: group.description,
-        category: group.category?.name,
-        company: group.company?.title,
-        basePrice: group.basePrice,
-        groupPrice: group.groupPrice,
-        minParticipants: group.minParticipants,
-        maxParticipants: group.maxParticipants,
-        deadline: group.deadline,
-        status: group.status,
-        createdAt: group.createdAt,
-        images: group.images.map(img => img.image.url)
       })),
       pendingRequestGroups: user.requestGroups
         .filter(group => group.status === GroupStatus.PENDING)
@@ -261,10 +223,8 @@ export async function GET(request: Request) {
           createdAt: group.createdAt,
           images: group.images.length ? group.images.map(img => img.image.url) : ["/InaClubLogo.png"],
           participants: group.participants.map(p => ({
-            // id: p.user.id,
             name: p.user.name || "",
             image: p.user.profilePicture?.url || "",
-            // mail: p.user.email
           })),
           openedGroups: group.activeGroups.map(ag => ({ id: ag.id }))
         }))
