@@ -25,6 +25,7 @@ export default async function RequestGroupDetail({
   const { id } = params;
   const session = await getServerSession(authOptions);
 
+  // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
   const rg = await prisma.requestGroup.findUnique({
     where: { id },
     select: {

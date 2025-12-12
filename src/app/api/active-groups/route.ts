@@ -76,7 +76,6 @@ export async function GET(req: Request) {
 
     const where = filters.length ? { AND: filters } : {};
 
-    // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
     const rows = await prisma.activeGroup.findMany({
       take: limit + 1,
       select: {
