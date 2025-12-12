@@ -136,11 +136,11 @@ function Header() {
   const loggedIn = status === "authenticated" && !!profile;
   const menuItems: MenuItemConfig[] = loggedIn ? LOGGED_IN_MENU : LOGGED_OUT_MENU;
 
-  return (
+  return (  
     <>
       <AppBar
-        position="static"
-        sx={{ background: "#fff", boxShadow: "0 0 10px rgba(0,0,0,0.2)" }}
+        position="sticky"
+        sx={{ background: "#fff", boxShadow: "0 0 10px rgba(0,0,0,0.2)", zIndex: 1000, top: 0 }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           

@@ -25,6 +25,7 @@ export default function Page() {
   const [hasMore, setHasMore] = useState(true);
   const loadingRef = useRef(false);
   const loadingMoreRef = useRef(false);
+  const latestRequestIdRef = useRef(0);
   const [filterState, setFilterState] = useState<FilterState>({
     searchText: "",
     categories: [],
@@ -59,6 +60,10 @@ export default function Page() {
   const fetchPage = useCallback(async (opts?: { cursor?: string | null; append?: boolean; signal?: AbortSignal }) => {
     const append = opts?.append ?? false;
     const nextCursor = opts?.cursor ?? null;
+  
+    // מזהה של הבקשה הנוכחית
+    const requestId = ++latestRequestIdRef.current;
+  
     if (append) {
       if (!nextCursor || loadingMoreRef.current || loadingRef.current) return;
       loadingMoreRef.current = true;
@@ -67,34 +72,46 @@ export default function Page() {
       loadingRef.current = true;
       setLoading(true);
     }
-
+  
     const urlParams: string = buildParams(nextCursor);
-
+  
     try {
-      const res = await fetch("/api/active-groups/?" + urlParams, { signal: opts?.signal });
+      const res = await fetch("/api/active-groups/?" + urlParams, {
+        signal: opts?.signal,
+      });
+  
       const data = await res.json();
       const incoming: ActiveGroup[] = data.activeGroups ?? [];
+  
       setCursor(data.nextCursor ?? null);
       setHasMore(!!data.nextCursor);
+  
       setActiveGroups((prev) => {
         if (!append) return incoming;
+  
         const seen = new Set(prev.map((r) => r.id));
         const filtered = incoming.filter((r) => !seen.has(r.id));
+  
         return [...prev, ...filtered];
       });
     } catch (err: any) {
       if (err?.name === "AbortError") return;
+  
       if (!append) setActiveGroups([]);
     } finally {
-      if (append) {
-        loadingMoreRef.current = false;
-        setLoadingMore(false);
-      } else {
-        loadingRef.current = false;
-        setLoading(false);
+      // כיבוי loading רק אם זו עדיין הבקשה האחרונה
+      if (requestId === latestRequestIdRef.current) {
+        if (append) {
+          loadingMoreRef.current = false;
+          setLoadingMore(false);
+        } else {
+          loadingRef.current = false;
+          setLoading(false);
+        }
       }
     }
   }, [buildParams]);
+  
 
   useEffect(() => {
     setCursor(null);
@@ -111,14 +128,16 @@ export default function Page() {
 
   return (
     <>
-      <DefaultPageBanner header={headerText} description={descriptionText} />
+      <DefaultPageBanner
+              mainSx={{ top: -66 , zIndex: 900, pb: 3, position: "sticky" }}
+              header={headerText} description={descriptionText} />
 
       {/* Top bar: Search + Mobile filters trigger */}
       <Box
         sx={{
           maxWidth: 800,
           mx: "auto",
-          position: "relative",
+          // position: "relative",
           mt: { xs: -6, md: -3 },
           bgcolor: "white",
           boxShadow: 3,
@@ -126,6 +145,10 @@ export default function Page() {
           py: { xs: 2, md: 1 },
           px: { xs: 2, md: 2 },
           display: "flex",
+          position: "sticky",
+          top: 82,
+          zIndex: 1000,
+          pb: 3, // רשות — כדי שהדף לא יקפוץ
           alignItems: "center",
           border: "2px solid transparent",
           "&:hover": { borderColor: "#1a2a5a" },
@@ -163,7 +186,7 @@ export default function Page() {
           sx={{
             display: { xs: "none", md: "block" },
             position: "sticky",
-            top: "20px",
+            top: 176,
             alignSelf: "flex-start",
             zIndex: 1,
           }}
