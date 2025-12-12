@@ -28,6 +28,7 @@ export default async function ActiveGroupDetail({
   const { id } = params;
   const session = await getServerSession(authOptions);
 
+  // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
   const ag = await prisma.activeGroup.findUnique({
     where: { id },
     select: {
@@ -253,11 +254,7 @@ export default async function ActiveGroupDetail({
                   images: s.images.length
                     ? s.images.map((i) => i.image.url)
                     : ["/InaClubLogo.png"],
-                  participants: s.participants.map((p: any) => ({
-                    name: p.user.name,
-                    mail: p.user.email,
-                    image: p.user.profilePicture?.url || "",
-                  })),
+                  participants: [],
                   status: GroupStatus.OPEN,
                   basePrice: s.basePrice,
                   groupPrice: s.groupPrice,

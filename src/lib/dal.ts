@@ -5,16 +5,15 @@ export interface RequestGroup {
   images: string[];
   category: string;
   title: string;
-  participants: User[]; //TODO: Length instead
+  participants: User[];
   openedGroups?: string[]; //TODO: Remove
   status: GroupStatus;
   description?: string;
 }
 
 export interface User {
+  firstName: string;
   image: string;
-  name: string;
-  mail: string;
 }
 
 export interface ActiveGroup {
