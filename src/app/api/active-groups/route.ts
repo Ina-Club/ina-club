@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
-import { validateSession } from "@/lib/auth";
+import { requireAuth, validateSession } from "@/lib/auth";
 import { getUserIdBySession } from "@/lib/user";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+import { RoleLevel } from "@/lib/types/role";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -142,7 +143,7 @@ export async function GET(req: Request) {
 // POST /api/active-groups
 export async function POST(req: Request) {
   try {
-    const { session, response } = await validateSession();
+    const { session, response } = await requireAuth(RoleLevel.BUSINESS);
     if (response) return response;
 
     const body = await req.json();
