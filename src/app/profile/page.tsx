@@ -26,16 +26,19 @@ import {
   ShoppingBag as ShoppingBagIcon,
   Delete as DeleteIcon,
   Warning as WarningIcon,
+  Favorite as FavoriteIcon,
 } from "@mui/icons-material";
 import { useState, useEffect, type ReactNode } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useSession, signOut } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "@/components/loading-circle";
 import RequestGroupCard from "@/components/card/request-group-card";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import UserAvatar from "@/components/user-avatar";
 import { useUserProfile } from "@/contexts/user-profile-context";
+import { useFavorites } from "@/contexts/favorites-context";
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -61,6 +64,7 @@ function TabPanel(props: TabPanelProps) {
 
 export default function Profile() {
   const { status } = useSession();
+  const searchParams = useSearchParams();
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const {
@@ -82,6 +86,10 @@ export default function Profile() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const {
+    likedRequestGroups,
+    likedActiveGroups,
+  } = useFavorites();
 
   useEffect(() => {
     let isMounted = true;
@@ -133,6 +141,19 @@ export default function Profile() {
       setEditName(profileSummary.name);
     }
   }, [profileSummary?.name]);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    const mapping: Record<string, number> = {
+      status: 0,
+      requests: 1,
+      pending: 2,
+      liked: 3,
+    };
+    if (tabParam && mapping[tabParam] !== undefined) {
+      setTabValue(mapping[tabParam]);
+    }
+  }, [searchParams]);
 
   const handleEdit = () => {
     setEditing(true);
@@ -452,6 +473,7 @@ export default function Profile() {
             <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FoundationIcon />} label="סטטוס בקשות" iconPosition="start" />
             <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
             <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
+            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FavoriteIcon />} label="מועדפים" iconPosition="start" />
           </Tabs>
 
           {/* Panels */}
@@ -459,7 +481,7 @@ export default function Profile() {
             {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={0}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שאתה פתחת ({detailProfile?.ownedRequestGroups.length ?? 0})
+                בקשות ממתינות לאישור ({detailProfile?.ownedRequestGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
@@ -498,7 +520,7 @@ export default function Profile() {
             {/* Pending Request Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות ממתינות לאישור ({detailProfile?.pendingRequestGroups.length ?? 0})
+                קבוצות פעילות שנרשמת להן ({detailProfile?.pendingRequestGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
@@ -512,6 +534,34 @@ export default function Profile() {
                       ))}
                     </Box>
                   )}
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={3}>
+              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
+                בקשות שסימנת ({likedRequestGroups.length})
+              </Typography>
+              {likedRequestGroups.length === 0 ? (
+                <Alert severity="info">עוד לא סימנת בקשות שאהבת</Alert>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                  {likedRequestGroups.map((requestGroup) => (
+                    <RequestGroupCard key={requestGroup.id} requestGroup={requestGroup} />
+                  ))}
+                </Box>
+              )}
+
+              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom sx={{ mt: 3 }}>
+                קבוצות רכישה שסימנת ({likedActiveGroups.length})
+              </Typography>
+              {likedActiveGroups.length === 0 ? (
+                <Alert severity="info">עוד לא סימנת קבוצות רכישה שאהבת</Alert>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+                  {likedActiveGroups.map((activeGroup) => (
+                    <ActiveGroupCard key={activeGroup.id} activeGroup={activeGroup} />
+                  ))}
+                </Box>
+              )}
             </TabPanel>
           </Box>
         </Box>

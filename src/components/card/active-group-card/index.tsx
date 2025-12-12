@@ -8,15 +8,17 @@ import { useState } from "react";
 import ParticipantsProgress from "./participations-progress-bar";
 import Countdown from "./countdown";
 import { useRouter } from "next/navigation";
+import { useFavorites } from "@/contexts/favorites-context";
 
 interface ActiveGroupCardProps {
   activeGroup: ActiveGroup;
 }
 
 const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
-  const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const router = useRouter();
+  const { isActiveGroupLiked, toggleActiveGroupLike } = useFavorites();
+  const liked = isActiveGroupLiked(activeGroup.id);
 
   const goToActiveGroup = () => {
     router.push(`/active-groups/${activeGroup.id}`);
@@ -69,7 +71,7 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
           }}
           onClick={(e) => {
             e.stopPropagation(); // כדי שלחיצה על הלב לא תפעיל ניווט
-            setLiked(!liked);
+            toggleActiveGroupLike(activeGroup);
           }}
         >
           {liked ? (

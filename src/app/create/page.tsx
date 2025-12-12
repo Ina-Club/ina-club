@@ -196,7 +196,7 @@ export default function CreateRequestGroupPage() {
       <Box
         sx={{
           position: "sticky",
-          top: 0,
+          top: 72,
           zIndex: 5,
           bgcolor: "background.paper",
           borderBottom: "1px solid",

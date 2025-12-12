@@ -3,6 +3,7 @@ import HeaderWrapper from "@/components/wrapper/header-wrapper"; // ✅ חדש
 import ThemeRegistry from "@/components/theme-registry/theme-registry";
 import SessionProviderWrapper from "@/components/wrapper/session-provider-wrapper";
 import { UserProfileProvider } from "@/contexts/user-profile-context";
+import { FavoritesProvider } from "@/contexts/favorites-context";
 import { Box } from "@mui/material";
 import type { Metadata } from "next";
 
@@ -30,9 +31,11 @@ export default function RootLayout({
         >
           <SessionProviderWrapper>
             <UserProfileProvider>
-              <HeaderWrapper /> {/* ✅ עכשיו ה-header מתנהג לפי הדף */}
-              <main style={{ flex: 1 }}>{children}</main>
-              <Footer />
+              <FavoritesProvider>
+                <HeaderWrapper /> {/* ✅ עכשיו ה-header מתנהג לפי הדף */}
+                <main style={{ flex: 1 }}>{children}</main>
+                <Footer />
+              </FavoritesProvider>
             </UserProfileProvider>
           </SessionProviderWrapper>
         </body>

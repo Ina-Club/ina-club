@@ -20,6 +20,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import { useState } from "react";
+import { useFavorites } from "@/contexts/favorites-context";
 
 interface RequestGroupCardProps {
   requestGroup: RequestGroup;
@@ -28,8 +29,9 @@ interface RequestGroupCardProps {
 const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => {
   const router = useRouter();
   const goToRequestGroup = () => router.push(`/request-groups/${requestGroup.id}`);
-  const [liked, setLiked] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
+  const { isRequestGroupLiked, toggleRequestGroupLike } = useFavorites();
+  const liked = isRequestGroupLiked(requestGroup.id);
 
   const isOpen: boolean = requestGroup.status === GroupStatus.OPEN;
   const isPreview: boolean = requestGroup.status === GroupStatus.PREVIEW;
@@ -103,7 +105,10 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             boxShadow: 2,
             "&:hover": { bgcolor: "grey.100" },
           }}
-          onClick={() => setLiked(!liked)}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleRequestGroupLike(requestGroup);
+          }}
         >
           {liked ? (
             <FavoriteIcon sx={{ color: "red" }} />

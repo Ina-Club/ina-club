@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
@@ -15,78 +15,109 @@ import ResponsiveVerticalCardWrapper from "@/components/wrapper/responsive-verti
 
 export default function Page() {
   const headerText: string = "כל הבקשות";
-  const descriptionText: string = "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
+  const descriptionText: string =
+    "גלה את כל הבקשות הפעילות, הצטרף לקבוצות קנייה וחסוך כסף יחד עם אחרים.";
   const debounceDelay: number = 400; //Time in milliseconds
-  const [openRequestGroups, setOpenRequestGroups] = useState<RequestGroup[]>([]);
+  const [openRequestGroups, setOpenRequestGroups] = useState<RequestGroup[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loadingRef = useRef(false);
   const loadingMoreRef = useRef(false);
+  const latestRequestIdRef = useRef(0);
   const [filterState, setFilterState] = useState<FilterState>({
     searchText: "",
     categories: [],
     locations: [],
-    popularities: []
+    popularities: [],
   });
   const [cursor, setCursor] = useState<string | null>(null);
-  const debouncedParams: FilterState = useDebouncedValue(filterState, debounceDelay);
+  const debouncedParams: FilterState = useDebouncedValue(
+    filterState,
+    debounceDelay
+  );
 
-  const buildParams = useCallback((nextCursor?: string | null) => {
-    const params = new URLSearchParams({
-      status: "open",
-      limit: DEFAULT_PAGINATION.toString(),
-    });
-    const trimmedSearch = debouncedParams.searchText.trim();
-    if (nextCursor) params.set("cursor", nextCursor);
-    if (trimmedSearch) params.set("search", trimmedSearch);
-    debouncedParams.categories.forEach((category) => params.append("category", category));
-    return params.toString();
-  }, [debouncedParams]);
+  const buildParams = useCallback(
+    (nextCursor?: string | null) => {
+      const params = new URLSearchParams({
+        status: "open",
+        limit: DEFAULT_PAGINATION.toString(),
+      });
+      const trimmedSearch = debouncedParams.searchText.trim();
+      if (nextCursor) params.set("cursor", nextCursor);
+      if (trimmedSearch) params.set("search", trimmedSearch);
+      debouncedParams.categories.forEach((category) =>
+        params.append("category", category)
+      );
+      return params.toString();
+    },
+    [debouncedParams]
+  );
 
   const handleSearchTextChange = (newText: string) => {
     setFilterState((prev) => ({ ...prev, searchText: newText }));
-  }
+  };
 
-  const fetchPage = useCallback(async (opts?: { cursor?: string | null; append?: boolean; signal?: AbortSignal }) => {
-    const append = opts?.append ?? false;
-    const nextCursor = opts?.cursor ?? null;
-    if (append) {
-      if (!nextCursor || loadingMoreRef.current || loadingRef.current) return;
-      loadingMoreRef.current = true;
-      setLoadingMore(true);
-    } else {
-      loadingRef.current = true;
-      setLoading(true);
-    }
+  const fetchPage = useCallback(
+    async (opts?: {
+      cursor?: string | null;
+      append?: boolean;
+      signal?: AbortSignal;
+    }) => {
+      const append = opts?.append ?? false;
+      const nextCursor = opts?.cursor ?? null;
 
-    const urlParams: string = buildParams(nextCursor);
+      // צור requestId חדש
+      const requestId = ++latestRequestIdRef.current;
 
-    try {
-      const res = await fetch('/api/request-groups/?' + urlParams, { signal: opts?.signal });
-      const data = await res.json();
-      const incoming: RequestGroup[] = data.requestGroups ?? [];
-      setCursor(data.nextCursor ?? null);
-      setHasMore(!!data.nextCursor);
-      setOpenRequestGroups((prev) => {
-        if (!append) return incoming;
-        const seen = new Set(prev.map((r) => r.id));
-        const filtered = incoming.filter((r) => !seen.has(r.id));
-        return [...prev, ...filtered];
-      });
-    } catch (err: any) {
-      if (err?.name === "AbortError") return;
-      if (!append) setOpenRequestGroups([]);
-    } finally {
       if (append) {
-        loadingMoreRef.current = false;
-        setLoadingMore(false);
+        if (!nextCursor || loadingMoreRef.current || loadingRef.current) return;
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
       } else {
-        loadingRef.current = false;
-        setLoading(false);
+        loadingRef.current = true;
+        setLoading(true);
       }
-    }
-  }, [buildParams]);
+
+      const urlParams = buildParams(nextCursor);
+
+      try {
+        const res = await fetch("/api/request-groups/?" + urlParams, {
+          signal: opts?.signal,
+        });
+
+        const data = await res.json();
+        const incoming: RequestGroup[] = data.requestGroups ?? [];
+
+        setCursor(data.nextCursor ?? null);
+        setHasMore(!!data.nextCursor);
+
+        setOpenRequestGroups((prev) => {
+          if (!append) return incoming;
+          const seen = new Set(prev.map((r) => r.id));
+          const filtered = incoming.filter((r) => !seen.has(r.id));
+          return [...prev, ...filtered];
+        });
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
+        if (!append) setOpenRequestGroups([]);
+      } finally {
+        // רק אם זה ה-request האחרון שיצא — מותר לכבות את הטעינה
+        if (requestId === latestRequestIdRef.current) {
+          if (append) {
+            loadingMoreRef.current = false;
+            setLoadingMore(false);
+          } else {
+            loadingRef.current = false;
+            setLoading(false);
+          }
+        }
+      }
+    },
+    [buildParams]
+  );
 
   useEffect(() => {
     setCursor(null);
@@ -103,13 +134,17 @@ export default function Page() {
 
   return (
     <>
-      <DefaultPageBanner header={headerText} description={descriptionText} />
-      {/* Top bar: Search + (mobile) Filters trigger */}
+      <DefaultPageBanner
+        header={headerText}
+        description={descriptionText}
+        mainSx={{ top: -66 , zIndex: 900, pb: 3, position: "sticky" }}
+      />
+      {/* Top bar: Search + (mobile) Filters trigger 160 */}
       <Box
         sx={{
           maxWidth: 800,
           mx: "auto",
-          position: "relative",
+          //position: "relative",
           mt: { xs: -6, md: -3 }, // מרים את הסרגל חיפוש שיהיה קצת מעל הגרדיאנט
           bgcolor: "white",
           boxShadow: 3,
@@ -117,18 +152,36 @@ export default function Page() {
           py: { xs: 2, md: 1 },
           px: { xs: 2, md: 2 },
           display: "flex",
+          position: "sticky",
+          top: 82,
+          zIndex: 1000,
+          pb: 3, // רשות — כדי שהדף לא יקפוץ
           alignItems: "center",
           border: "2px solid transparent",
           "&:hover": {
-            borderColor: "#1a2a5a"
-          }
+            borderColor: "#1a2a5a",
+          },
         }}
       >
-        <SearchBar searchText={filterState.searchText} placeholderText="חיפוש בקשות..." handleSearchTextChange={handleSearchTextChange} />
+        <SearchBar
+          searchText={filterState.searchText}
+          placeholderText="חיפוש בקשות..."
+          handleSearchTextChange={handleSearchTextChange}
+        />
 
         {/* Mobile filters trigger (inside the same row as search) */}
-        <Box sx={{ display: { xs: "flex", md: "none" } }}>
-          <GroupFilters mode="trigger" group="request" filterState={filterState} onFilterChange={setFilterState} />
+        <Box
+          sx={{
+            display: { xs: "flex", md: "none" },
+
+          }}
+        >
+          <GroupFilters
+            mode="trigger"
+            group="request"
+            filterState={filterState}
+            onFilterChange={setFilterState}
+          />
         </Box>
       </Box>
 
@@ -145,14 +198,21 @@ export default function Page() {
         }}
       >
         {/* Desktop sidebar filters */}
-        <Box sx={{
-          display: { xs: "none", md: "block" },
-          position: "sticky",
-          top: "20px",
-          alignSelf: "flex-start",
-          zIndex: 1
-        }}>
-          <GroupFilters mode="sidebar" group="request" filterState={filterState} onFilterChange={setFilterState} />
+        <Box
+          sx={{
+            display: { xs: "none", md: "block" },
+            position: "sticky",
+            top: 176,
+            alignSelf: "flex-start",
+            zIndex: 1,
+          }}
+        >
+          <GroupFilters
+            mode="sidebar"
+            group="request"
+            filterState={filterState}
+            onFilterChange={setFilterState}
+          />
         </Box>
 
         {/* Cards grid */}
@@ -173,29 +233,31 @@ export default function Page() {
             }}
           >
             <Suspense fallback={<GroupSectionSkeleton />}>
-            {loading ? (
-              Array.from({ length: 6 }).map((_, i) => <RequestGroupCardSkeleton key={i} />)
-            ) : openRequestGroups.length > 0 ? (
-              openRequestGroups.map((requestGroup, index) => (
-                <RequestGroupCard key={index} requestGroup={requestGroup} />
-              ))
-            ) : (
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: "50%",
-                  width: "100%",
-                  transform: "translateX(-50%)",
-                  mt: { xs: 4, md: 2 }, // space below search bar
-                  display: "flex",
-                  justifyContent: "center",
-                  color: "text.secondary",
-                  textAlign: "center"
-                }}
-              >
-                לא נמצאו בקשות התואמות לחיפוש שלך
-              </Box>
-            )}
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <RequestGroupCardSkeleton key={i} />
+                ))
+              ) : openRequestGroups.length > 0 ? (
+                openRequestGroups.map((requestGroup, index) => (
+                  <RequestGroupCard key={index} requestGroup={requestGroup} />
+                ))
+              ) : (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: "50%",
+                    width: "100%",
+                    transform: "translateX(-50%)",
+                    mt: { xs: 4, md: 2 }, // space below search bar
+                    display: "flex",
+                    justifyContent: "center",
+                    color: "text.secondary",
+                    textAlign: "center",
+                  }}
+                >
+                  לא נמצאו בקשות התואמות לחיפוש שלך
+                </Box>
+              )}
             </Suspense>
           </Box>
         </ResponsiveVerticalCardWrapper>
