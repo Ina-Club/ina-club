@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
-import { validateSession } from "@/lib/auth";
+import { requireAuth, validateSession } from "@/lib/auth";
 import { getUserIdBySession } from "@/lib/user";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+import { RoleLevel } from "@/lib/types/role";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -76,7 +77,6 @@ export async function GET(req: Request) {
 
     const where = filters.length ? { AND: filters } : {};
 
-    // Get all active groups
     const rows = await prisma.activeGroup.findMany({
       take: limit + 1,
       select: {
@@ -87,13 +87,11 @@ export async function GET(req: Request) {
         basePrice: true,
         groupPrice: true,
         deadline: true,
-        participants: { //TODO: Fetch length instead
+        participants: {
           select: {
             user: {
               select: {
-                // id: true,
                 name: true,
-                // email: true,
                 profilePicture: { select: { url: true } },
               },
             },
@@ -128,10 +126,8 @@ export async function GET(req: Request) {
       deadline: r.deadline,
       images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
       participants: r.participants.map((p) => ({
-        // id: p.user.id,
-        name: p.user.name ?? "",
+        firstName: p.user.name ? p.user.name.split(" ")[0] : "", // This way we avoid sending full user names to the client.
         image: p.user.profilePicture?.url ?? "",
-        // mail: p.user.email,
       })),
       minParticipants: r.minParticipants,
       maxParticipants: r.maxParticipants
@@ -147,7 +143,7 @@ export async function GET(req: Request) {
 // POST /api/active-groups
 export async function POST(req: Request) {
   try {
-    const { session, response } = await validateSession();
+    const { session, response } = await requireAuth(RoleLevel.BUSINESS);
     if (response) return response;
 
     const body = await req.json();

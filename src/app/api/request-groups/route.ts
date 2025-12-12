@@ -74,13 +74,10 @@ export async function GET(req: Request) {
         status: true,
         category: { select: { name: true } },
         participants: {
-          //TODO: Fetch length instead
           select: {
             user: {
               select: {
-                // id: true,
                 name: true,
-                // email: true,
                 profilePicture: { select: { url: true } },
               },
             },
@@ -113,10 +110,8 @@ export async function GET(req: Request) {
         ? r.images.map((ri) => ri.image.url)
         : ["/InaClubLogo.png"],
       participants: r.participants.map((p) => ({
-        // id: p.user.id,
-        name: p.user.name ?? "",
+        firstName: p.user.name ? p.user.name.split(" ")[0] : "", // This way we avoid sending full user names to the client.
         image: p.user.profilePicture?.url ?? "",
-        // mail: p.user.email,
       })),
       // TODO: Remove
       openedGroups: r.activeGroups.map((ag) => ({ id: ag.id })),

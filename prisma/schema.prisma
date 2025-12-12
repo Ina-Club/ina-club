@@ -23,6 +23,12 @@ enum GroupStatus {
   PREVIEW
 }
 
+enum Role {
+  USER
+  BUSINESS
+  ADMIN
+}
+
 // ----------------------------------------------------
 // Core: User, Company, Category
 // ----------------------------------------------------
@@ -33,6 +39,7 @@ model User {
   password         String?  // 👈 may be set after email verification
   emailVerified    DateTime?
   createdAt        DateTime                   @default(now())
+  role             Role                       @default(USER)
 
   // Participation
   requestGroupMemberships RequestGroupParticipant[]

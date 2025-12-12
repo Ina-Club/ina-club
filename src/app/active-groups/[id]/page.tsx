@@ -18,6 +18,7 @@ import JoinButton from "@/components/join-button";
 import UserAvatar from "@/components/user-avatar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
 
 export default async function ActiveGroupDetail({
   params,
@@ -27,6 +28,7 @@ export default async function ActiveGroupDetail({
   const { id } = params;
   const session = await getServerSession(authOptions);
 
+  // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
   const ag = await prisma.activeGroup.findUnique({
     where: { id },
     select: {
@@ -45,13 +47,11 @@ export default async function ActiveGroupDetail({
       company: {
         select: { id: true, title: true, logo: { select: { url: true } } },
       },
-      participants: { //TODO: Fetch length instead
+      participants: {
         select: {
           user: {
             select: {
-              // id: true,
               name: true,
-              // email: true,
               profilePicture: { select: { url: true } },
             },
           },
@@ -71,19 +71,13 @@ export default async function ActiveGroupDetail({
   }
 
   const images = ag.images.map((i) => i.image.url);
-  const mainImage = images[0] || "/InaClubLogo.png";
-  const restImages = images.slice(1);
   const participantsCount = ag.participants.length;
   const participantAvatars = ag.participants.slice(0, 10).map((p) => ({
-    id: p.user.id,
-    name: p.user.name,
-    email: p.user.email,
+    name: !!p.user.name ? p.user.name.split(" ")[0] : null, // This way we avoid sending full user names to the client.
     imageUrl: p.user.profilePicture?.url || undefined,
   }));
   const viewerEmail = session?.user?.email;
-  const alreadyJoined = !!viewerEmail
-    ? ag.participants.some((p) => p.user.email === viewerEmail)
-    : false;
+  const alreadyJoined = !!viewerEmail ? await checkUserIsActiveGroupParticipant(viewerEmail, ag.id) : false;
 
   // Similar ActiveGroups
   const similar = await prisma.activeGroup.findMany({
@@ -203,11 +197,11 @@ export default async function ActiveGroupDetail({
                 mb: 3,
               }}
             >
-              {participantAvatars.map((p) => (
+              {participantAvatars.map((p, index) => (
                 <UserAvatar
-                  key={p.id}
-                  name={p.name || p.email}
-                  identifier={p.email || p.id}
+                  key={index}
+                  name={p.name}
+                  identifier={index.toString()}
                   imageUrl={p.imageUrl}
                   sx={{ width: 36, height: 36 }}
                 />
@@ -260,11 +254,7 @@ export default async function ActiveGroupDetail({
                   images: s.images.length
                     ? s.images.map((i) => i.image.url)
                     : ["/InaClubLogo.png"],
-                  participants: s.participants.map((p: any) => ({
-                    name: p.user.name,
-                    mail: p.user.email,
-                    image: p.user.profilePicture?.url || "",
-                  })),
+                  participants: [],
                   status: GroupStatus.OPEN,
                   basePrice: s.basePrice,
                   groupPrice: s.groupPrice,
