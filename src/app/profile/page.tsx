@@ -463,11 +463,11 @@ export default function Profile() {
               borderColor: 'divider',
               width: isMdUp ? 'auto' : '100%',
               minWidth: isMdUp ? 220 : '100%',
-              height: isMdUp ? "auto" : 80,
               '& .MuiTab-root': {
                 fontSize: isMdUp ? '0.95rem' : '0.8rem',
                 justifyContent: isMdUp ? "flex-start" : "center",
                 minWidth: isMdUp ? undefined : 0,
+                height: isMdUp ? "auto" : 80,
               },
             }}
           >
