@@ -96,26 +96,28 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         />
 
         {/* Floating Like button */}
-        <IconButton
-          sx={{
-            position: "absolute",
-            top: 12,
-            right: 12,
-            bgcolor: "white",
-            boxShadow: 2,
-            "&:hover": { bgcolor: "grey.100" },
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleRequestGroupLike(requestGroup);
-          }}
-        >
-          {liked ? (
-            <FavoriteIcon sx={{ color: "red" }} />
-          ) : (
-            <FavoriteBorderIcon sx={{ color: "grey.600" }} />
-          )}
-        </IconButton>
+        {isOpen &&
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              bgcolor: "white",
+              boxShadow: 2,
+              "&:hover": { bgcolor: "grey.100" },
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleRequestGroupLike(requestGroup);
+            }}
+          >
+            {liked ? (
+              <FavoriteIcon sx={{ color: "red" }} />
+            ) : (
+              <FavoriteBorderIcon sx={{ color: "grey.600" }} />
+            )}
+          </IconButton>
+        }
 
         {/* Status Chip (only for canceled/expired/closed) */}
         {(!isOpen && !isPreview) && (
