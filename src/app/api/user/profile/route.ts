@@ -213,7 +213,7 @@ export async function GET(request: Request) {
         images: membership.activeGroup.images.map(img => img.image.url)
       })),
       pendingRequestGroups: user.requestGroups
-        .filter(group => group.status === GroupStatus.PENDING)
+        .filter(group => group.status !== GroupStatus.OPEN)
         .map(group => ({
           id: group.id,
           title: group.title,
