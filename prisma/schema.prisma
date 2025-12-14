@@ -142,6 +142,7 @@ model RequestGroup {
   createdAt        DateTime      @default(now())
   createdById      String
   createdBy        User          @relation("RequestGroupOwners", fields: [createdById], references: [id], onDelete: Restrict)
+  rejectionReason  String?
 
   // Relations
   participants     RequestGroupParticipant[]
