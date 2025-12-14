@@ -468,29 +468,26 @@ export default function Profile() {
                 justifyContent: isMdUp ? "flex-start" : "center",
                 minWidth: isMdUp ? undefined : 0,
                 height: isMdUp ? "auto" : 80,
+                "&:hover": { color: "primary.main" }
               },
             }}
           >
             <Tab
-              sx={{ "&:hover": { color: "primary.main" } }}
               icon={<FoundationIcon />}
               label={isMdUp ? "סטטוס בקשות" : (tabValue === 0 ? "סטטוס בקשות" : undefined)}
               iconPosition={isMdUp ? "start" : undefined}
             />
             <Tab
-              sx={{ "&:hover": { color: "primary.main" } }}
               icon={<ShoppingBagIcon />}
               label={isMdUp ? "בקשות" : (tabValue === 1 ? "בקשות" : undefined)}
               iconPosition={isMdUp ? "start" : undefined}
             />
             <Tab
-              sx={{ "&:hover": { color: "primary.main" } }}
               icon={<GroupIcon />}
               label={isMdUp ? "קבוצות רכישה" : (tabValue === 2 ? "קבוצות רכישה" : undefined)}
               iconPosition={isMdUp ? "start" : undefined}
             />
             <Tab
-              sx={{ "&:hover": { color: "primary.main" } }}
               icon={<FavoriteIcon />}
               label={isMdUp ? "מועדפים" : (tabValue === 3 ? "מועדפים" : undefined)}
               iconPosition={isMdUp ? "start" : undefined}
