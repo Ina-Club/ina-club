@@ -498,16 +498,16 @@ export default function Profile() {
             {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={0}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות ממתינות לאישור ({detailProfile?.pendingRequestGroups.length ?? 0})
+                בקשות ממתינות לאישור ({detailProfile?.waitingRequestGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
-                : detailProfile!.pendingRequestGroups.length === 0
+                : detailProfile!.waitingRequestGroups.length === 0
                   ? (
                     <Alert severity="info">עדיין לא יצרת בקשות</Alert>
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                      {detailProfile!.pendingRequestGroups.map((requestGroup, index) => (
+                      {detailProfile!.waitingRequestGroups.map((requestGroup, index) => (
                         <RequestGroupCard key={index} requestGroup={requestGroup} />
                       ))}
                     </Box>

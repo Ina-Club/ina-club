@@ -25,7 +25,7 @@ export interface UserProfileSummary {
 export interface UserProfile extends UserProfileSummary {
   enrolledRequestGroups: Array<RequestGroup>;
   enrolledActiveGroups: Array<ActiveGroup>;
-  pendingRequestGroups: Array<RequestGroup>;
+  waitingRequestGroups: Array<RequestGroup>;
 }
 
 type RefreshOptions = {

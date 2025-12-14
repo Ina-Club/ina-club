@@ -189,7 +189,7 @@ export async function GET(request: Request) {
         joinedAt: membership.joinedAt,
         images: membership.activeGroup.images.map(img => img.image.url)
       })),
-      pendingRequestGroups: user.requestGroups
+      waitingRequestGroups: user.requestGroups
         .filter(group => group.status !== GroupStatus.OPEN)
         .map(group => ({
           id: group.id,
@@ -203,7 +203,8 @@ export async function GET(request: Request) {
             name: p.user.name || "",
             image: p.user.profilePicture?.url || "",
           })),
-          openedGroups: group.activeGroups.map(ag => ({ id: ag.id }))
+          openedGroups: group.activeGroups.map(ag => ({ id: ag.id })),
+          rejectionReason: group.rejectionReason
         }))
     };
 
