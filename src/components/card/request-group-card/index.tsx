@@ -225,73 +225,77 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
           {requestGroup.title}
         </Typography>
 
-        {/* Meta Info */}
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          בקשה נוצרה לפני 2 ימים
-        </Typography>
+        {isOpen &&
+          <>
+            {/* Meta Info */}
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              בקשה נוצרה לפני 2 ימים
+            </Typography>
 
-        {/* Participants */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <PeopleAltOutlinedIcon
-            sx={{ fontSize: 18, mr: 0.5, color: "primary.main" }}
-          />
-          <Typography
-            variant="body2"
-            fontWeight={500}
-            color="primary.main"
-            mr={0.5}
-          >
-            {requestGroup.participants.length}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            מעוניינים
-          </Typography>
-        </Box>
+            {/* Participants */}
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <PeopleAltOutlinedIcon
+                sx={{ fontSize: 18, mr: 0.5, color: "primary.main" }}
+              />
+              <Typography
+                variant="body2"
+                fontWeight={500}
+                color="primary.main"
+                mr={0.5}
+              >
+                {requestGroup.participants.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                מעוניינים
+              </Typography>
+            </Box>
 
-        {/* Groups Info */}
-        {requestGroup.openedGroups?.length ? (
-          <Alert
-            severity="success"
-            sx={{
-              borderRadius: 2,
-              px: 1.5,
-              py: "3.3px", // This particular amount is to make the smart-search cards be the exact same size
-              bgcolor: "#e3e7f5",
-              color: "#1a2a5a",
-              fontSize: "0.75rem",
-              "& .MuiAlert-icon": {
-                color: "#1a2a5a",
-              },
-            }}
-          >
-            <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#1a2a5a" }}>
-              נפתחו {requestGroup.openedGroups.length} קבוצות
-            </AlertTitle>
-            {requestGroup.participants.length} רוכשים • אחרונה לפי 3 ימים
-          </Alert>
-        ) : (
-          <Alert
-            iconMapping={{
-              success: <AccessTimeOutlinedIcon fontSize="inherit" />,
-            }}
-            sx={{
-              bgcolor: "#fff7ec",
-              color: "#ff8c42",
-              fontSize: "0.75rem",
-              "& .MuiAlert-icon": {
-                color: "#f0a868",
-              },
-              borderRadius: 2,
-              px: 1.5,
-              py: "3.3px",
-            }}
-          >
-            <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#ff8c42" }}>
-              ממתין לקבוצה ראשונה
-            </AlertTitle>
-            עוד מעט מעוניינים ונפתח קבוצה
-          </Alert>
-        )}
+            {/* Groups Info */}
+            {requestGroup.openedGroups?.length ? (
+              <Alert
+                severity="success"
+                sx={{
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: "3.3px", // This particular amount is to make the smart-search cards be the exact same size
+                  bgcolor: "#e3e7f5",
+                  color: "#1a2a5a",
+                  fontSize: "0.75rem",
+                  "& .MuiAlert-icon": {
+                    color: "#1a2a5a",
+                  },
+                }}
+              >
+                <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#1a2a5a" }}>
+                  נפתחו {requestGroup.openedGroups.length} קבוצות
+                </AlertTitle>
+                {requestGroup.participants.length} רוכשים • אחרונה לפי 3 ימים
+              </Alert>
+            ) : (
+              <Alert
+                iconMapping={{
+                  success: <AccessTimeOutlinedIcon fontSize="inherit" />,
+                }}
+                sx={{
+                  bgcolor: "#fff7ec",
+                  color: "#ff8c42",
+                  fontSize: "0.75rem",
+                  "& .MuiAlert-icon": {
+                    color: "#f0a868",
+                  },
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: "3.3px",
+                }}
+              >
+                <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#ff8c42" }}>
+                  ממתין לקבוצה ראשונה
+                </AlertTitle>
+                עוד מעט מעוניינים ונפתח קבוצה
+              </Alert>
+            )}
+          </>
+        }
       </CardContent>
     </Card>
   );
