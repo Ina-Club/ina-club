@@ -135,30 +135,6 @@ export async function GET(request: Request) {
               }
             }
           }
-        },
-        activeGroups: {
-          include: {
-            category: true,
-            company: true,
-            images: {
-              include: {
-                image: true
-              },
-              orderBy: {
-                order: 'asc'
-              }
-            },
-            participants: {
-              include: {
-                user: {
-                  select: {
-                    name: true,
-                    profilePicture: { select: { url: true } }
-                  }
-                }
-              }
-            },
-          }
         }
       }
     });

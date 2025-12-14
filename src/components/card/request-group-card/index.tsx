@@ -8,6 +8,11 @@ import {
   CardContent,
   CardMedia,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
   Chip,
   Box,
   IconButton,
@@ -30,6 +35,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const router = useRouter();
   const goToRequestGroup = () => router.push(`/request-groups/${requestGroup.id}`);
   const [currentImage, setCurrentImage] = useState(0);
+  const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const { isRequestGroupLiked, toggleRequestGroupLike } = useFavorites();
   const liked = isRequestGroupLiked(requestGroup.id);
 
@@ -49,6 +55,8 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       default: return ""; // For opened groups.
     }
   };
+
+  const requestGroupRejectionReason = requestGroup.rejectionReason ?? getStatusDescription(GroupStatus.CANCELED);
 
   const handleRequestGroupClick = () => {
     if (isOpen || isPreview) {
@@ -217,7 +225,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
           "&:hover": {
             cursor: isOpen ? "pointer" : "default",
           },
-          pointerEvents: isOpen ? "auto" : "none",
+          pointerEvents: isOpen || isCanceled ? "auto" : "none",
           opacity: !isOpen && !isPreview ? 0.6 : 1,
         }}
         onClick={handleRequestGroupClick}
@@ -226,6 +234,21 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         <Typography variant="h6" fontWeight={600} gutterBottom noWrap>
           {requestGroup.title}
         </Typography>
+
+        {isCanceled && (
+          <Box>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={(e) => {
+                e.stopPropagation();
+                setReasonDialogOpen(true);
+              }}
+            >
+              למה זה קרה?
+            </Button>
+          </Box>
+        )}
 
         {isOpen &&
           <>
@@ -299,6 +322,22 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
           </>
         }
       </CardContent>
+
+      {/* Closed reason dialog */}
+      <Dialog open={reasonDialogOpen} onClose={() => setReasonDialogOpen(false)}>
+        <DialogTitle>בקשה זו לא מאושרת</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body1" fontWeight="bold">פירוט</Typography>
+          <Typography variant="body1" color="text.primary">
+            {requestGroupRejectionReason}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReasonDialogOpen(false)} autoFocus>
+            הבנתי
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 };
