@@ -456,26 +456,46 @@ export default function Profile() {
             onChange={(e, newValue) => setTabValue(newValue)}
             aria-label="profile tabs"
             orientation={isMdUp ? 'vertical' : 'horizontal'}
-            variant='scrollable'
+            variant={isMdUp ? 'standard' : 'fullWidth'}
             sx={{
               borderRight: isMdUp ? 1 : 0,
               borderBottom: !isMdUp ? 1 : 0,
               borderColor: 'divider',
-              alignSelf: isMdUp ? 'stretch' : 'auto',
-              minWidth: isMdUp ? 220 : 'auto',
+              width: isMdUp ? 'auto' : '100%',
+              minWidth: isMdUp ? 220 : '100%',
+              height: isMdUp ? "auto" : 80,
               '& .MuiTab-root': {
-                textTransform: 'none',
-                fontSize: { xs: '0.8rem', md: '0.95rem' },
-                justifyContent: 'flex-start',
+                fontSize: isMdUp ? '0.95rem' : '0.8rem',
+                justifyContent: isMdUp ? "flex-start" : "center",
+                minWidth: isMdUp ? undefined : 0,
               },
             }}
           >
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FoundationIcon />} label="סטטוס בקשות" iconPosition="start" />
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FavoriteIcon />} label="מועדפים" iconPosition="start" />
+            <Tab
+              sx={{ "&:hover": { color: "primary.main" } }}
+              icon={<FoundationIcon />}
+              label={isMdUp ? "סטטוס בקשות" : (tabValue === 0 ? "סטטוס בקשות" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
+            <Tab
+              sx={{ "&:hover": { color: "primary.main" } }}
+              icon={<ShoppingBagIcon />}
+              label={isMdUp ? "בקשות" : (tabValue === 1 ? "בקשות" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
+            <Tab
+              sx={{ "&:hover": { color: "primary.main" } }}
+              icon={<GroupIcon />}
+              label={isMdUp ? "קבוצות רכישה" : (tabValue === 2 ? "קבוצות רכישה" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
+            <Tab
+              sx={{ "&:hover": { color: "primary.main" } }}
+              icon={<FavoriteIcon />}
+              label={isMdUp ? "מועדפים" : (tabValue === 3 ? "מועדפים" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
           </Tabs>
-
           {/* Panels */}
           <Box sx={{ flex: 1 }}>
             {/* Owned Request Groups Tab */}
