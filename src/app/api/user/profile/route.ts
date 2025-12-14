@@ -143,6 +143,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
     }
 
+    // TODO: Optimize this, retrieve required data in one query.
     // Transform the data to match the expected format
     const transformedUser = {
       id: user.id,
