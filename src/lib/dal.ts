@@ -9,6 +9,7 @@ export interface RequestGroup {
   openedGroups?: string[]; //TODO: Remove
   status: GroupStatus;
   description?: string;
+  rejectionReason?: string;
 }
 
 export interface User {

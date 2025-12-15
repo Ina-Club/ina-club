@@ -456,41 +456,58 @@ export default function Profile() {
             onChange={(e, newValue) => setTabValue(newValue)}
             aria-label="profile tabs"
             orientation={isMdUp ? 'vertical' : 'horizontal'}
-            variant='scrollable'
+            variant={isMdUp ? 'standard' : 'fullWidth'}
             sx={{
               borderRight: isMdUp ? 1 : 0,
               borderBottom: !isMdUp ? 1 : 0,
               borderColor: 'divider',
-              alignSelf: isMdUp ? 'stretch' : 'auto',
-              minWidth: isMdUp ? 220 : 'auto',
+              width: isMdUp ? 'auto' : '100%',
+              minWidth: isMdUp ? 220 : '100%',
               '& .MuiTab-root': {
-                textTransform: 'none',
-                fontSize: { xs: '0.8rem', md: '0.95rem' },
-                justifyContent: 'flex-start',
+                fontSize: isMdUp ? '0.95rem' : '0.8rem',
+                justifyContent: isMdUp ? "flex-start" : "center",
+                minWidth: isMdUp ? undefined : 0,
+                height: isMdUp ? "auto" : 80,
+                "&:hover": { color: "primary.main" }
               },
             }}
           >
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FoundationIcon />} label="סטטוס בקשות" iconPosition="start" />
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<ShoppingBagIcon />} label="בקשות" iconPosition="start" />
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<GroupIcon />} label="קבוצות רכישה" iconPosition="start" />
-            <Tab sx={{ "&:hover": { color: "primary.main" } }} icon={<FavoriteIcon />} label="מועדפים" iconPosition="start" />
+            <Tab
+              icon={<FoundationIcon />}
+              label={isMdUp ? "סטטוס בקשות" : (tabValue === 0 ? "סטטוס בקשות" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
+            <Tab
+              icon={<ShoppingBagIcon />}
+              label={isMdUp ? "בקשות" : (tabValue === 1 ? "בקשות" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
+            <Tab
+              icon={<GroupIcon />}
+              label={isMdUp ? "קבוצות רכישה" : (tabValue === 2 ? "קבוצות רכישה" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
+            <Tab
+              icon={<FavoriteIcon />}
+              label={isMdUp ? "מועדפים" : (tabValue === 3 ? "מועדפים" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
           </Tabs>
-
           {/* Panels */}
           <Box sx={{ flex: 1 }}>
             {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={0}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות ממתינות לאישור ({detailProfile?.ownedRequestGroups.length ?? 0})
+                בקשות ממתינות לאישור ({detailProfile?.waitingRequestGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
-                : detailProfile!.ownedRequestGroups.length === 0
+                : detailProfile!.waitingRequestGroups.length === 0
                   ? (
                     <Alert severity="info">עדיין לא יצרת בקשות</Alert>
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                      {detailProfile!.ownedRequestGroups.map((requestGroup, index) => (
+                      {detailProfile!.waitingRequestGroups.map((requestGroup, index) => (
                         <RequestGroupCard key={index} requestGroup={requestGroup} />
                       ))}
                     </Box>
@@ -520,17 +537,17 @@ export default function Profile() {
             {/* Pending Request Groups Tab */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                קבוצות פעילות שנרשמת להן ({detailProfile?.pendingRequestGroups.length ?? 0})
+                קבוצות פעילות שנרשמת להן ({detailProfile?.enrolledActiveGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
-                : detailProfile!.pendingRequestGroups.length === 0
+                : detailProfile!.enrolledActiveGroups.length === 0
                   ? (
-                    <Alert severity="info">אין לך בקשות ממתינות לאישור</Alert>
+                    <Alert severity="info">לא הצטרפת לקבוצות</Alert>
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                      {detailProfile!.pendingRequestGroups.map((requestGroup, index) => (
-                        <RequestGroupCard key={index} requestGroup={requestGroup} />
+                      {detailProfile!.enrolledActiveGroups.map((activeGroup, index) => (
+                        <ActiveGroupCard key={index} activeGroup={activeGroup} />
                       ))}
                     </Box>
                   )}

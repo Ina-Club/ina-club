@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
-import { validateSession } from "@/lib/auth";
+import { requireAuth, validateSession } from "@/lib/auth";
 import { getUserIdBySession } from "@/lib/user";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+import { RoleLevel } from "@/lib/types/role";
 
 export async function GET(req: Request) {
   try {
@@ -14,11 +15,11 @@ export async function GET(req: Request) {
     const lastWeekParam = searchParams.get("lastWeek");
     const searchParam = searchParams.get("search");
     const categoryParams = searchParams.getAll("category").filter(Boolean);
-    
+
     const cursor = searchParams.get("cursor") || undefined;
     const rawLimit: number = Number(searchParams.get("limit")) || DEFAULT_PAGINATION;
     const limit: number = Math.min(rawLimit, MAX_PAGINATION_LIMIT);
-    
+
     const filters: any[] = [];
     if (titleParam) {
       const exists = await prisma.requestGroup.findFirst({
@@ -207,7 +208,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const { response } = await validateSession();
+    const { response } = await requireAuth(RoleLevel.ADMIN);
     if (response) return response;
 
     const { searchParams } = new URL(req.url);
@@ -229,7 +230,7 @@ export async function PUT(req: Request) {
       );
 
     const body = await req.json();
-    const { status } = body;
+    const { status, rejectionReason } = body;
     const dataToUpdate: any = {};
     if (status) {
       if (
@@ -242,6 +243,12 @@ export async function PUT(req: Request) {
         );
       }
       dataToUpdate.status = status;
+    }
+
+    if (rejectionReason) {
+      if (typeof status !== "string")
+        return NextResponse.json({ error: "Invalid rejection reason: type must be string!", status: 400 })
+      dataToUpdate.rejectionReason = rejectionReason;
     }
 
     const updated = await prisma.requestGroup.update({
