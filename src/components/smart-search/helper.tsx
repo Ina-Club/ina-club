@@ -2,7 +2,7 @@ import { Box, Card, Container, Typography } from "@mui/material";
 
 export const SmartSearchHelper = () => {
     return (
-        <Container maxWidth="md" sx={{ mb: 6 }}>
+        <Box sx={{ width: "100%", maxWidth: 800, mx: "auto", px: { xs: 2, md: 0 }, mb: 6 }}>
             <Card sx={{ p: { xs: 2, md: 3 } }}>
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
                     איך להשתמש בחיפוש החכם
@@ -39,6 +39,6 @@ export const SmartSearchHelper = () => {
                     שימו לב: החיפוש החכם יציג את 4 הקבוצות/הבקשות הרלוונטיות ביותר בהתאם לטקסט המבוקש.
                 </Typography>
             </Card>
-        </Container>
+        </Box>
     );
 };
