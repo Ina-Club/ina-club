@@ -14,6 +14,7 @@ import {
   Alert,
   Chip,
   Divider,
+  useMediaQuery,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -30,6 +31,7 @@ import type {
 
 export default function PriceAnalyzerComponent() {
   const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,7 +157,7 @@ export default function PriceAnalyzerComponent() {
           <Box sx={{ flexGrow: 1 }}>
             <SearchBar
               searchText={searchText}
-              placeholderText="חפש מוצר (למשל: אוטו, טלפון, מחשב נייד...)"
+              placeholderText={ isMdUp ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)" : "חפשו מוצר..."  }
               handleSearchTextChange={setSearchText}
             />
           </Box>
@@ -168,7 +170,7 @@ export default function PriceAnalyzerComponent() {
             }
             sx={{ minWidth: 120 }}
           >
-            {loading ? "מחפש..." : "חפש"}
+            {loading ? "מחפש..." : "חפשו"}
           </Button>
         </Box>
       </Card>
