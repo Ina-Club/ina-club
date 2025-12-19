@@ -210,23 +210,30 @@ function Header() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       >
-        <Box sx={{ width: 250, pt: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mx: 1 }}>
-            <Box sx={{ display: "flex" }}>
-              <Image
-                src="/InaClubLogo.png"
-                alt="Ina Club Logo"
-                width={90}
-                height={60}
-              />
+        <Box sx={{ width: 250, height: "100%", display: "flex", flexDirection: "column", pb: 4, bgcolor: "#f5f7fa" }}>
+          <Box sx={{ bgcolor: "#f5f7fa", py: 1 }}>
+            <Box sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mx: 1,
+            }}>
+              <Box sx={{ display: "flex" }}>
+                <Image
+                  src="/InaClubLogo.png"
+                  alt="Ina Club Logo"
+                  width={90}
+                  height={60}
+                />
+              </Box>
+              <IconButton
+                onClick={() => setDrawerOpen(false)}
+              >
+                <CloseIcon />
+              </IconButton>
             </Box>
-            <IconButton
-              onClick={() => setDrawerOpen(false)}
-            >
-              <CloseIcon />
-            </IconButton>
+            <Divider />
           </Box>
-          <Divider />
           <List>
             {MOBILE_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -279,6 +286,26 @@ function Header() {
               );
             })}
           </List>
+          <Box sx={{ mt: 'auto' }}>
+            <Divider sx={{ mb: 3 }} />
+            <Button
+              component={Link}
+              href="/create"
+              variant="outlined"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                borderRadius: "999px",
+                color: "#1a2a5a",
+                borderColor: "#1a2a5a",
+                mx: 2,
+                fontWeight: 600,
+              }}
+            >
+              <AddIcon sx={{ mr: 1 }} />
+              צור בקשה
+            </Button>
+          </Box>
         </Box>
       </Drawer>
       <AppBar
@@ -405,7 +432,7 @@ function Header() {
                 fontWeight: 600,
               }}
             >
-              <AddIcon sx={{ ml: 1 }} />
+              <AddIcon sx={{ mr: 1 }} />
               צור בקשה
             </Button>
 
