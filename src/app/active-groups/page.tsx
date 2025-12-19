@@ -60,10 +60,10 @@ export default function Page() {
   const fetchPage = useCallback(async (opts?: { cursor?: string | null; append?: boolean; signal?: AbortSignal }) => {
     const append = opts?.append ?? false;
     const nextCursor = opts?.cursor ?? null;
-  
+
     // מזהה של הבקשה הנוכחית
     const requestId = ++latestRequestIdRef.current;
-  
+
     if (append) {
       if (!nextCursor || loadingMoreRef.current || loadingRef.current) return;
       loadingMoreRef.current = true;
@@ -72,31 +72,31 @@ export default function Page() {
       loadingRef.current = true;
       setLoading(true);
     }
-  
+
     const urlParams: string = buildParams(nextCursor);
-  
+
     try {
       const res = await fetch("/api/active-groups/?" + urlParams, {
         signal: opts?.signal,
       });
-  
+
       const data = await res.json();
       const incoming: ActiveGroup[] = data.activeGroups ?? [];
-  
+
       setCursor(data.nextCursor ?? null);
       setHasMore(!!data.nextCursor);
-  
+
       setActiveGroups((prev) => {
         if (!append) return incoming;
-  
+
         const seen = new Set(prev.map((r) => r.id));
         const filtered = incoming.filter((r) => !seen.has(r.id));
-  
+
         return [...prev, ...filtered];
       });
     } catch (err: any) {
       if (err?.name === "AbortError") return;
-  
+
       if (!append) setActiveGroups([]);
     } finally {
       // כיבוי loading רק אם זו עדיין הבקשה האחרונה
@@ -111,7 +111,7 @@ export default function Page() {
       }
     }
   }, [buildParams]);
-  
+
 
   useEffect(() => {
     setCursor(null);
@@ -129,26 +129,24 @@ export default function Page() {
   return (
     <>
       <DefaultPageBanner
-              mainSx={{ top: -66 , zIndex: 900, pb: 3, position: "sticky" }}
-              header={headerText} description={descriptionText} />
+        mainSx={{ top: -66, zIndex: 900, position: "sticky" }}
+        header={headerText} description={descriptionText} />
 
       {/* Top bar: Search + Mobile filters trigger */}
       <Box
         sx={{
           maxWidth: 800,
-          mx: "auto",
+          mx: { xs: 2, md: "auto" },
           // position: "relative",
-          mt: { xs: -6, md: -3 },
+          mt: { xs: -4, md: -3 },
           bgcolor: "white",
           boxShadow: 3,
           borderRadius: "12px",
-          py: { xs: 2, md: 1 },
-          px: { xs: 2, md: 2 },
+          p: 1,
           display: "flex",
           position: "sticky",
           top: 82,
           zIndex: 1000,
-          pb: 3, // רשות — כדי שהדף לא יקפוץ
           alignItems: "center",
           border: "2px solid transparent",
           "&:hover": { borderColor: "#1a2a5a" },
@@ -217,31 +215,31 @@ export default function Page() {
             }}
           >
             <Suspense fallback={<GroupSectionSkeleton />}>
-            {loading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <ActiveGroupCardSkeleton key={i} />
-              ))
-            ) : activeGroups.length > 0 ? (
-              activeGroups.map((activeGroup, index) => (
-                <ActiveGroupCard key={index} activeGroup={activeGroup} />
-              ))
-            ) : (
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: "50%",
-                  width: "100%",
-                  transform: "translateX(-50%)",
-                  mt: { xs: 4, md: 2 },
-                  display: "flex",
-                  justifyContent: "center",
-                  color: "text.secondary",
-                  textAlign: "center",
-                }}
-              >
-                לא נמצאו קבוצות התואמות לחיפוש שלך
-              </Box>
-            )}
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <ActiveGroupCardSkeleton key={i} />
+                ))
+              ) : activeGroups.length > 0 ? (
+                activeGroups.map((activeGroup, index) => (
+                  <ActiveGroupCard key={index} activeGroup={activeGroup} />
+                ))
+              ) : (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: "50%",
+                    width: "100%",
+                    transform: "translateX(-50%)",
+                    mt: { xs: 4, md: 2 },
+                    display: "flex",
+                    justifyContent: "center",
+                    color: "text.secondary",
+                    textAlign: "center",
+                  }}
+                >
+                  לא נמצאו קבוצות התואמות לחיפוש שלך
+                </Box>
+              )}
             </Suspense>
           </Box>
         </ResponsiveVerticalCardWrapper>

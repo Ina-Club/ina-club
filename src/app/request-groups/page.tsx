@@ -137,25 +137,23 @@ export default function Page() {
       <DefaultPageBanner
         header={headerText}
         description={descriptionText}
-        mainSx={{ top: -66 , zIndex: 900, pb: 3, position: "sticky" }}
+        mainSx={{ top: -66, zIndex: 900, position: "sticky" }}
       />
       {/* Top bar: Search + (mobile) Filters trigger 160 */}
       <Box
         sx={{
           maxWidth: 800,
-          mx: "auto",
-          //position: "relative",
-          mt: { xs: -6, md: -3 }, // מרים את הסרגל חיפוש שיהיה קצת מעל הגרדיאנט
+          mx: { xs: 2, md: "auto" },
+          // position: "relative",
+          mt: { xs: -4, md: -3 }, // מרים את הסרגל חיפוש שיהיה קצת מעל הגרדיאנט
           bgcolor: "white",
           boxShadow: 3,
           borderRadius: "12px",
-          py: { xs: 2, md: 1 },
-          px: { xs: 2, md: 2 },
+          p: 1,
           display: "flex",
           position: "sticky",
           top: 82,
           zIndex: 1000,
-          pb: 3, // רשות — כדי שהדף לא יקפוץ
           alignItems: "center",
           border: "2px solid transparent",
           "&:hover": {
