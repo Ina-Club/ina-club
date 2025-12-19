@@ -42,6 +42,7 @@ import {
   HowToReg as HowToRegIcon,
   ShoppingBag as ShoppingBagIcon,
   ExpandMore as ExpandMoreIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 
 // -----------------------------
@@ -210,13 +211,20 @@ function Header() {
         onClose={() => setDrawerOpen(false)}
       >
         <Box sx={{ width: 250, pt: 2 }}>
-          <Box sx={{ display: "flex", pl: 1 }}>
-            <Image
-              src="/InaClubLogo.png"
-              alt="Ina Club Logo"
-              width={90}
-              height={60}
-            />
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mx: 1 }}>
+            <Box sx={{ display: "flex" }}>
+              <Image
+                src="/InaClubLogo.png"
+                alt="Ina Club Logo"
+                width={90}
+                height={60}
+              />
+            </Box>
+            <IconButton
+              onClick={() => setDrawerOpen(false)}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
           <Divider />
           <List>
