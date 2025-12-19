@@ -16,6 +16,7 @@ import {
   Menu,
   MenuItem,
   Collapse,
+  Divider,
 } from "@mui/material";
 
 import Link from "next/link";
@@ -209,6 +210,15 @@ function Header() {
         onClose={() => setDrawerOpen(false)}
       >
         <Box sx={{ width: 250, pt: 2 }}>
+          <Box sx={{ display: "flex", pl: 1 }}>
+            <Image
+              src="/InaClubLogo.png"
+              alt="Ina Club Logo"
+              width={90}
+              height={60}
+            />
+          </Box>
+          <Divider />
           <List>
             {MOBILE_ITEMS.map((item) => {
               const Icon = item.icon;
