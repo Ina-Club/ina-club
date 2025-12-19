@@ -155,7 +155,7 @@ function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const avatarSx = useMemo(
-    () => ({ width: 40, height: 40, borderColor: "primary.main" }),
+    () => ({ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, borderColor: "primary.main" }),
     []
   );
 
@@ -268,12 +268,12 @@ function Header() {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <IconButton
-                sx={{ display: { xs: "block", md: "none" } }}
+                sx={{ p: 0, display: { xs: "flex", md: "none" } }}
                 onClick={() => setDrawerOpen(true)}
               >
                 <MenuIcon />
               </IconButton>
-              <Link href="/">
+              <Link href="/" style={{ display: "flex" }}>
                 <Image
                   src="/InaClubLogo.png"
                   alt="Ina Club Logo"
