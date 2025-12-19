@@ -15,6 +15,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Collapse,
 } from "@mui/material";
 
 import Link from "next/link";
@@ -91,9 +92,9 @@ const NAV_ITEMS: (NavLinkItem | NavDropdownItem)[] = [
 ];
 
 const MOBILE_ITEMS = [
-  ...NAV_ITEMS,
   { title: "פרופיל", href: "/profile", icon: PersonIcon },
   { title: "מועדפים", href: "/profile?tab=liked", icon: FavoriteIcon },
+  ...NAV_ITEMS,
 ];
 
 const LOGGED_IN_MENU: MenuItemConfig[] = [
@@ -153,6 +154,7 @@ function Header() {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
 
   const avatarSx = useMemo(
     () => ({ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, borderColor: "primary.main" }),
@@ -216,23 +218,30 @@ function Header() {
                 const subItems = item.menuItems ?? [];
                 return (
                   <Box key={item.title}>
-                    <ListItemButton disabled>
+                    <ListItemButton onClick={() => setMobileMoreOpen((prev) => !prev)}>
                       <ListItemIcon>
-                        <Icon />
+                        <Icon sx={{
+                          transform: mobileMoreOpen ? "rotate(180deg)" : "rotate(0deg)",
+                          transition: "0.3s",
+                        }} />
                       </ListItemIcon>
                       <ListItemText primary={item.title} />
                     </ListItemButton>
-                    {subItems.map((sub) => (
-                      <ListItemButton
-                        key={sub.href}
-                        component={Link}
-                        href={sub.href}
-                        onClick={() => setDrawerOpen(false)}
-                        sx={{ pl: 6 }}
-                      >
-                        <ListItemText primary={sub.label} />
-                      </ListItemButton>
-                    ))}
+                    <Collapse in={mobileMoreOpen} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding>
+                        {subItems.map((sub) => (
+                          <ListItemButton
+                            key={sub.href}
+                            component={Link}
+                            href={sub.href}
+                            onClick={() => setDrawerOpen(false)}
+                            sx={{ pl: 6 }}
+                          >
+                            <ListItemText primary={sub.label} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </Collapse>
                   </Box>
                 );
               }
