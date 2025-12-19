@@ -201,6 +201,59 @@ function Header() {
 
   return (
     <>
+      {/* Mobile Drawer */}
+      <Drawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <Box sx={{ width: 250, pt: 2 }}>
+          <List>
+            {MOBILE_ITEMS.map((item) => {
+              const Icon = item.icon;
+
+              // mobile sub-menu for "עוד"
+              if ("menuItems" in item) {
+                const subItems = item.menuItems ?? [];
+                return (
+                  <Box key={item.title}>
+                    <ListItemButton disabled>
+                      <ListItemIcon>
+                        <Icon />
+                      </ListItemIcon>
+                      <ListItemText primary={item.title} />
+                    </ListItemButton>
+                    {subItems.map((sub) => (
+                      <ListItemButton
+                        key={sub.href}
+                        component={Link}
+                        href={sub.href}
+                        onClick={() => setDrawerOpen(false)}
+                        sx={{ pl: 6 }}
+                      >
+                        <ListItemText primary={sub.label} />
+                      </ListItemButton>
+                    ))}
+                  </Box>
+                );
+              }
+
+              return (
+                <ListItemButton
+                  key={item.title}
+                  component={Link}
+                  href={item.href}
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  <ListItemIcon>
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText primary={item.title} />
+                </ListItemButton>
+              );
+            })}
+          </List>
+        </Box>
+      </Drawer>
       <AppBar
         position="sticky"
         sx={{
@@ -213,15 +266,22 @@ function Header() {
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           {/* Logo + Tabs */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Link href="/">
-              <Image
-                src="/InaClubLogo.png"
-                alt="Ina Club Logo"
-                width={90}
-                height={60}
-              />
-            </Link>
-
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <IconButton
+                sx={{ display: { xs: "block", md: "none" } }}
+                onClick={() => setDrawerOpen(true)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Link href="/">
+                <Image
+                  src="/InaClubLogo.png"
+                  alt="Ina Club Logo"
+                  width={90}
+                  height={60}
+                />
+              </Link>
+            </Box>
             <Tabs
               value={currentTab >= 0 ? currentTab : false}
               sx={{ display: { xs: "none", md: "flex" } }}
@@ -373,68 +433,9 @@ function Header() {
                 <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
               )}
             </IconButton>
-
-            <IconButton onClick={() => setDrawerOpen(true)}>
-              <MenuIcon />
-            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
-
-      {/* Mobile Drawer */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      >
-        <Box sx={{ width: 250, pt: 2 }}>
-          <List>
-            {MOBILE_ITEMS.map((item) => {
-              const Icon = item.icon;
-
-              // mobile sub-menu for "עוד"
-              if ("menuItems" in item) {
-                const subItems = item.menuItems ?? [];
-                return (
-                  <Box key={item.title}>
-                    <ListItemButton disabled>
-                      <ListItemIcon>
-                        <Icon />
-                      </ListItemIcon>
-                      <ListItemText primary={item.title} />
-                    </ListItemButton>
-                    {subItems.map((sub) => (
-                      <ListItemButton
-                        key={sub.href}
-                        component={Link}
-                        href={sub.href}
-                        onClick={() => setDrawerOpen(false)}
-                        sx={{ pl: 6 }}
-                      >
-                        <ListItemText primary={sub.label} />
-                      </ListItemButton>
-                    ))}
-                  </Box>
-                );
-              }
-
-              return (
-                <ListItemButton
-                  key={item.title}
-                  component={Link}
-                  href={item.href}
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <ListItemIcon>
-                    <Icon />
-                  </ListItemIcon>
-                  <ListItemText primary={item.title} />
-                </ListItemButton>
-              );
-            })}
-          </List>
-        </Box>
-      </Drawer>
     </>
   );
 }
