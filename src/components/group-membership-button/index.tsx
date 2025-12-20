@@ -5,7 +5,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button, CircularProgress } from "@mui/material";
 
-interface JoinButtonProps {
+
+interface GroupMembershipButtonProps {
   type: "request-group" | "active-group";
   id: string;
   onJoinSuccess?: () => void;
@@ -14,14 +15,14 @@ interface JoinButtonProps {
   isJoined?: boolean;
 }
 
-export default function JoinButton({
+export default function GroupMembershipButton({
   type,
   id,
   onJoinSuccess,
   fullWidth = false,
   children,
   isJoined = false,
-}: JoinButtonProps) {
+}: GroupMembershipButtonProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -31,13 +32,9 @@ export default function JoinButton({
     setHasJoined(isJoined);
   }, [isJoined]);
 
-  const handleJoin = async () => {
-    if (hasJoined) {
-      return;
-    }
-
-    // Check if user is authenticated
-    if (status === "unauthenticated" || !session) {
+  const changeMembershipState = async () => {
+    // Check if user is authenticated only when joining
+    if (!hasJoined && (status === "unauthenticated" || !session)) {
       const currentUrl = encodeURIComponent(window.location.href);
       router.push(`/auth/signin?message=login_required&callbackUrl=${currentUrl}`);
       return;
@@ -51,15 +48,15 @@ export default function JoinButton({
           : `/api/active-groups/${id}/join`;
 
       const response = await fetch(endpoint, {
-        method: "POST",
+        method: hasJoined ? "DELETE" : "POST",
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "שגיאה בהצטרפות");
+        throw new Error(data.error || (hasJoined ? "שגיאה בביטול ההרשמה" : "שגיאה בהצטרפות"));
       }
 
-      setHasJoined(true);
+      setHasJoined(!hasJoined);
       // Refresh the page to show updated participants
       if (onJoinSuccess) {
         onJoinSuccess();
@@ -67,8 +64,8 @@ export default function JoinButton({
         window.location.reload();
       }
     } catch (error: any) {
-      console.error("Join error:", error);
-      alert(error.message || "שגיאה בהצטרפות");
+      console.error("Change Membership error:", error);
+      alert(hasJoined ? "שגיאה בביטול ההרשמה" : "שגיאה בהצטרפות");
     } finally {
       setLoading(false);
     }
@@ -77,18 +74,15 @@ export default function JoinButton({
   return (
     <Button
       variant="contained"
-      color="primary"
+      color={hasJoined ? "error" : "primary"}
       fullWidth={fullWidth}
-      onClick={handleJoin}
-      disabled={loading || hasJoined}
+      onClick={changeMembershipState}
+      disabled={loading}
     >
       {loading ? (
         <CircularProgress size={20} color="inherit" />
       ) : (
-        hasJoined
-          ? "כבר הצטרפת"
-          : children ||
-          (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
+        hasJoined ? "בטל הרשמה" : children || (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
       )}
     </Button>
   );

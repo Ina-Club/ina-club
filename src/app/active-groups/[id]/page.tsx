@@ -6,15 +6,13 @@ import {
   Divider,
   Paper,
   Avatar,
-  Button,
-  CardMedia,
 } from "@mui/material";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import RequestGroupImages from "@/components/request-group/request-group-images";
 import NotFound from "app/not-found";
-import JoinButton from "@/components/join-button";
+import GroupMembershipButton from "@/components/group-membership-button";
 import UserAvatar from "@/components/user-avatar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -219,14 +217,12 @@ export default async function ActiveGroupDetail({
                 </Avatar>
               )}
             </Box>
-            <JoinButton
+            <GroupMembershipButton
               type="active-group"
               id={id}
               fullWidth
               isJoined={alreadyJoined}
-            >
-              הצטרף לקבוצה
-            </JoinButton>
+            />
           </Paper>
         </Box>
       </Box>

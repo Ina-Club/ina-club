@@ -11,7 +11,7 @@ import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupImages from "@/components/request-group/request-group-images";
 import NotFound from "app/not-found";
-import JoinButton from "@/components/join-button";
+import GroupMembershipButton from "@/components/group-membership-button";
 import UserAvatar from "@/components/user-avatar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -216,14 +216,12 @@ export default async function RequestGroupDetail({
                 </Avatar>
               )}
             </Box>
-            <JoinButton
+            <GroupMembershipButton
               type="request-group"
               id={id}
               fullWidth
               isJoined={alreadyJoined}
-            >
-              הצטרף לבקשה
-            </JoinButton>
+            />
           </Paper>
         </Box>
       </Box>
