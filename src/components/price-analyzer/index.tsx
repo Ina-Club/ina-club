@@ -46,6 +46,7 @@ export default function PriceAnalyzerComponent() {
   // Making sure to extract the maximum price for the chart
   const highestPrice = Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
   const calculateChartFillPercentage = (v: number) => `${Math.max(5, Math.round((v / highestPrice) * 100))}%`;
+  const readyForSearch: boolean = !!searchText.trim() && !loading;
 
   const handleSearch = async () => {
     if (!searchText.trim()) {
@@ -152,19 +153,22 @@ export default function PriceAnalyzerComponent() {
           border: "2px solid transparent",
           "&:hover": { borderColor: "#1a2a5a" },
         }}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === "Enter" && readyForSearch) handleSearch();
+        }}
       >
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Box sx={{ flexGrow: 1 }}>
             <SearchBar
               searchText={searchText}
-              placeholderText={ isMdUp ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)" : "חפשו מוצר..."  }
+              placeholderText={isMdUp ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)" : "חפשו מוצר..."}
               handleSearchTextChange={setSearchText}
             />
           </Box>
           <Button
             variant="contained"
             onClick={handleSearch}
-            disabled={loading || !searchText.trim()}
+            disabled={!readyForSearch}
             startIcon={
               loading ? <CircularProgress size={20} /> : <SearchIcon />
             }
