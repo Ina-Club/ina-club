@@ -226,12 +226,17 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             cursor: isOpen ? "pointer" : "default",
           },
           pointerEvents: isOpen || isCanceled ? "auto" : "none",
-          opacity: !isOpen && !isPreview ? 0.6 : 1,
         }}
         onClick={handleRequestGroupClick}
       >
         {/* Title */}
-        <Typography variant="h6" fontWeight={600} gutterBottom noWrap>
+        <Typography
+          variant="h6"
+          fontWeight={600}
+          gutterBottom
+          noWrap
+          sx={{ opacity: !isOpen && !isPreview ? 0.6 : 1 }}
+        >
           {requestGroup.title}
         </Typography>
 

@@ -15,6 +15,8 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Collapse,
+  Divider,
 } from "@mui/material";
 
 import Link from "next/link";
@@ -40,6 +42,7 @@ import {
   HowToReg as HowToRegIcon,
   ShoppingBag as ShoppingBagIcon,
   ExpandMore as ExpandMoreIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 
 // -----------------------------
@@ -91,9 +94,9 @@ const NAV_ITEMS: (NavLinkItem | NavDropdownItem)[] = [
 ];
 
 const MOBILE_ITEMS = [
-  ...NAV_ITEMS,
   { title: "פרופיל", href: "/profile", icon: PersonIcon },
   { title: "מועדפים", href: "/profile?tab=liked", icon: FavoriteIcon },
+  ...NAV_ITEMS,
 ];
 
 const LOGGED_IN_MENU: MenuItemConfig[] = [
@@ -153,9 +156,10 @@ function Header() {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
 
   const avatarSx = useMemo(
-    () => ({ width: 40, height: 40, borderColor: "primary.main" }),
+    () => ({ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, borderColor: "primary.main" }),
     []
   );
 
@@ -201,6 +205,109 @@ function Header() {
 
   return (
     <>
+      {/* Mobile Drawer */}
+      <Drawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <Box sx={{ width: 250, height: "100%", display: "flex", flexDirection: "column", pb: 4, bgcolor: "#f5f7fa" }}>
+          <Box sx={{ bgcolor: "#f5f7fa", py: 1 }}>
+            <Box sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mx: 1,
+            }}>
+              <Box sx={{ display: "flex" }}>
+                <Image
+                  src="/InaClubLogo.png"
+                  alt="Ina Club Logo"
+                  width={90}
+                  height={60}
+                />
+              </Box>
+              <IconButton
+                onClick={() => setDrawerOpen(false)}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Divider />
+          </Box>
+          <List>
+            {MOBILE_ITEMS.map((item) => {
+              const Icon = item.icon;
+
+              // mobile sub-menu for "עוד"
+              if ("menuItems" in item) {
+                const subItems = item.menuItems ?? [];
+                return (
+                  <Box key={item.title}>
+                    <ListItemButton onClick={() => setMobileMoreOpen((prev) => !prev)}>
+                      <ListItemIcon>
+                        <Icon sx={{
+                          transform: mobileMoreOpen ? "rotate(180deg)" : "rotate(0deg)",
+                          transition: "0.3s",
+                        }} />
+                      </ListItemIcon>
+                      <ListItemText primary={item.title} />
+                    </ListItemButton>
+                    <Collapse in={mobileMoreOpen} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding>
+                        {subItems.map((sub) => (
+                          <ListItemButton
+                            key={sub.href}
+                            component={Link}
+                            href={sub.href}
+                            onClick={() => setDrawerOpen(false)}
+                            sx={{ pl: 6 }}
+                          >
+                            <ListItemText primary={sub.label} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </Collapse>
+                  </Box>
+                );
+              }
+
+              return (
+                <ListItemButton
+                  key={item.title}
+                  component={Link}
+                  href={item.href}
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  <ListItemIcon>
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText primary={item.title} />
+                </ListItemButton>
+              );
+            })}
+          </List>
+          <Box sx={{ mt: 'auto' }}>
+            <Divider sx={{ mb: 3 }} />
+            <Button
+              component={Link}
+              href="/create"
+              variant="outlined"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                borderRadius: "999px",
+                color: "#1a2a5a",
+                borderColor: "#1a2a5a",
+                mx: 2,
+                fontWeight: 600,
+              }}
+            >
+              <AddIcon sx={{ mr: 1 }} />
+              צור בקשה
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
       <AppBar
         position="sticky"
         sx={{
@@ -213,15 +320,22 @@ function Header() {
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           {/* Logo + Tabs */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Link href="/">
-              <Image
-                src="/InaClubLogo.png"
-                alt="Ina Club Logo"
-                width={90}
-                height={60}
-              />
-            </Link>
-
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <IconButton
+                sx={{ p: 0, display: { xs: "flex", md: "none" } }}
+                onClick={() => setDrawerOpen(true)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Link href="/" style={{ display: "flex" }}>
+                <Image
+                  src="/InaClubLogo.png"
+                  alt="Ina Club Logo"
+                  width={90}
+                  height={60}
+                />
+              </Link>
+            </Box>
             <Tabs
               value={currentTab >= 0 ? currentTab : false}
               sx={{ display: { xs: "none", md: "flex" } }}
@@ -318,7 +432,7 @@ function Header() {
                 fontWeight: 600,
               }}
             >
-              <AddIcon sx={{ ml: 1 }} />
+              <AddIcon sx={{ mr: 1 }} />
               צור בקשה
             </Button>
 
@@ -373,68 +487,9 @@ function Header() {
                 <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
               )}
             </IconButton>
-
-            <IconButton onClick={() => setDrawerOpen(true)}>
-              <MenuIcon />
-            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
-
-      {/* Mobile Drawer */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      >
-        <Box sx={{ width: 250, pt: 2 }}>
-          <List>
-            {MOBILE_ITEMS.map((item) => {
-              const Icon = item.icon;
-
-              // mobile sub-menu for "עוד"
-              if ("menuItems" in item) {
-                const subItems = item.menuItems ?? [];
-                return (
-                  <Box key={item.title}>
-                    <ListItemButton disabled>
-                      <ListItemIcon>
-                        <Icon />
-                      </ListItemIcon>
-                      <ListItemText primary={item.title} />
-                    </ListItemButton>
-                    {subItems.map((sub) => (
-                      <ListItemButton
-                        key={sub.href}
-                        component={Link}
-                        href={sub.href}
-                        onClick={() => setDrawerOpen(false)}
-                        sx={{ pl: 6 }}
-                      >
-                        <ListItemText primary={sub.label} />
-                      </ListItemButton>
-                    ))}
-                  </Box>
-                );
-              }
-
-              return (
-                <ListItemButton
-                  key={item.title}
-                  component={Link}
-                  href={item.href}
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <ListItemIcon>
-                    <Icon />
-                  </ListItemIcon>
-                  <ListItemText primary={item.title} />
-                </ListItemButton>
-              );
-            })}
-          </List>
-        </Box>
-      </Drawer>
     </>
   );
 }

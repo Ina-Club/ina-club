@@ -14,6 +14,7 @@ import {
   Alert,
   Chip,
   Divider,
+  useMediaQuery,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -30,6 +31,7 @@ import type {
 
 export default function PriceAnalyzerComponent() {
   const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export default function PriceAnalyzerComponent() {
   // Making sure to extract the maximum price for the chart
   const highestPrice = Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
   const calculateChartFillPercentage = (v: number) => `${Math.max(5, Math.round((v / highestPrice) * 100))}%`;
+  const readyForSearch: boolean = !!searchText.trim() && !loading;
 
   const handleSearch = async () => {
     if (!searchText.trim()) {
@@ -77,6 +80,7 @@ export default function PriceAnalyzerComponent() {
       } else {
         // קיבלנו תוצאה סופית
         setPriceResult(data as PriceResponse);
+        setSelectedValues({});
         setDynamicSelects([]); // נקה את ה-selects
       }
     } catch (err) {
@@ -121,6 +125,7 @@ export default function PriceAnalyzerComponent() {
       } else {
         // קיבלנו תוצאה סופית
         setPriceResult(data as PriceResponse);
+        setSelectedValues({});
         setDynamicSelects([]); // נקה את ה-selects
       }
     } catch (err) {
@@ -150,25 +155,28 @@ export default function PriceAnalyzerComponent() {
           border: "2px solid transparent",
           "&:hover": { borderColor: "#1a2a5a" },
         }}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === "Enter" && readyForSearch) handleSearch();
+        }}
       >
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Box sx={{ flexGrow: 1 }}>
             <SearchBar
               searchText={searchText}
-              placeholderText="חפש מוצר (למשל: אוטו, טלפון, מחשב נייד...)"
+              placeholderText={isMdUp ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)" : "חפשו מוצר..."}
               handleSearchTextChange={setSearchText}
             />
           </Box>
           <Button
             variant="contained"
             onClick={handleSearch}
-            disabled={loading || !searchText.trim()}
+            disabled={!readyForSearch}
             startIcon={
               loading ? <CircularProgress size={20} /> : <SearchIcon />
             }
             sx={{ minWidth: 120 }}
           >
-            {loading ? "מחפש..." : "חפש"}
+            {loading ? "מחפש..." : "חפשו"}
           </Button>
         </Box>
       </Card>

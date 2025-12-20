@@ -21,7 +21,7 @@ export default function PriceAnalyzerPage() {
         <Box
           sx={{
             position: "relative",
-            mt: { xs: -8, md: -7 },
+            mt: { xs: -8, md: -8 },
             mb: { xs: 4, md: 4 },
           }}
         >

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, CircularProgress } from "@mui/material";
+import { Box, Button, Card } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { SearchBar } from "@/components/search-bar";
@@ -58,42 +58,42 @@ export default function SmartSearchPage() {
     return (
         <>
             <DefaultPageBanner header={headerText} description={descriptionText} />
-            <Box
-                sx={{
-                    maxWidth: 900,
-                    mx: "auto",
-                    position: "relative",
-                    mt: { xs: -6, md: -3 },
-                    mb: 2,
-                    bgcolor: "white",
-                    boxShadow: 3,
-                    borderRadius: "12px",
-                    py: { xs: 2, md: 1 },
-                    px: { xs: 2, md: 2 },
-                    display: "flex",
-                    alignItems: "center",
-                    border: "2px solid transparent",
-                    "&:hover": { borderColor: "#1a2a5a" },
-                }}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter" && readyForSearch) handleSmartSearch();
-                }}
-            >
-                <SearchBar
-                    searchText={searchText}
-                    placeholderText="חפשו טקסט חופשי..."
-                    handleSearchTextChange={setSearchText}
-                />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<SearchIcon />}
-                    onClick={handleSmartSearch}
-                    sx={{ ml: 1, whiteSpace: "nowrap" }}
-                    disabled={!readyForSearch}
+            <Box sx={{ width: "100%", maxWidth: 800, mx: "auto", px: { xs: 2, md: 0 }, bgcolor: "white" }}>
+                <Card
+                    sx={{
+                        p: 1,
+                        mt: -4,
+                        mb: 3,
+                        boxShadow: 3,
+                        borderRadius: "12px",
+                        position: "relative",
+                        border: "2px solid transparent",
+                        "&:hover": { borderColor: "#1a2a5a" },
+                    }}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter" && readyForSearch) handleSmartSearch();
+                    }}
                 >
-                    {loadingSearch ? <CircularProgress size={25} /> : 'חיפוש'}
-                </Button>
+                    <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                        <Box sx={{ flexGrow: 1 }}>
+                            <SearchBar
+                                searchText={searchText}
+                                placeholderText="חפשו טקסט חופשי..."
+                                handleSearchTextChange={setSearchText}
+                            />
+                        </Box>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<SearchIcon />}
+                            onClick={handleSmartSearch}
+                            sx={{ minWidth: 120 }}
+                            disabled={!readyForSearch}
+                        >
+                            {loadingSearch ? "מחפש..." : "חיפוש"}
+                        </Button>
+                    </Box>
+                </Card>
             </Box>
 
             {displayHelper ?
