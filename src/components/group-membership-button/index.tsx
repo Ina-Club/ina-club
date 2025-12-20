@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 
 
 interface GroupMembershipButtonProps {
@@ -27,6 +27,7 @@ export default function GroupMembershipButton({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [hasJoined, setHasJoined] = useState(isJoined);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   useEffect(() => {
     setHasJoined(isJoined);
@@ -41,11 +42,12 @@ export default function GroupMembershipButton({
     }
 
     setLoading(true);
+    setLeaveDialogOpen(false);
     try {
       const endpoint =
         type === "request-group"
-          ? `/api/request-groups/${id}/join`
-          : `/api/active-groups/${id}/join`;
+          ? `/api/request-groups/${id}/membership`
+          : `/api/active-groups/${id}/membership`;
 
       const response = await fetch(endpoint, {
         method: hasJoined ? "DELETE" : "POST",
@@ -72,19 +74,31 @@ export default function GroupMembershipButton({
   };
 
   return (
-    <Button
-      variant="contained"
-      color={hasJoined ? "error" : "primary"}
-      fullWidth={fullWidth}
-      onClick={changeMembershipState}
-      disabled={loading}
-    >
-      {loading ? (
-        <CircularProgress size={20} color="inherit" />
-      ) : (
-        hasJoined ? "בטל הרשמה" : children || (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
-      )}
-    </Button>
+    <>
+      <Dialog open={leaveDialogOpen} onClose={() => setLeaveDialogOpen(false)}>
+        <DialogTitle>האם אתה בטוח שברצונך לבטל את ההרשמה?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">פעולה זו תסיר אותך מרשימת המעוניינים ותמנע ממך לקבל עדכונים על הבקשה או הקבוצה.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLeaveDialogOpen(false)}>ביטול</Button>
+          <Button onClick={changeMembershipState}>אישור</Button>
+        </DialogActions>
+      </Dialog>
+      <Button
+        variant="contained"
+        color={hasJoined ? "error" : "primary"}
+        fullWidth={fullWidth}
+        onClick={hasJoined ? () => setLeaveDialogOpen(true) : changeMembershipState}
+        disabled={loading}
+      >
+        {loading ? (
+          <CircularProgress size={20} color="inherit" />
+        ) : (
+          hasJoined ? "בטל הרשמה" : children || (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
+        )}
+      </Button>
+    </>
   );
 }
 
