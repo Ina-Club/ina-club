@@ -38,7 +38,8 @@ export default function JoinButton({
 
     // Check if user is authenticated
     if (status === "unauthenticated" || !session) {
-      router.push("/auth/signin");
+      const currentUrl = encodeURIComponent(window.location.href);
+      router.push(`/auth/signin?message=login_required&callbackUrl=${currentUrl}`);
       return;
     }
 
@@ -87,7 +88,7 @@ export default function JoinButton({
         hasJoined
           ? "כבר הצטרפת"
           : children ||
-            (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
+          (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
       )}
     </Button>
   );

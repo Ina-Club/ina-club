@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import {
   Edit as EditIcon,
-  Person as PersonIcon,
   Email as EmailIcon,
   CalendarToday as CalendarIcon,
   Group as GroupIcon,
@@ -96,14 +95,6 @@ export default function Profile() {
 
     const ensureFreshProfile = async () => {
       if (status === 'loading') {
-        return;
-      }
-
-      if (status !== 'authenticated') {
-        if (isMounted) {
-          setPageError('עליך להתחבר כדי לצפות בפרופיל');
-          setPageLoading(false);
-        }
         return;
       }
 
