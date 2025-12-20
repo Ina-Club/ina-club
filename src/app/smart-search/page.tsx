@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, CircularProgress, Card } from "@mui/material";
+import { Box, Button, Card } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { SearchBar } from "@/components/search-bar";
@@ -85,7 +85,7 @@ export default function SmartSearchPage() {
                         <Button
                             variant="contained"
                             color="primary"
-                            startIcon={loadingSearch ? <CircularProgress size={20} color="inherit" /> : <SearchIcon />}
+                            startIcon={<SearchIcon />}
                             onClick={handleSmartSearch}
                             sx={{ minWidth: 120 }}
                             disabled={!readyForSearch}
