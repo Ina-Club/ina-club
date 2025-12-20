@@ -80,6 +80,7 @@ export default function PriceAnalyzerComponent() {
       } else {
         // קיבלנו תוצאה סופית
         setPriceResult(data as PriceResponse);
+        setSelectedValues({});
         setDynamicSelects([]); // נקה את ה-selects
       }
     } catch (err) {
@@ -124,6 +125,7 @@ export default function PriceAnalyzerComponent() {
       } else {
         // קיבלנו תוצאה סופית
         setPriceResult(data as PriceResponse);
+        setSelectedValues({});
         setDynamicSelects([]); // נקה את ה-selects
       }
     } catch (err) {

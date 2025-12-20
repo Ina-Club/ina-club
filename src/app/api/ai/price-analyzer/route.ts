@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     const { searchQuery, context } = await req.json();
 
-    if (!searchQuery || searchQuery.trim() === "") {
+    if ((!searchQuery || !searchQuery.trim()) && !context) {
       return NextResponse.json({ error: "חיפוש ריק" }, { status: 400 });
     }
 
