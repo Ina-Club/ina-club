@@ -1,4 +1,5 @@
 import { GroupStatus } from "./types/status";
+import { LikeTargetType } from "./types/like";
 
 export interface RequestGroup {
   id: string;
@@ -50,4 +51,11 @@ export interface PublicGroup {
   description?: string;
   basePrice?: number;
   groupPrice?: number;
+}
+
+export interface Like {
+    id: string;
+    userId: string;
+    targetId: string;
+    targetType: LikeTargetType;
 }

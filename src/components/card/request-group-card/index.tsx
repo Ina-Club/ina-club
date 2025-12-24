@@ -83,6 +83,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
           }}
           onClick={(e) => {
             e.stopPropagation();
+            // TODO: handle error
             toggleRequestGroupLike(requestGroup);
           }}
         >
