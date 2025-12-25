@@ -34,6 +34,19 @@ enum LikeTargetType {
   ACTIVE_GROUP
 }
 
+enum PackageType {
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
 // ----------------------------------------------------
 // Core: User, Company, Category
 // ----------------------------------------------------
@@ -41,14 +54,24 @@ model User {
   id               String                     @id @default(uuid())
   name             String?
   email            String                     @unique
-  password         String?  // 👈 may be set after email verification
+  password         String?
   emailVerified    DateTime?
   createdAt        DateTime                   @default(now())
   role             Role                       @default(USER)
+  phone            String?
+
+  // B2B Package
+  b2bPackage       B2BPackage?
 
   // Participation
   requestGroupMemberships RequestGroupParticipant[]
   activeGroupMemberships  ActiveGroupParticipant[]
+
+
+  // Company (B2B users represent companies)
+  companyId        String?                    @unique
+  company          Company?                   @relation("CompanyOwner", fields: [companyId], references: [id], onDelete: SetNull)
+
 
   // Ownership
   requestGroups    RequestGroup[]             @relation("RequestGroupOwners")
@@ -61,7 +84,33 @@ model User {
   // NextAuth relations
   accounts         Account[]
   sessions         Session[]
-  likes            Like[]
+}
+
+model B2BPackage {
+  id              String        @id @default(uuid())
+  userId          String        @unique
+  packageType     PackageType
+  maxGroups       Int           // Maximum number of active groups
+  price           Float         // Monthly price
+  startDate       DateTime      @default(now())
+  endDate         DateTime?
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  b2bPackageId    String
+  amount          Float
+  status          PaymentStatus @default(PENDING)
+  paymentDate     DateTime      @default(now())
+  transactionId   String?
+  createdAt       DateTime      @default(now())
+
+  b2bPackage      B2BPackage    @relation(fields: [b2bPackageId], references: [id], onDelete: Cascade)
 }
 
 model Company {
@@ -75,6 +124,11 @@ model Company {
   city          String?
   verified      Boolean       @default(false)
   createdAt     DateTime      @default(now())
+
+  updatedAt     DateTime?      @updatedAt
+
+  // Owner (User who represents this company)
+  owner         User?          @relation("CompanyOwner")
 
   // Relations
   categories    Category[]    @relation("CompanyCategories")
@@ -261,6 +315,10 @@ model PendingProfile {
   createdAt      DateTime @default(now())
 }
 
+// ----------------------------------------------------
+// Likes for favorite user groups
+// ----------------------------------------------------
+
 model Like {
   id          String         @id @default(uuid())
   userId      String
@@ -274,3 +332,31 @@ model Like {
   @@index([userId, createdAt])
   @@index([targetType, targetId])
 }
+
+
+// ----------------------------------------------------
+// Testimonials and Partners for homepage
+// ----------------------------------------------------
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  company   String
+  role      String
+  quote     String
+  name      String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Partner {
+  id        String   @id @default(uuid())
+  name      String
+  category  String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
