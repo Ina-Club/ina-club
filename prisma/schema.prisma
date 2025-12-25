@@ -132,6 +132,7 @@ model Company {
   // Relations
   categories   Category[]    @relation("CompanyCategories")
   activeGroups ActiveGroup[]
+  testimonials Testimonial[]
 
   // Image (1-to-1)
   logo   Image?  @relation("CompanyLogo", fields: [logoId], references: [id], onDelete: SetNull)
@@ -337,23 +338,15 @@ model Like {
 // ----------------------------------------------------
 
 model Testimonial {
-  id        String   @id @default(uuid())
-  company   String
-  role      String
-  quote     String
-  name      String
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Partner {
-  id        String   @id @default(uuid())
-  name      String
-  category  String
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyName String // Keep for testimonials without linked company
+  role        String
+  quote       String
+  name        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
