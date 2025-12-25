@@ -22,7 +22,7 @@ export async function PUT(
         return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { targetType: typeParam, targetId } = params;
+    const { targetType: typeParam, targetId } = await params;
     let targetType: LikeTargetType;
 
     if (typeParam === "request-groups") targetType = LikeTargetType.REQUEST_GROUP;
@@ -71,7 +71,7 @@ export async function DELETE(
         return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { targetType: typeParam, targetId } = params;
+    const { targetType: typeParam, targetId } = await params;
     let targetType: LikeTargetType;
 
     if (typeParam === "request-groups") targetType = LikeTargetType.REQUEST_GROUP;

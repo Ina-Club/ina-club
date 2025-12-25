@@ -23,7 +23,7 @@ export default async function ActiveGroupDetail({
 }: {
   params: { id: string };
 }) {
-  const { id } = params;
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
