@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
 
-async function handleMembership(req: Request, id: string, action: "join" | "leave") {
+async function handleMembership(groupId: string, action: "join" | "leave") {
     try {
         const { session, response } = await validateSession();
         if (response) return response;
 
-        if (!id) return NextResponse.json({ error: "Group ID is required" }, { status: 400 });
+        if (!groupId) return NextResponse.json({ error: "Group ID is required" }, { status: 400 });
 
         const user = await prisma.user.findUnique({
             where: { email: session.user!.email! },
@@ -17,7 +17,7 @@ async function handleMembership(req: Request, id: string, action: "join" | "leav
         if (!user) return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
 
         const activeGroup = await prisma.activeGroup.findUnique({
-            where: { id },
+            where: { id: groupId },
             select: { id: true, status: true },
         });
 
@@ -27,7 +27,7 @@ async function handleMembership(req: Request, id: string, action: "join" | "leav
             where: {
                 userId_activeGroupId: {
                     userId: user.id,
-                    activeGroupId: id,
+                    activeGroupId: groupId,
                 },
             },
         });
@@ -37,7 +37,7 @@ async function handleMembership(req: Request, id: string, action: "join" | "leav
             await prisma.activeGroupParticipant.create({
                 data: {
                     userId: user.id,
-                    activeGroupId: id,
+                    activeGroupId: groupId,
                     lastPing: new Date(),
                 },
             });
@@ -47,7 +47,7 @@ async function handleMembership(req: Request, id: string, action: "join" | "leav
                 where: {
                     userId_activeGroupId: {
                         userId: user.id,
-                        activeGroupId: id,
+                        activeGroupId: groupId,
                     },
                 },
             });
@@ -61,9 +61,9 @@ async function handleMembership(req: Request, id: string, action: "join" | "leav
 }
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
-    return handleMembership(req, params.id, "join");
+    return handleMembership(params.id, "join");
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-    return handleMembership(req, params.id, "leave");
+    return handleMembership(params.id, "leave");
 }

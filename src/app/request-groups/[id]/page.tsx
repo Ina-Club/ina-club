@@ -22,7 +22,7 @@ export default async function RequestGroupDetail({
 }: {
   params: { id: string };
 }) {
-  const { id } = await params;
+  const { id } = params;
   const session = await getServerSession(authOptions);
 
   // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
