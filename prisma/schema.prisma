@@ -29,6 +29,11 @@ enum Role {
   ADMIN
 }
 
+enum LikeTargetType {
+  REQUEST_GROUP
+  ACTIVE_GROUP
+}
+
 // ----------------------------------------------------
 // Core: User, Company, Category
 // ----------------------------------------------------
@@ -56,6 +61,7 @@ model User {
   // NextAuth relations
   accounts         Account[]
   sessions         Session[]
+  likes            Like[]
 }
 
 model Company {
@@ -253,4 +259,18 @@ model PendingProfile {
   hashedPassword String
   imageUrl       String?
   createdAt      DateTime @default(now())
+}
+
+model Like {
+  id          String         @id @default(uuid())
+  userId      String
+  targetType  LikeTargetType
+  targetId    String
+  createdAt   DateTime       @default(now())
+
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId, createdAt])
+  @@index([targetType, targetId])
 }

@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   icons: { icon: "/InaAppLogo.png" },
 };
 
+import { SnackbarProvider } from "@/contexts/snackbar-context";
+
 export default function RootLayout({
   children,
 }: {
@@ -31,11 +33,13 @@ export default function RootLayout({
         >
           <SessionProviderWrapper>
             <UserProfileProvider>
-              <FavoritesProvider>
-                <HeaderWrapper /> {/* ✅ עכשיו ה-header מתנהג לפי הדף */}
-                <main style={{ flex: 1 }}>{children}</main>
-                <Footer />
-              </FavoritesProvider>
+              <SnackbarProvider>
+                <FavoritesProvider>
+                  <HeaderWrapper /> {/* ✅ עכשיו ה-header מתנהג לפי הדף */}
+                  <main style={{ flex: 1 }}>{children}</main>
+                  <Footer />
+                </FavoritesProvider>
+              </SnackbarProvider>
             </UserProfileProvider>
           </SessionProviderWrapper>
         </body>

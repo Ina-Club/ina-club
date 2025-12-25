@@ -11,6 +11,7 @@ import {
 import type { ReactNode } from "react";
 import type { ActiveGroup, RequestGroup } from "@/lib/dal";
 import { useSession } from "next-auth/react";
+import { useSnackbar } from "@/contexts/snackbar-context";
 
 type FavoritesState = {
   requestGroups: RequestGroup[];
@@ -38,6 +39,7 @@ const initialState: FavoritesState = {
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const [favorites, setFavorites] = useState<FavoritesState>(initialState);
+  const { showSnackbar } = useSnackbar();
 
   // Fetch likes from backend when user is authenticated
   useEffect(() => {
@@ -74,6 +76,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const toggleRequestGroupLike = useCallback(async (group: RequestGroup) => {
     if (status !== "authenticated") {
       console.error("User is not authenticated");
+      showSnackbar("עליך להתחבר כדי לשמור מועדפים", "warning");
       return;
     }
 
@@ -95,6 +98,8 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error("Like toggle failed, rolling back", err);
+      showSnackbar("שגיאה בעדכון המועדפים", "error");
+
       // 4. Rollback on failure
       setFavorites((prev) => {
         // Revert to previous state
@@ -104,11 +109,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         return { ...prev, requestGroups };
       });
     }
-  }, [favorites.requestGroups]);
+  }, [favorites.requestGroups, status, showSnackbar]);
 
   const toggleActiveGroupLike = useCallback(async (group: ActiveGroup) => {
     if (status !== "authenticated") {
       console.error("User is not authenticated");
+      showSnackbar("עליך להתחבר כדי לשמור מועדפים", "warning");
       return;
     }
 
@@ -129,6 +135,8 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error("Like toggle failed, rolling back", err);
+      showSnackbar("שגיאה בעדכון המועדפים", "error");
+
       setFavorites((prev) => {
         const activeGroups = isLiked
           ? [...prev.activeGroups, group]
@@ -136,7 +144,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         return { ...prev, activeGroups };
       });
     }
-  }, [favorites.activeGroups]);
+  }, [favorites.activeGroups, status, showSnackbar]);
 
   const value = useMemo(
     () => ({
