@@ -1,26 +1,17 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { LikeTargetType } from "@/lib/types/like";
+import { getUserIdBySession } from "@/lib/user";
+import { validateSession } from "@/lib/auth";
 
 export async function PUT(
     request: Request,
     { params }: { params: { targetType: string; targetId: string } }
 ) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-        return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
 
-    const user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        select: { id: true }
-    });
-
-    if (!user) {
-        return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const userId = await getUserIdBySession(session);
 
     const { targetType: typeParam, targetId } = params;
     let targetType: LikeTargetType;
@@ -34,20 +25,24 @@ export async function PUT(
         await prisma.like.upsert({
             where: {
                 userId_targetType_targetId: {
-                    userId: user.id,
+                    userId,
                     targetType,
                     targetId,
                 },
             },
             create: {
-                userId: user.id,
+                userId,
                 targetType,
                 targetId,
             },
             update: {},
         });
         return new NextResponse("OK");
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === "P2002") {
+            // Already liked — success
+            return new NextResponse("OK");
+        }
         console.error("Failed to add like:", error);
         return new NextResponse("Internal Error", { status: 500 });
     }
@@ -57,19 +52,10 @@ export async function DELETE(
     request: Request,
     { params }: { params: { targetType: string; targetId: string } }
 ) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-        return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const { session, response } = await validateSession();
+    if (response) return response;
 
-    const user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        select: { id: true }
-    });
-
-    if (!user) {
-        return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const userId = await getUserIdBySession(session);
 
     const { targetType: typeParam, targetId } = params;
     let targetType: LikeTargetType;
@@ -82,7 +68,7 @@ export async function DELETE(
         // Idempotent delete
         await prisma.like.deleteMany({
             where: {
-                userId: user.id,
+                userId,
                 targetType,
                 targetId,
             },
