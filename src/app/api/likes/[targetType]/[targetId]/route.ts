@@ -21,21 +21,9 @@ export async function PUT(
     else return new NextResponse("Invalid type", { status: 400 });
 
     try {
-        // Idempotent upsert
-        await prisma.like.upsert({
-            where: {
-                userId_targetType_targetId: {
-                    userId,
-                    targetType,
-                    targetId,
-                },
-            },
-            create: {
-                userId,
-                targetType,
-                targetId,
-            },
-            update: {},
+        // Idempotent
+        await prisma.like.create({
+            data: { userId, targetType, targetId },
         });
         return new NextResponse("OK");
     } catch (error: any) {
