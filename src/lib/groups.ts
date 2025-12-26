@@ -39,7 +39,7 @@ export const fetchRequestGroups = async (whereData: object) => {
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
             // id: p.user.id,
-            name: p.user.name ?? "",
+            firstName: p.user.name ? p.user.name.split(" ")[0] : "",
             image: p.user.profilePicture?.url ?? "",
             // mail: p.user.email,
         })),
@@ -95,7 +95,7 @@ export const fetchActiveGroups = async (whereData: object) => {
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
             // id: p.user.id,
-            name: p.user.name ?? "",
+            firstName: p.user.name ? p.user.name.split(" ")[0] : "",
             image: p.user.profilePicture?.url ?? "",
             // mail: p.user.email,
         })),

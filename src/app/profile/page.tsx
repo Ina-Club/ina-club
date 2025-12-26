@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import {
   Edit as EditIcon,
-  Person as PersonIcon,
   Email as EmailIcon,
   CalendarToday as CalendarIcon,
   Group as GroupIcon,
@@ -35,6 +34,7 @@ import { useSearchParams } from "next/navigation";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "@/components/loading-circle";
 import RequestGroupCard from "@/components/card/request-group-card";
+import MinimalRequestGroupCard from "@/components/card/minimal-request-group-card";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import UserAvatar from "@/components/user-avatar";
 import { useUserProfile } from "@/contexts/user-profile-context";
@@ -96,14 +96,6 @@ export default function Profile() {
 
     const ensureFreshProfile = async () => {
       if (status === 'loading') {
-        return;
-      }
-
-      if (status !== 'authenticated') {
-        if (isMounted) {
-          setPageError('עליך להתחבר כדי לצפות בפרופיל');
-          setPageLoading(false);
-        }
         return;
       }
 
@@ -508,7 +500,7 @@ export default function Profile() {
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
                       {detailProfile!.waitingRequestGroups.map((requestGroup, index) => (
-                        <RequestGroupCard key={index} requestGroup={requestGroup} />
+                        <MinimalRequestGroupCard key={index} requestGroup={requestGroup} />
                       ))}
                     </Box>
                   )}

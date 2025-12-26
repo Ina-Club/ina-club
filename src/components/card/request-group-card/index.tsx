@@ -8,17 +8,11 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   Chip,
   Box,
   IconButton,
   Alert,
   AlertTitle,
-  Tooltip,
 } from "@mui/material";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -35,40 +29,20 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const router = useRouter();
   const goToRequestGroup = () => router.push(`/request-groups/${requestGroup.id}`);
   const [currentImage, setCurrentImage] = useState(0);
-  const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const { isRequestGroupLiked, toggleRequestGroupLike } = useFavorites();
   const liked = isRequestGroupLiked(requestGroup.id);
-
-  const isOpen: boolean = requestGroup.status === GroupStatus.OPEN;
-  const isPreview: boolean = requestGroup.status === GroupStatus.PREVIEW;
-  const isClosed: boolean = requestGroup.status === GroupStatus.CLOSED;
-  const isCanceled: boolean = requestGroup.status === GroupStatus.CANCELED;
-  const isExpired: boolean = requestGroup.status === GroupStatus.EXPIRED;
-  const isPending: boolean = requestGroup.status === GroupStatus.PENDING;
-
-  const getStatusDescription = (status: GroupStatus) => {
-    switch (status) {
-      case 'CLOSED': return "בוצעה עסקה דרך קבוצת רכישה.";
-      case 'CANCELED': return "הבקשה לא עמדה בתנאי השימוש של האפליקציה ולכן לא אושרה.";
-      case 'EXPIRED': return "תוקף הבקשה הסתיים.";
-      case 'PENDING': return "הבקשה ממתינה לאישור."
-      default: return ""; // For opened groups.
-    }
-  };
-
-  const requestGroupRejectionReason = requestGroup.rejectionReason ?? getStatusDescription(GroupStatus.CANCELED);
+  const isOpen = requestGroup.status === GroupStatus.OPEN;
 
   const handleRequestGroupClick = () => {
-    if (isOpen || isPreview) {
-      goToRequestGroup();
-    }
+    if (!isOpen) return;
+    goToRequestGroup();
   }
 
   return (
     <Card
       sx={{
         borderRadius: 4,
-        boxShadow: !isOpen && !isPreview ? 1 : 3,
+        boxShadow: 3,
         flex: 1,
         overflowWrap: "anywhere",
         overflow: "hidden",
@@ -76,15 +50,10 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
-        border: isPending ? 1 : 0,
-        borderStyle: isPending ? "dashed" : "solid",
-        borderColor: isPending ? "#ff9800" : "transparent",
-        "&:hover": isOpen || isPreview
-          ? {
-            transform: "translateY(-6px)",
-            boxShadow: 8,
-          }
-          : undefined,
+        "&:hover": {
+          transform: "translateY(-6px)",
+          boxShadow: 8,
+        },
       }}
     >
       {/* Image Section */}
@@ -99,73 +68,31 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            opacity: !isOpen && !isPreview ? 0.6 : 1,
           }}
         />
 
         {/* Floating Like button */}
-        {isOpen &&
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: 12,
-              right: 12,
-              bgcolor: "white",
-              boxShadow: 2,
-              "&:hover": { bgcolor: "grey.100" },
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleRequestGroupLike(requestGroup);
-            }}
-          >
-            {liked ? (
-              <FavoriteIcon sx={{ color: "red" }} />
-            ) : (
-              <FavoriteBorderIcon sx={{ color: "grey.600" }} />
-            )}
-          </IconButton>
-        }
-
-        {/* Status Chip (only for canceled/expired/closed) */}
-        {(!isOpen && !isPreview) && (
-          <Tooltip
-            title={getStatusDescription(requestGroup.status)}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  bgcolor: "#1a2a5a",
-                  color: "#fff",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  borderRadius: 4,
-                  boxShadow: 3,
-                },
-              },
-              arrow: {
-                sx: { color: "#1a2a5a" },
-              },
-            }}
-          >
-            <Chip
-              label={
-                isCanceled ? "מבוטל" : isExpired ? "פג תוקף" : isPending ? "בתהליך" : "סגור"
-              }
-              size="small"
-              sx={{
-                position: "absolute",
-                top: 12,
-                left: 12,
-                fontWeight: 600,
-                color: (isExpired || isPending) ? "black" : "white",
-                bgcolor: isClosed ? "primary.dark" : isExpired ? "#eeeeee" : isCanceled ? "#d32f2f" : isPending ? "#ff9800" : undefined,
-                userSelect: "none",
-              }}
-            />
-          </Tooltip>
-        )}
+        <IconButton
+          sx={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            bgcolor: "white",
+            boxShadow: 2,
+            "&:hover": { bgcolor: "grey.100" },
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            // TODO: handle error
+            toggleRequestGroupLike(requestGroup);
+          }}
+        >
+          {liked ? (
+            <FavoriteIcon sx={{ color: "red" }} />
+          ) : (
+            <FavoriteBorderIcon sx={{ color: "grey.600" }} />
+          )}
+        </IconButton>
 
         {/* Category Chip */}
         <Chip
@@ -222,10 +149,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
       <CardContent
         sx={{
           p: 2,
-          "&:hover": {
-            cursor: isOpen ? "pointer" : "default",
-          },
-          pointerEvents: isOpen || isCanceled ? "auto" : "none",
+          cursor: "pointer",
         }}
         onClick={handleRequestGroupClick}
       >
@@ -235,114 +159,78 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
           fontWeight={600}
           gutterBottom
           noWrap
-          sx={{ opacity: !isOpen && !isPreview ? 0.6 : 1 }}
         >
           {requestGroup.title}
         </Typography>
 
-        {isCanceled && (
-          <Box>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={(e) => {
-                e.stopPropagation();
-                setReasonDialogOpen(true);
-              }}
-            >
-              למה זה קרה?
-            </Button>
-          </Box>
-        )}
+        {/* Meta Info */}
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          בקשה נוצרה לפני 2 ימים
+        </Typography>
 
-        {isOpen &&
-          <>
-            {/* Meta Info */}
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              בקשה נוצרה לפני 2 ימים
-            </Typography>
-
-            {/* Participants */}
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-              <PeopleAltOutlinedIcon
-                sx={{ fontSize: 18, mr: 0.5, color: "primary.main" }}
-              />
-              <Typography
-                variant="body2"
-                fontWeight={500}
-                color="primary.main"
-                mr={0.5}
-              >
-                {requestGroup.participants.length}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                מעוניינים
-              </Typography>
-            </Box>
-
-            {/* Groups Info */}
-            {requestGroup.openedGroups?.length ? (
-              <Alert
-                severity="success"
-                sx={{
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: "3.3px", // This particular amount is to make the smart-search cards be the exact same size
-                  bgcolor: "#e3e7f5",
-                  color: "#1a2a5a",
-                  fontSize: "0.75rem",
-                  "& .MuiAlert-icon": {
-                    color: "#1a2a5a",
-                  },
-                }}
-              >
-                <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#1a2a5a" }}>
-                  נפתחו {requestGroup.openedGroups.length} קבוצות
-                </AlertTitle>
-                {requestGroup.participants.length} רוכשים • אחרונה לפי 3 ימים
-              </Alert>
-            ) : (
-              <Alert
-                iconMapping={{
-                  success: <AccessTimeOutlinedIcon fontSize="inherit" />,
-                }}
-                sx={{
-                  bgcolor: "#fff7ec",
-                  color: "#ff8c42",
-                  fontSize: "0.75rem",
-                  "& .MuiAlert-icon": {
-                    color: "#f0a868",
-                  },
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: "3.3px",
-                }}
-              >
-                <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#ff8c42" }}>
-                  ממתין לקבוצה ראשונה
-                </AlertTitle>
-                עוד מעט מעוניינים ונפתח קבוצה
-              </Alert>
-            )}
-          </>
-        }
-      </CardContent>
-
-      {/* Closed reason dialog */}
-      <Dialog open={reasonDialogOpen} onClose={() => setReasonDialogOpen(false)}>
-        <DialogTitle>בקשה זו לא מאושרת</DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body1" fontWeight="bold">פירוט</Typography>
-          <Typography variant="body1" color="text.primary">
-            {requestGroupRejectionReason}
+        {/* Participants */}
+        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+          <PeopleAltOutlinedIcon
+            sx={{ fontSize: 18, mr: 0.5, color: "primary.main" }}
+          />
+          <Typography
+            variant="body2"
+            fontWeight={500}
+            color="primary.main"
+            mr={0.5}
+          >
+            {requestGroup.participants.length}
           </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setReasonDialogOpen(false)} autoFocus>
-            הבנתי
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <Typography variant="body2" color="text.secondary">
+            מעוניינים
+          </Typography>
+        </Box>
+
+        {/* Groups Info */}
+        {requestGroup.openedGroups?.length ? (
+          <Alert
+            severity="success"
+            sx={{
+              borderRadius: 2,
+              px: 1.5,
+              py: "3.3px", // This particular amount is to make the smart-search cards be the exact same size
+              bgcolor: "#e3e7f5",
+              color: "#1a2a5a",
+              fontSize: "0.75rem",
+              "& .MuiAlert-icon": {
+                color: "#1a2a5a",
+              },
+            }}
+          >
+            <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#1a2a5a" }}>
+              נפתחו {requestGroup.openedGroups.length} קבוצות
+            </AlertTitle>
+            {requestGroup.participants.length} רוכשים • אחרונה לפי 3 ימים
+          </Alert>
+        ) : (
+          <Alert
+            iconMapping={{
+              success: <AccessTimeOutlinedIcon fontSize="inherit" />,
+            }}
+            sx={{
+              bgcolor: "#fff7ec",
+              color: "#ff8c42",
+              fontSize: "0.75rem",
+              "& .MuiAlert-icon": {
+                color: "#f0a868",
+              },
+              borderRadius: 2,
+              px: 1.5,
+              py: "3.3px",
+            }}
+          >
+            <AlertTitle sx={{ fontSize: "0.85rem", mb: 0, color: "#ff8c42" }}>
+              ממתין לקבוצה ראשונה
+            </AlertTitle>
+            עוד מעט מעוניינים ונפתח קבוצה
+          </Alert>
+        )}
+      </CardContent>
     </Card>
   );
 };

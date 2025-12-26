@@ -3,6 +3,7 @@ import { prisma } from "lib/prisma";
 import bcrypt from "bcrypt";
 import { validateSession } from "@/lib/auth";
 
+//TODO: Save user.id in session
 export async function POST(req: Request) {
   try {
     const { session, response } = await validateSession();

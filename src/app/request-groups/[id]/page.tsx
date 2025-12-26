@@ -11,7 +11,7 @@ import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupImages from "@/components/request-group/request-group-images";
 import NotFound from "app/not-found";
-import JoinButton from "@/components/join-button";
+import GroupMembershipButton from "@/components/group-membership-button";
 import UserAvatar from "@/components/user-avatar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -26,6 +26,7 @@ export default async function RequestGroupDetail({
   const session = await getServerSession(authOptions);
 
   // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
+  // TODO: Add like count
   const rg = await prisma.requestGroup.findUnique({
     where: { id },
     select: {
@@ -68,6 +69,7 @@ export default async function RequestGroupDetail({
   const alreadyJoined = !!viewerEmail ? await checkUserIsRequestGroupParticipant(viewerEmail, rg.id) : false;
 
   // Similar items
+  // TODO: Move this somewhere else!
   const similar = await prisma.requestGroup.findMany({
     where: { categoryId: rg.categoryId ?? undefined, NOT: { id } },
     take: 3,
@@ -216,14 +218,12 @@ export default async function RequestGroupDetail({
                 </Avatar>
               )}
             </Box>
-            <JoinButton
+            <GroupMembershipButton
               type="request-group"
               id={id}
               fullWidth
               isJoined={alreadyJoined}
-            >
-              הצטרף לבקשה
-            </JoinButton>
+            />
           </Paper>
         </Box>
       </Box>
