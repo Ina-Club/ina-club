@@ -26,6 +26,7 @@ export default async function RequestGroupDetail({
   const session = await getServerSession(authOptions);
 
   // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
+  // TODO: Add like count
   const rg = await prisma.requestGroup.findUnique({
     where: { id },
     select: {
@@ -68,6 +69,7 @@ export default async function RequestGroupDetail({
   const alreadyJoined = !!viewerEmail ? await checkUserIsRequestGroupParticipant(viewerEmail, rg.id) : false;
 
   // Similar items
+  // TODO: Move this somewhere else!
   const similar = await prisma.requestGroup.findMany({
     where: { categoryId: rg.categoryId ?? undefined, NOT: { id } },
     take: 3,
