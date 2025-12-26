@@ -21,9 +21,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === "clickaway") {
-            return;
-        }
+        if (reason === "clickaway") return;
         setOpen(false);
     };
 
