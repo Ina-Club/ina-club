@@ -3,21 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { fetchActiveGroups, fetchRequestGroups } from "@/lib/groups";
 import { validateSession } from "@/lib/auth";
 import { LikeTargetType } from "@/lib/types/like";
+import { getUserIdBySession } from "@/lib/user";
 
 export async function GET() {
     const { session, response } = await validateSession();
     if (response) return response;
 
-    const user = await prisma.user.findUnique({
-        where: { email: session.user!.email! },
-        select: { id: true }
-    });
-
-    if (!user) {
-        return NextResponse.json({ requestGroups: [], activeGroups: [] });
-    }
-
-    const userId = user.id;
+    const userId = await getUserIdBySession(session);
 
     try {
         const likes = await prisma.like.findMany({
