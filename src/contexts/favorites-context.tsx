@@ -75,7 +75,6 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const toggleRequestGroupLike = useCallback(async (group: RequestGroup) => {
     if (status !== "authenticated") {
-      console.error("User is not authenticated");
       showSnackbar("עליך להתחבר כדי לשמור מועדפים", "warning");
       return;
     }
@@ -113,7 +112,6 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const toggleActiveGroupLike = useCallback(async (group: ActiveGroup) => {
     if (status !== "authenticated") {
-      console.error("User is not authenticated");
       showSnackbar("עליך להתחבר כדי לשמור מועדפים", "warning");
       return;
     }
