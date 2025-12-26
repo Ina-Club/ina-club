@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
+import { getUserIdBySession } from "@/lib/user";
 
 async function handleMembership(groupId: string, action: "join" | "leave") {
     try {
@@ -9,12 +10,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
 
         if (!groupId) return NextResponse.json({ error: "Group ID is required" }, { status: 400 });
 
-        const user = await prisma.user.findUnique({
-            where: { email: session.user!.email! },
-            select: { id: true },
-        });
-
-        if (!user) return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
+        const userId = await getUserIdBySession(session);
 
         const activeGroup = await prisma.activeGroup.findUnique({
             where: { id: groupId },
@@ -26,7 +22,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
         const existingParticipant = await prisma.activeGroupParticipant.findUnique({
             where: {
                 userId_activeGroupId: {
-                    userId: user.id,
+                    userId,
                     activeGroupId: groupId,
                 },
             },
@@ -36,7 +32,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
             if (existingParticipant) return NextResponse.json({ error: "User is already a participant" }, { status: 400 });
             await prisma.activeGroupParticipant.create({
                 data: {
-                    userId: user.id,
+                    userId,
                     activeGroupId: groupId,
                     lastPing: new Date(),
                 },
@@ -46,7 +42,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
             await prisma.activeGroupParticipant.delete({
                 where: {
                     userId_activeGroupId: {
-                        userId: user.id,
+                        userId,
                         activeGroupId: groupId,
                     },
                 },

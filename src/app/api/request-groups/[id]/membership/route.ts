@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
+import { getUserIdBySession } from "@/lib/user";
 
 async function handleMembership(groupId: string, action: "join" | "leave") {
     try {
@@ -9,12 +10,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
 
         if (!groupId) return NextResponse.json({ error: "Group ID is required" }, { status: 400 });
 
-        const user = await prisma.user.findUnique({
-            where: { email: session.user!.email! },
-            select: { id: true },
-        });
-
-        if (!user) return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
+        const userId = await getUserIdBySession(session);
 
         const requestGroup = await prisma.requestGroup.findUnique({
             where: { id: groupId },
@@ -26,7 +22,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
         const existingParticipant = await prisma.requestGroupParticipant.findUnique({
             where: {
                 userId_requestGroupId: {
-                    userId: user.id,
+                    userId,
                     requestGroupId: groupId,
                 },
             },
@@ -36,7 +32,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
             if (existingParticipant) return NextResponse.json({ error: "אתה כבר משתתף בבקשה זו" }, { status: 400 });
             await prisma.requestGroupParticipant.create({
                 data: {
-                    userId: user.id,
+                    userId,
                     requestGroupId: groupId,
                 },
             });
@@ -45,7 +41,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
             await prisma.requestGroupParticipant.delete({
                 where: {
                     userId_requestGroupId: {
-                        userId: user.id,
+                        userId,
                         requestGroupId: groupId,
                     },
                 },
