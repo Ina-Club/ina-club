@@ -89,10 +89,8 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
         deadline: r.deadline,
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
-            // id: p.user.id,
             firstName: p.user.name ? p.user.name.split(" ")[0] : "",
             image: p.user.profilePicture?.url ?? "",
-            // mail: p.user.email,
         })),
         minParticipants: r.minParticipants,
         maxParticipants: r.maxParticipants
