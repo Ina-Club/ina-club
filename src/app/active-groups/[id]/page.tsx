@@ -7,7 +7,6 @@ import {
   Paper,
   Avatar,
 } from "@mui/material";
-import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import RequestGroupImages from "@/components/request-group/request-group-images";
@@ -17,50 +16,13 @@ import UserAvatar from "@/components/user-avatar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
+import { fetchActiveGroups } from "@/lib/groups";
 
-export default async function ActiveGroupDetail({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function ActiveGroupDetail({ params }: { params: { id: string }; }) {
   const { id } = params;
   const session = await getServerSession(authOptions);
 
-  // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
-  const ag = await prisma.activeGroup.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      status: true,
-      categoryId: true,
-      category: { select: { name: true } },
-      basePrice: true,
-      groupPrice: true,
-      minParticipants: true,
-      maxParticipants: true,
-      deadline: true,
-      createdAt: true,
-      company: {
-        select: { id: true, title: true, logo: { select: { url: true } } },
-      },
-      participants: {
-        select: {
-          user: {
-            select: {
-              name: true,
-              profilePicture: { select: { url: true } },
-            },
-          },
-        },
-      },
-      images: {
-        select: { image: { select: { url: true } }, order: true },
-        orderBy: { order: "asc" },
-      },
-    },
-  });
+  const ag = (await fetchActiveGroups({ id }))?.[0] || null;
 
   if (!ag) {
     return (
@@ -68,33 +30,14 @@ export default async function ActiveGroupDetail({
     );
   }
 
-  const images = ag.images.map((i) => i.image.url);
   const participantsCount = ag.participants.length;
   const participantAvatars = ag.participants.slice(0, 10).map((p) => ({
-    name: !!p.user.name ? p.user.name.split(" ")[0] : null, // This way we avoid sending full user names to the client.
-    imageUrl: p.user.profilePicture?.url || undefined,
+    name: p.firstName || null,
+    imageUrl: p.image || undefined,
   }));
   const viewerEmail = session?.user?.email;
   const alreadyJoined = !!viewerEmail ? await checkUserIsActiveGroupParticipant(viewerEmail, ag.id) : false;
-
-  // Similar ActiveGroups
-  const similar = await prisma.activeGroup.findMany({
-    where: { categoryId: ag.categoryId ?? undefined, NOT: { id } },
-    take: 3,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      images: {
-        select: { image: { select: { url: true } }, order: true },
-        orderBy: { order: "asc" },
-      },
-      category: { select: { name: true } },
-      groupPrice: true,
-      basePrice: true,
-      participants: true,
-    },
-  });
+  const similarGroups = await fetchActiveGroups({ category: { name: ag.category ?? "" }, NOT: { id } }, 3);
 
   return (
     <Box
@@ -120,7 +63,7 @@ export default async function ActiveGroupDetail({
           {ag.title}
         </Typography>
         <Box sx={{ display: "flex", gap: 1, mt: { xs: 1, md: 0 } }}>
-          <Chip label={ag.category?.name || "קטגוריה"} size="small" />
+          <Chip label={ag.category || "קטגוריה"} size="small" />
         </Box>
       </Box>
 
@@ -134,7 +77,7 @@ export default async function ActiveGroupDetail({
       >
         {/* Media + Description */}
         <Box>
-          <RequestGroupImages images={images}></RequestGroupImages>
+          <RequestGroupImages images={ag.images}></RequestGroupImages>
 
           <Paper
             elevation={0}
@@ -227,7 +170,7 @@ export default async function ActiveGroupDetail({
         </Box>
       </Box>
 
-      {similar.length > 0 && (
+      {similarGroups.length > 0 && (
         <Box sx={{ mt: 6 }}>
           <Typography variant="h6" fontWeight={700} mb={2}>
             מומלץ עבורך • קבוצות דומות
@@ -239,17 +182,15 @@ export default async function ActiveGroupDetail({
               gap: 2,
             }}
           >
-            {similar.map((s) => (
+            {similarGroups.map((s) => (
               <ActiveGroupCard
                 key={s.id}
                 activeGroup={{
                   id: s.id,
                   title: s.title,
                   description: undefined,
-                  category: s.category?.name || "",
-                  images: s.images.length
-                    ? s.images.map((i) => i.image.url)
-                    : ["/InaClubLogo.png"],
+                  category: s.category,
+                  images: s.images.length ? s.images : ["/InaClubLogo.png"],
                   participants: [],
                   status: GroupStatus.OPEN,
                   basePrice: s.basePrice,
