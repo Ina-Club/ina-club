@@ -6,7 +6,6 @@ import {
   Paper,
   Avatar,
 } from "@mui/material";
-import { prisma } from "lib/prisma";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
 import RequestGroupImages from "@/components/request-group/request-group-images";
@@ -16,74 +15,27 @@ import UserAvatar from "@/components/user-avatar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { checkUserIsRequestGroupParticipant } from "@/lib/utils/praticipant";
+import { fetchRequestGroups } from "@/lib/groups";
 
-export default async function RequestGroupDetail({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function RequestGroupDetail({ params, }: { params: { id: string }; }) {
   const { id } = params;
   const session = await getServerSession(authOptions);
 
-  // TODO: Move this somewhere else and make sure no Name and Email are being fetched!
-  // TODO: Add like count
-  const rg = await prisma.requestGroup.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      status: true,
-      categoryId: true,
-      category: { select: { name: true } },
-      images: {
-        select: { image: { select: { url: true } }, order: true },
-        orderBy: { order: "asc" },
-      },
-      participants: {
-        select: {
-          user: {
-            select: {
-              name: true,
-              profilePicture: { select: { url: true } },
-            },
-          },
-        },
-      },
-    },
-  });
-
+  const rg = (await fetchRequestGroups({ id }))?.[0] || null;
   if (!rg) {
     return (
       <NotFound />
     );
   }
 
-  const images = rg.images.map((i) => i.image.url);
   const participantsCount = rg.participants.length;
   const participantAvatars = rg.participants.slice(0, 10).map((p) => ({
-    name: !!p.user.name ? p.user.name.split(" ")[0] : null, // This way we avoid sending full user names to the client.
-    imageUrl: p.user.profilePicture?.url || undefined,
+    name: p.firstName || null,
+    imageUrl: p.image || undefined,
   }));
   const viewerEmail = session?.user?.email;
   const alreadyJoined = !!viewerEmail ? await checkUserIsRequestGroupParticipant(viewerEmail, rg.id) : false;
-
-  // Similar items
-  // TODO: Move this somewhere else!
-  const similar = await prisma.requestGroup.findMany({
-    where: { categoryId: rg.categoryId ?? undefined, NOT: { id } },
-    take: 3,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      images: {
-        select: { image: { select: { url: true } }, order: true },
-        orderBy: { order: "asc" },
-      },
-      category: { select: { name: true } },
-    },
-  });
+  const similarGroups = await fetchRequestGroups({ category: { name: rg.category ?? "" }, NOT: { id } }, 3);
 
   return (
     <Box
@@ -109,7 +61,7 @@ export default async function RequestGroupDetail({
           {rg.title}
         </Typography>
         <Box sx={{ display: "flex", gap: 1, mt: { xs: 1, md: 0 } }}>
-          <Chip label={rg.category?.name || "קטגוריה"} size="small" />
+          <Chip label={rg.category || "קטגוריה"} size="small" />
         </Box>
       </Box>
 
@@ -123,7 +75,7 @@ export default async function RequestGroupDetail({
       >
         {/* מדיה + תיאור */}
         <Box>
-          <RequestGroupImages images={images}></RequestGroupImages>
+          <RequestGroupImages images={rg.images}></RequestGroupImages>
           {/* <Paper elevation={0} sx={{ p: 0, overflow: 'hidden', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <CardMedia component="img" image={mainImage} alt="main" sx={{ width: '100%', height: { xs: 240, md: 460 }, objectFit: 'cover' }} />
             {restImages.length > 0 && (
@@ -228,7 +180,7 @@ export default async function RequestGroupDetail({
         </Box>
       </Box>
 
-      {similar.length > 0 && (
+      {similarGroups.length > 0 && (
         <Box sx={{ mt: 6 }}>
           <Typography variant="h6" fontWeight={700} mb={2}>
             מומלץ עבורך • פריטים דומים
@@ -240,17 +192,15 @@ export default async function RequestGroupDetail({
               gap: 2,
             }}
           >
-            {similar.map((s) => (
+            {similarGroups.map((s) => (
               <RequestGroupCard
                 key={s.id}
                 requestGroup={{
                   id: s.id,
                   title: s.title,
                   description: undefined,
-                  category: s.category?.name || "",
-                  images: s.images.length
-                    ? s.images.map((i) => i.image.url)
-                    : ["/InaClubLogo.png"],
+                  category: s.category,
+                  images: s.images ?? ["/InaClubLogo.png"],
                   participants: [],
                   openedGroups: [],
                   status: GroupStatus.OPEN,

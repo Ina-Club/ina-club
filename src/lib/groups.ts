@@ -1,7 +1,7 @@
 import { ActiveGroup, RequestGroup } from "./dal";
 import { prisma } from "./prisma";
 
-export const fetchRequestGroups = async (whereData: object) => {
+export const fetchRequestGroups = async (whereData: object, take?: number) => {
     const where: any = { ...whereData };
     const rows = await prisma.requestGroup.findMany({
         select: {
@@ -25,7 +25,8 @@ export const fetchRequestGroups = async (whereData: object) => {
             },
             activeGroups: { select: { id: true } },
         },
-        where
+        where,
+        take
     });
 
     const data = rows.map((r) => ({

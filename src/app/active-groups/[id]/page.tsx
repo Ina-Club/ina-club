@@ -23,7 +23,6 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
   const session = await getServerSession(authOptions);
 
   const ag = (await fetchActiveGroups({ id }))?.[0] || null;
-
   if (!ag) {
     return (
       <NotFound />
@@ -190,7 +189,7 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
                   title: s.title,
                   description: undefined,
                   category: s.category,
-                  images: s.images.length ? s.images : ["/InaClubLogo.png"],
+                  images: s.images ?? ["/InaClubLogo.png"],
                   participants: [],
                   status: GroupStatus.OPEN,
                   basePrice: s.basePrice,
