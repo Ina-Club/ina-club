@@ -21,7 +21,7 @@ export async function PUT(
     else return new NextResponse("Invalid type", { status: 400 });
 
     try {
-        // Idempotent
+        // Idempotent - this ensures like exists and eliminates multiple upserts attempting to create the same like
         await prisma.like.create({
             data: { userId, targetType, targetId },
         });
