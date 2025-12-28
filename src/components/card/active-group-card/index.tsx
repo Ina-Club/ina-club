@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Card, CardContent, CardMedia, Chip, Typography } from "@mui/material";
-import FloatingLikeButton from "@/components/floating-like-button";
+import ConnectedLikeButton from "@/components/floating-like-button/connected-like-button";
 import { ActiveGroup } from "lib/dal";
 import { useState } from "react";
 import ParticipantsProgress from "./participations-progress-bar";
@@ -58,7 +58,7 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         />
 
         {/* Floating Like button */}
-        <FloatingLikeButton
+        <ConnectedLikeButton
           group={activeGroup}
           type="active-group"
           sx={{

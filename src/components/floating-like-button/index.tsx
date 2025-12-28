@@ -1,34 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { IconButton, SxProps, Theme } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { useFavorites } from "@/contexts/favorites-context";
-import { ActiveGroup, RequestGroup } from "@/lib/dal";
 
 interface FloatingLikeButtonProps {
-    group: RequestGroup | ActiveGroup;
-    type: "request-group" | "active-group";
+    isLiked?: boolean;
+    onClick?: (e: React.MouseEvent) => void;
     sx?: SxProps<Theme>;
 }
 
-export default function FloatingLikeButton({ group, type, sx }: FloatingLikeButtonProps) {
-    const {
-        isRequestGroupLiked,
-        isActiveGroupLiked,
-        toggleRequestGroupLike,
-        toggleActiveGroupLike
-    } = useFavorites();
+export default function FloatingLikeButton({ isLiked, onClick, sx }: FloatingLikeButtonProps) {
+    const [localLiked, setLocalLiked] = useState<boolean>(!!isLiked);
 
-    const isLiked = type === "request-group" ? isRequestGroupLiked(group.id) : isActiveGroupLiked(group.id);
+    useEffect(() => {
+        if (isLiked !== undefined) setLocalLiked(isLiked);
+    }, [isLiked]);
 
     const handleToggle = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (type === "request-group") {
-            toggleRequestGroupLike(group as RequestGroup);
-        } else {
-            toggleActiveGroupLike(group as ActiveGroup);
+        if (onClick) {
+            onClick(e);
         }
+
+        // If uncontrolled (isLiked is undefined), we manage state. 
+        // If controlled, the parent should update isLiked, triggering the useEffect above.
+        // However, for immediate UI feedback (optimistic), and for PENDING request groups we can toggle locally too, 
+        // relying on the parent to eventually set the correct state or this getting overwritten by useEffect.
+        setLocalLiked((prev) => !prev);
     };
 
     return (
@@ -41,7 +41,7 @@ export default function FloatingLikeButton({ group, type, sx }: FloatingLikeButt
                 ...sx,
             }}
         >
-            {isLiked ? (
+            {localLiked ? (
                 <FavoriteIcon sx={{ color: "red" }} />
             ) : (
                 <FavoriteBorderIcon sx={{ color: "grey.600" }} />

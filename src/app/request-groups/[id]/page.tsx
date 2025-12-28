@@ -16,6 +16,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { checkUserIsRequestGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchRequestGroups } from "@/lib/groups";
+import ConnectedLikeButton from "@/components/floating-like-button/connected-like-button";
 
 export default async function RequestGroupDetail({ params, }: { params: { id: string }; }) {
   const { id } = params;
@@ -75,7 +76,17 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
       >
         {/* מדיה + תיאור */}
         <Box>
-          <RequestGroupImages images={rg.images}></RequestGroupImages>
+          <RequestGroupImages images={rg.images}>
+            <ConnectedLikeButton
+              group={rg}
+              type="request-group"
+              sx={{
+                position: "absolute",
+                top: 12,
+                right: 12,
+              }}
+            />
+          </RequestGroupImages>
           {/* <Paper elevation={0} sx={{ p: 0, overflow: 'hidden', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <CardMedia component="img" image={mainImage} alt="main" sx={{ width: '100%', height: { xs: 240, md: 460 }, objectFit: 'cover' }} />
             {restImages.length > 0 && (

@@ -13,11 +13,10 @@ import {
   Alert,
   AlertTitle,
 } from "@mui/material";
+import { useState } from "react";
+import ConnectedLikeButton from "@/components/floating-like-button/connected-like-button";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import { useState } from "react";
-import FloatingLikeButton from "@/components/floating-like-button";
-
 
 interface RequestGroupCardProps {
   requestGroup: RequestGroup;
@@ -69,7 +68,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         />
 
         {/* Floating Like button */}
-        <FloatingLikeButton
+        <ConnectedLikeButton
           group={requestGroup}
           type="request-group"
           sx={{

@@ -17,6 +17,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchActiveGroups } from "@/lib/groups";
+import ConnectedLikeButton from "@/components/floating-like-button/connected-like-button";
 
 export default async function ActiveGroupDetail({ params }: { params: { id: string }; }) {
   const { id } = params;
@@ -76,7 +77,17 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
       >
         {/* Media + Description */}
         <Box>
-          <RequestGroupImages images={ag.images}></RequestGroupImages>
+          <RequestGroupImages images={ag.images}>
+            <ConnectedLikeButton
+              group={ag}
+              type="active-group"
+              sx={{
+                position: "absolute",
+                top: 12,
+                right: 12,
+              }}
+            />
+          </RequestGroupImages>
 
           <Paper
             elevation={0}
