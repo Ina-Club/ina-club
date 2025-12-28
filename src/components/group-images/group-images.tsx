@@ -8,7 +8,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export default function RequestGroupImages({ images, children }: Props) {
+export default function GroupImages({ images, children }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const mainImage = images[selectedIndex];
   const hasMultiple = images.length > 1;

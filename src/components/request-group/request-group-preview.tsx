@@ -7,7 +7,7 @@ import {
   Button,
 } from "@mui/material";
 import { GroupStatus } from "lib/types/status";
-import RequestGroupImages from "./request-group-images";
+import GroupImages from "@/components/group-images/group-images";
 import UserAvatar from "@/components/user-avatar";
 import FloatingLikeButton from "@/components/floating-like-button";
 
@@ -57,7 +57,7 @@ export default function RequestGroupPreview({
       </Box>
 
       {/* מדיה עם אפשרות בחירה */}
-      <RequestGroupImages images={images}>
+      <GroupImages images={images}>
         <FloatingLikeButton
           sx={{
             position: "absolute",
@@ -66,7 +66,7 @@ export default function RequestGroupPreview({
           }}
         />
 
-      </RequestGroupImages>
+      </GroupImages>
       {/* תיאור */}
       <Paper
         elevation={0}

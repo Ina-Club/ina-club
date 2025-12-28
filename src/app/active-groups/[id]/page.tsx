@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
-import RequestGroupImages from "@/components/request-group/request-group-images";
+import GroupImages from "@/components/group-images/group-images";
 import NotFound from "app/not-found";
 import GroupMembershipButton from "@/components/group-membership-button";
 import UserAvatar from "@/components/user-avatar";
@@ -77,7 +77,7 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
       >
         {/* Media + Description */}
         <Box>
-          <RequestGroupImages images={ag.images}>
+          <GroupImages images={ag.images}>
             <GenericEntityLikeButton
               entity={ag}
               type="active-group"
@@ -87,7 +87,7 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
                 right: 12,
               }}
             />
-          </RequestGroupImages>
+          </GroupImages>
 
           <Paper
             elevation={0}

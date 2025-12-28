@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import RequestGroupCard from "@/components/card/request-group-card";
 import { GroupStatus } from "lib/types/status";
-import RequestGroupImages from "@/components/request-group/request-group-images";
+import GroupImages from "@/components/group-images/group-images";
 import NotFound from "app/not-found";
 import GroupMembershipButton from "@/components/group-membership-button";
 import UserAvatar from "@/components/user-avatar";
@@ -76,7 +76,7 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
       >
         {/* מדיה + תיאור */}
         <Box>
-          <RequestGroupImages images={rg.images}>
+          <GroupImages images={rg.images}>
             <GenericEntityLikeButton
               entity={rg}
               type="request-group"
@@ -86,7 +86,7 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
                 right: 12,
               }}
             />
-          </RequestGroupImages>
+          </GroupImages>
           {/* <Paper elevation={0} sx={{ p: 0, overflow: 'hidden', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <CardMedia component="img" image={mainImage} alt="main" sx={{ width: '100%', height: { xs: 240, md: 460 }, objectFit: 'cover' }} />
             {restImages.length > 0 && (
