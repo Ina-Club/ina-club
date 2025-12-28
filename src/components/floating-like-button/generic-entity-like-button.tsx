@@ -6,13 +6,13 @@ import { useFavorites } from "@/contexts/favorites-context";
 import { GroupStatus } from "@/lib/types/status";
 import FloatingLikeButton from "./index";
 
-interface ConnectedLikeButtonProps {
-    group: ActiveGroup | RequestGroup;
+interface GenericEntityLikeButtonProps {
+    entity: ActiveGroup | RequestGroup;
     type: "request-group" | "active-group";
     sx?: SxProps<Theme>;
 }
 
-export default function ConnectedLikeButton({ group, type, sx }: ConnectedLikeButtonProps) {
+export default function GenericEntityLikeButton({ entity, type, sx }: GenericEntityLikeButtonProps) {
     const {
         isRequestGroupLiked,
         isActiveGroupLiked,
@@ -21,16 +21,16 @@ export default function ConnectedLikeButton({ group, type, sx }: ConnectedLikeBu
     } = useFavorites();
 
     const isLiked = type === "request-group"
-        ? isRequestGroupLiked(group.id)
-        : isActiveGroupLiked(group.id);
+        ? isRequestGroupLiked(entity.id)
+        : isActiveGroupLiked(entity.id);
 
     const handleClick = (e: React.MouseEvent) => {
-        if (group.status !== GroupStatus.OPEN) return;
+        if (entity.status !== GroupStatus.OPEN) return;
 
         if (type === "request-group") {
-            toggleRequestGroupLike(group as RequestGroup);
+            toggleRequestGroupLike(entity as RequestGroup);
         } else {
-            toggleActiveGroupLike(group as ActiveGroup);
+            toggleActiveGroupLike(entity as ActiveGroup);
         }
     };
 

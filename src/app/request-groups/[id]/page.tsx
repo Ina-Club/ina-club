@@ -16,7 +16,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { checkUserIsRequestGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchRequestGroups } from "@/lib/groups";
-import ConnectedLikeButton from "@/components/floating-like-button/connected-like-button";
+import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
 
 export default async function RequestGroupDetail({ params, }: { params: { id: string }; }) {
   const { id } = params;
@@ -77,8 +77,8 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
         {/* מדיה + תיאור */}
         <Box>
           <RequestGroupImages images={rg.images}>
-            <ConnectedLikeButton
-              group={rg}
+            <GenericEntityLikeButton
+              entity={rg}
               type="request-group"
               sx={{
                 position: "absolute",

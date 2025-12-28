@@ -14,7 +14,7 @@ import {
   AlertTitle,
 } from "@mui/material";
 import { useState } from "react";
-import ConnectedLikeButton from "@/components/floating-like-button/connected-like-button";
+import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 
@@ -68,8 +68,8 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         />
 
         {/* Floating Like button */}
-        <ConnectedLikeButton
-          group={requestGroup}
+        <GenericEntityLikeButton
+          entity={requestGroup}
           type="request-group"
           sx={{
             position: "absolute",
