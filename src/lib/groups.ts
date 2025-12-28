@@ -8,6 +8,7 @@ export const fetchRequestGroups = async (whereData: object, take?: number) => {
             id: true,
             title: true,
             status: true,
+            description: true,
             category: { select: { name: true } },
             participants: {
                 select: {
@@ -33,6 +34,7 @@ export const fetchRequestGroups = async (whereData: object, take?: number) => {
         id: r.id,
         title: r.title,
         status: r.status,
+        description: r.description,
         category: r.category?.name ?? "",
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
@@ -53,6 +55,7 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
             id: true,
             title: true,
             status: true,
+            description: true,
             category: { select: { name: true } },
             basePrice: true,
             groupPrice: true,
@@ -83,6 +86,7 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
         id: r.id,
         title: r.title,
         status: r.status,
+        description: r.description,
         category: r.category?.name ?? "",
         basePrice: r.basePrice,
         groupPrice: r.groupPrice,
