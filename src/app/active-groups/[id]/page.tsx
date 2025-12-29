@@ -20,6 +20,7 @@ import { fetchActiveGroups } from "@/lib/groups";
 import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
 import { LikeTargetType } from "@/lib/types/like";
 import { fetchGroupLikeCount } from "@/lib/groups";
+import ParticipantsProgress from "@/components/card/active-group-card/participations-progress-bar";
 
 export default async function ActiveGroupDetail({ params }: { params: { id: string }; }) {
   const { id } = params;
@@ -96,13 +97,13 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
             elevation={0}
             sx={{
               mt: 3,
-              p: 3,
+              p: 2,
               border: "1px solid",
               borderColor: "divider",
               borderRadius: 3,
             }}
           >
-            <Typography variant="h6" fontWeight={700} mb={1.5}>
+            <Typography variant="h6" fontWeight={700} mb={1}>
               תיאור
             </Typography>
             <Typography
@@ -112,6 +113,26 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
             >
               {ag.description || "—"}
             </Typography>
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
+              mt: 3,
+              p: 2,
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 3,
+            }}
+          >
+            <Typography variant="h6" fontWeight={700} mb={1}>
+              סטטוס רשומים
+            </Typography>
+            <ParticipantsProgress
+              current={ag.participants.length}
+              min={ag.minParticipants}
+              max={ag.maxParticipants}
+            />
           </Paper>
         </Box>
 
