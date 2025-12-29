@@ -22,7 +22,7 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
   const { id } = params;
   const session = await getServerSession(authOptions);
 
-  const rg = (await fetchRequestGroups({ id }))?.[0] || null;
+  const rg = (await fetchRequestGroups({ id }))?.[0] ?? null;
   if (!rg) {
     return (
       <NotFound />

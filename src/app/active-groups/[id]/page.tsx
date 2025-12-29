@@ -23,7 +23,7 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
   const { id } = params;
   const session = await getServerSession(authOptions);
 
-  const ag = (await fetchActiveGroups({ id }))?.[0] || null;
+  const ag = (await fetchActiveGroups({ id }))?.[0] ?? null;
   if (!ag) {
     return (
       <NotFound />
