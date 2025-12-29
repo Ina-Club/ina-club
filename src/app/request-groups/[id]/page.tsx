@@ -143,8 +143,8 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
               המשתתפים יעלה, כך פוטנציאל ההנחה גדל.
             </Typography>
             <Divider sx={{ my: 2 }} />
-            <Typography variant="body2" color="text.secondary">
-              סטטוס: {rg.status}
+            <Typography variant="subtitle2">
+              {participantsCount} אנשים כבר אהבו את הבקשה!
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2" fontWeight={700} mb={1}>

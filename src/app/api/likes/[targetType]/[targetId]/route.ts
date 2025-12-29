@@ -4,6 +4,30 @@ import { LikeTargetType } from "@/lib/types/like";
 import { getUserIdBySession } from "@/lib/user";
 import { validateSession } from "@/lib/auth";
 
+export async function GET(
+    request: Request,
+    { params }: { params: { targetType: string; targetId: string } }
+) {
+    const { targetType: typeParam, targetId } = params;
+    let targetType: LikeTargetType;
+
+    if (typeParam === "request-groups") targetType = LikeTargetType.REQUEST_GROUP;
+    else if (typeParam === "active-groups") targetType = LikeTargetType.ACTIVE_GROUP;
+    else return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+
+    try {
+        const likes = await prisma.like.findMany({
+            select: { id: true },
+            where: { targetType, targetId },
+        });
+        return NextResponse.json({ likes: likes.length });
+    } catch (error: any) {
+        console.error("Failed to get likes:", error);
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    }
+}
+
+
 export async function PUT(
     request: Request,
     { params }: { params: { targetType: string; targetId: string } }
