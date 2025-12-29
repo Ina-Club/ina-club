@@ -10,16 +10,13 @@ import {
   Typography,
   Chip,
   Box,
-  IconButton,
   Alert,
   AlertTitle,
 } from "@mui/material";
-import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import { useState } from "react";
-import { useFavorites } from "@/contexts/favorites-context";
+import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 
 interface RequestGroupCardProps {
   requestGroup: RequestGroup;
@@ -29,8 +26,7 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
   const router = useRouter();
   const goToRequestGroup = () => router.push(`/request-groups/${requestGroup.id}`);
   const [currentImage, setCurrentImage] = useState(0);
-  const { isRequestGroupLiked, toggleRequestGroupLike } = useFavorites();
-  const liked = isRequestGroupLiked(requestGroup.id);
+
   const isOpen = requestGroup.status === GroupStatus.OPEN;
 
   const handleRequestGroupClick = () => {
@@ -72,27 +68,15 @@ const RequestGroupCard: React.FC<RequestGroupCardProps> = ({ requestGroup }) => 
         />
 
         {/* Floating Like button */}
-        <IconButton
+        <GenericEntityLikeButton
+          entity={requestGroup}
+          type="request-group"
           sx={{
             position: "absolute",
             top: 12,
             right: 12,
-            bgcolor: "white",
-            boxShadow: 2,
-            "&:hover": { bgcolor: "grey.100" },
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            // TODO: handle error
-            toggleRequestGroupLike(requestGroup);
-          }}
-        >
-          {liked ? (
-            <FavoriteIcon sx={{ color: "red" }} />
-          ) : (
-            <FavoriteBorderIcon sx={{ color: "grey.600" }} />
-          )}
-        </IconButton>
+        />
 
         {/* Category Chip */}
         <Chip

@@ -1,14 +1,13 @@
 "use client";
 
-import { Box, Card, CardContent, CardMedia, Chip, IconButton, Typography } from "@mui/material";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
+import { Box, Card, CardContent, CardMedia, Chip, Typography } from "@mui/material";
+import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
 import { ActiveGroup } from "lib/dal";
 import { useState } from "react";
 import ParticipantsProgress from "./participations-progress-bar";
 import Countdown from "./countdown";
 import { useRouter } from "next/navigation";
-import { useFavorites } from "@/contexts/favorites-context";
+
 
 interface ActiveGroupCardProps {
   activeGroup: ActiveGroup;
@@ -17,8 +16,7 @@ interface ActiveGroupCardProps {
 const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
   const [currentImage, setCurrentImage] = useState(0);
   const router = useRouter();
-  const { isActiveGroupLiked, toggleActiveGroupLike } = useFavorites();
-  const liked = isActiveGroupLiked(activeGroup.id);
+
 
   const goToActiveGroup = () => {
     router.push(`/active-groups/${activeGroup.id}`);
@@ -60,26 +58,15 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         />
 
         {/* Floating Like button */}
-        <IconButton
+        <GenericEntityLikeButton
+          entity={activeGroup}
+          type="active-group"
           sx={{
             position: "absolute",
             top: 12,
             right: 12,
-            bgcolor: "white",
-            boxShadow: 2,
-            "&:hover": { bgcolor: "grey.100" },
           }}
-          onClick={(e) => {
-            e.stopPropagation(); // כדי שלחיצה על הלב לא תפעיל ניווט
-            toggleActiveGroupLike(activeGroup);
-          }}
-        >
-          {liked ? (
-            <FavoriteIcon sx={{ color: "red" }} />
-          ) : (
-            <FavoriteBorderIcon sx={{ color: "grey.600" }} />
-          )}
-        </IconButton>
+        />
 
         {/* Category Chip */}
         <Chip

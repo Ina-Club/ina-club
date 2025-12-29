@@ -1,22 +1,20 @@
 import { ActiveGroup, RequestGroup } from "./dal";
 import { prisma } from "./prisma";
 
-export const fetchRequestGroups = async (whereData: object) => {
+export const fetchRequestGroups = async (whereData: object, take?: number) => {
     const where: any = { ...whereData };
     const rows = await prisma.requestGroup.findMany({
         select: {
             id: true,
             title: true,
             status: true,
+            description: true,
             category: { select: { name: true } },
             participants: {
-                //TODO: Fetch length instead
                 select: {
                     user: {
                         select: {
-                            // id: true,
                             name: true,
-                            // email: true,
                             profilePicture: { select: { url: true } },
                         },
                     },
@@ -28,20 +26,20 @@ export const fetchRequestGroups = async (whereData: object) => {
             },
             activeGroups: { select: { id: true } },
         },
-        where
+        where,
+        take
     });
 
     const data = rows.map((r) => ({
         id: r.id,
         title: r.title,
         status: r.status,
+        description: r.description,
         category: r.category?.name ?? "",
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
-            // id: p.user.id,
             firstName: p.user.name ? p.user.name.split(" ")[0] : "",
             image: p.user.profilePicture?.url ?? "",
-            // mail: p.user.email,
         })),
         // TODO: Remove
         // openedGroups: r.activeGroups.map((ag) => ({ id: ag.id })),
@@ -50,24 +48,23 @@ export const fetchRequestGroups = async (whereData: object) => {
     return data as RequestGroup[];
 }
 
-export const fetchActiveGroups = async (whereData: object) => {
+export const fetchActiveGroups = async (whereData: object, take?: number) => {
     const where: any = { ...whereData };
     const rows = await prisma.activeGroup.findMany({
         select: {
             id: true,
             title: true,
             status: true,
+            description: true,
             category: { select: { name: true } },
             basePrice: true,
             groupPrice: true,
             deadline: true,
-            participants: { //TODO: Fetch length instead
+            participants: {
                 select: {
                     user: {
                         select: {
-                            // id: true,
                             name: true,
-                            // email: true,
                             profilePicture: { select: { url: true } },
                         },
                     },
@@ -81,23 +78,23 @@ export const fetchActiveGroups = async (whereData: object) => {
             },
         },
         orderBy: { createdAt: "desc" },
-        where
+        where,
+        take
     });
 
     const data = rows.map((r) => ({
         id: r.id,
         title: r.title,
         status: r.status,
+        description: r.description,
         category: r.category?.name ?? "",
         basePrice: r.basePrice,
         groupPrice: r.groupPrice,
         deadline: r.deadline,
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
-            // id: p.user.id,
             firstName: p.user.name ? p.user.name.split(" ")[0] : "",
             image: p.user.profilePicture?.url ?? "",
-            // mail: p.user.email,
         })),
         minParticipants: r.minParticipants,
         maxParticipants: r.maxParticipants

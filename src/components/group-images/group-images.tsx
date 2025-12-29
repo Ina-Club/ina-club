@@ -5,9 +5,10 @@ import { ArrowBack, ArrowForward } from "@mui/icons-material";
 
 interface Props {
   images: string[];
+  children?: React.ReactNode;
 }
 
-export default function RequestGroupImages({ images }: Props) {
+export default function GroupImages({ images, children }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const mainImage = images[selectedIndex];
   const hasMultiple = images.length > 1;
@@ -36,6 +37,7 @@ export default function RequestGroupImages({ images }: Props) {
         alt="main"
         sx={{ width: "100%", height: 300, objectFit: "cover" }}
       />
+      {children}
 
       {hasMultiple && (
         <>

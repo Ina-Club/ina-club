@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Box,
   Typography,
@@ -6,13 +5,11 @@ import {
   Paper,
   Avatar,
   Button,
-  CardMedia,
-  IconButton,
 } from "@mui/material";
 import { GroupStatus } from "lib/types/status";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
-import RequestGroupImages from "./request-group-images";
+import GroupImages from "@/components/group-images/group-images";
 import UserAvatar from "@/components/user-avatar";
+import FloatingLikeButton from "@/components/floating-like-button";
 
 interface PreviewProps {
   title: string;
@@ -39,7 +36,6 @@ export default function RequestGroupPreview({
   participantAvatars = [],
   status = GroupStatus.OPEN,
 }: PreviewProps) {
-
   return (
     <Box sx={{ width: "100%" }}>
       {/* כותרת וקטגוריה */}
@@ -61,7 +57,16 @@ export default function RequestGroupPreview({
       </Box>
 
       {/* מדיה עם אפשרות בחירה */}
-      <RequestGroupImages images={images} />
+      <GroupImages images={images}>
+        <FloatingLikeButton
+          sx={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+          }}
+        />
+
+      </GroupImages>
       {/* תיאור */}
       <Paper
         elevation={0}
