@@ -18,6 +18,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchActiveGroups } from "@/lib/groups";
 import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
+import { LikeTargetType } from "@/lib/types/like";
+import { fetchGroupLikeCount } from "@/lib/groups";
 
 export default async function ActiveGroupDetail({ params }: { params: { id: string }; }) {
   const { id } = params;
@@ -38,6 +40,7 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
   const viewerEmail = session?.user?.email;
   const alreadyJoined = !!viewerEmail ? await checkUserIsActiveGroupParticipant(viewerEmail, ag.id) : false;
   const similarGroups = await fetchActiveGroups({ category: { name: ag.category ?? "" }, NOT: { id } }, 3);
+  const likeCount = await fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP);
 
   return (
     <Box
@@ -131,11 +134,12 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
             <Typography variant="body2" color="text.secondary">
               מחיר יחידה: ₪{ag.basePrice} <br />
               מחיר קבוצתי: ₪{ag.groupPrice} <br />
-              סטטוס: {ag.status}
             </Typography>
-
             <Divider sx={{ my: 2 }} />
-
+            <Typography variant="subtitle2">
+              {likeCount} אנשים כבר אהבו את הבקשה!
+            </Typography>
+            <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2" fontWeight={700} mb={1}>
               משתתפים
             </Typography>

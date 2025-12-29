@@ -1,5 +1,6 @@
 import { ActiveGroup, RequestGroup } from "./dal";
 import { prisma } from "./prisma";
+import { LikeTargetType } from "./types/like";
 
 export const fetchRequestGroups = async (whereData: object, take?: number) => {
     const where: any = { ...whereData };
@@ -106,4 +107,14 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
 export const filterGroupsByIds = (groups: RequestGroup[] | ActiveGroup[], groupIds: string[]) => {
     const groupIdsSet: Set<string> = new Set(groupIds);
     return groups.filter((g) => groupIdsSet.has(g.id));
+}
+
+export const fetchGroupLikeCount = async (targetId: string, targetType: LikeTargetType) => {
+    const count = await prisma.like.count({
+        where: {
+            targetType,
+            targetId,
+        },
+    });
+    return count;
 }

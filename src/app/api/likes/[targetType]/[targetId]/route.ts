@@ -42,21 +42,20 @@ export async function PUT(
 
     if (typeParam === "request-groups") targetType = LikeTargetType.REQUEST_GROUP;
     else if (typeParam === "active-groups") targetType = LikeTargetType.ACTIVE_GROUP;
-    else return new NextResponse("Invalid type", { status: 400 });
+    else return NextResponse.json({ error: "Invalid type" }, { status: 400 });
 
     try {
         // Idempotent - this ensures like exists and eliminates multiple upserts attempting to create the same like
         await prisma.like.create({
             data: { userId, targetType, targetId },
         });
-        return new NextResponse("OK");
+        return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
         if (error.code === "P2002") {
-            // Already liked — success
-            return new NextResponse("OK");
+            return NextResponse.json({ success: true }, { status: 200 });
         }
         console.error("Failed to add like:", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
 
@@ -74,7 +73,7 @@ export async function DELETE(
 
     if (typeParam === "request-groups") targetType = LikeTargetType.REQUEST_GROUP;
     else if (typeParam === "active-groups") targetType = LikeTargetType.ACTIVE_GROUP;
-    else return new NextResponse("Invalid type", { status: 400 });
+    else return NextResponse.json({ error: "Invalid type" }, { status: 400 });
 
     try {
         // Idempotent delete
@@ -85,9 +84,9 @@ export async function DELETE(
                 targetId,
             },
         });
-        return new NextResponse("OK");
+        return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
         console.error("Failed to remove like:", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
