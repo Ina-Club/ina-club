@@ -137,7 +137,7 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2">
-              {likeCount} אנשים כבר אהבו את הבקשה!
+              {likeCount} אנשים כבר אהבו את הקבוצה!
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2" fontWeight={700} mb={1}>
