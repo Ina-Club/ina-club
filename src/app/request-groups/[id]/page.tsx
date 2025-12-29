@@ -17,6 +17,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { checkUserIsRequestGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchRequestGroups } from "@/lib/groups";
 import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
+import { LikeTargetType } from "@/lib/types/like";
+import { fetchGroupLikeCount } from "@/lib/groups";
 
 export default async function RequestGroupDetail({ params, }: { params: { id: string }; }) {
   const { id } = params;
@@ -37,6 +39,7 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
   const viewerEmail = session?.user?.email;
   const alreadyJoined = !!viewerEmail ? await checkUserIsRequestGroupParticipant(viewerEmail, rg.id) : false;
   const similarGroups = await fetchRequestGroups({ category: { name: rg.category ?? "" }, NOT: { id } }, 3);
+  const likeCount: number = await fetchGroupLikeCount(rg.id, LikeTargetType.REQUEST_GROUP);
 
   return (
     <Box
@@ -143,8 +146,8 @@ export default async function RequestGroupDetail({ params, }: { params: { id: st
               המשתתפים יעלה, כך פוטנציאל ההנחה גדל.
             </Typography>
             <Divider sx={{ my: 2 }} />
-            <Typography variant="body2" color="text.secondary">
-              סטטוס: {rg.status}
+            <Typography variant="subtitle2">
+              {likeCount} אנשים כבר אהבו את הבקשה!
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2" fontWeight={700} mb={1}>
