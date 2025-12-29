@@ -9,9 +9,10 @@ interface FloatingLikeButtonProps {
     isLiked?: boolean;
     onClick?: (e: React.MouseEvent) => void;
     sx?: SxProps<Theme>;
+    disabled?: boolean;
 }
 
-export default function FloatingLikeButton({ isLiked, onClick, sx }: FloatingLikeButtonProps) {
+export default function FloatingLikeButton({ isLiked, onClick, sx, disabled }: FloatingLikeButtonProps) {
     const [localLiked, setLocalLiked] = useState<boolean>(!!isLiked);
 
     useEffect(() => {
@@ -23,6 +24,7 @@ export default function FloatingLikeButton({ isLiked, onClick, sx }: FloatingLik
         if (onClick) {
             onClick(e);
         }
+        if (disabled) return;
 
         // If uncontrolled (isLiked is undefined), we manage state. 
         // If controlled, the parent should update isLiked, triggering the useEffect above.
