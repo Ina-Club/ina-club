@@ -1,53 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
-import { getPaymentProvider } from "@/lib/payments/factory";
-import { PaymentServiceProvider } from "@/lib/payments/PaymentServiceProvider";
 import { PaymentTokenStatus } from "@/lib/types/status";
+import { chargeParticipantToken, releaseParticipantToken } from "@/lib/services/activeGroups";
 
-async function chargeUserToken(
-    tk: { id: string; userId: string; pspToken: string; agreedFee: number },
-    provider: PaymentServiceProvider
-) {
-    try {
-        const res = await provider.chargeToken(tk.pspToken, tk.agreedFee, "ILS");
-        if (res.success) {
-            await prisma.paymentToken.update({
-                where: { id: tk.id },
-                data: { status: PaymentTokenStatus.CONSUMED, consumedAt: new Date() },
-            });
-            return { userId: tk.userId, action: "charge", success: true };
-        } else {
-            console.error(`Charge failed for user ${tk.userId}`);
-            return { userId: tk.userId, action: "charge", success: false };
-        }
-    } catch (err: any) {
-        console.error(`Charge failed for user ${tk.userId}: ${err.message}`);
-        return { userId: tk.userId, action: "charge", success: false, error: err.message };
-    }
-}
-
-async function releaseUserToken(
-    tk: { id: string; userId: string; pspToken: string },
-    provider: PaymentServiceProvider
-) {
-    try {
-        const success = await provider.releaseToken(tk.pspToken);
-        if (success) {
-            await prisma.paymentToken.update({
-                where: { id: tk.id },
-                data: { status: PaymentTokenStatus.RELEASED },
-            });
-            return { userId: tk.userId, action: "release", success: true };
-        } else {
-            console.error(`Release failed for user ${tk.userId}`);
-            return { userId: tk.userId, action: "release", success: false };
-        }
-    } catch (err: any) {
-        console.error(`Release failed for user ${tk.userId}: ${err.message}`);
-        return { userId: tk.userId, action: "release", success: false, error: err.message };
-    }
-}
 
 /**
  * Endpoint for B2B. Receives {"noShowUserIds": ["uuid-1", "uuid-2"]}
@@ -80,12 +36,21 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         const releasePromises = [];
 
         for (const tk of tokens) {
-            const provider = getPaymentProvider(tk.psp.name);
-
             if (noShowUserIds.includes(tk.userId)) {
-                chargePromises.push(chargeUserToken(tk, provider));
+                chargePromises.push(chargeParticipantToken({
+                    id: tk.id,
+                    userId: tk.userId,
+                    pspToken: tk.pspToken,
+                    pspName: tk.psp.name,
+                    agreedFee: tk.agreedFee
+                }));
             } else {
-                releasePromises.push(releaseUserToken(tk, provider));
+                releasePromises.push(releaseParticipantToken({
+                    id: tk.id,
+                    userId: tk.userId,
+                    pspToken: tk.pspToken,
+                    pspName: tk.psp.name
+                }));
             }
         }
 

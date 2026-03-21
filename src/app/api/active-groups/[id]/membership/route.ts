@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
-import { getPaymentProvider } from "@/lib/payments/factory";
 import { getPenaltyFeeAmount } from "@/lib/payments/config";
 import { PaymentTokenStatus } from "@/lib/types/status";
+import { chargeParticipantToken } from "@/lib/services/activeGroups";
 
 async function processJoin(groupId: string, userId: string, req: Request) {
     const body = await req.json();
@@ -63,19 +63,15 @@ async function processLeave(groupId: string, userId: string) {
 
     // Trigger Penalty Charge if ACTIVE
     if (tokenRecord && tokenRecord.status === PaymentTokenStatus.ACTIVE) {
-        const provider = getPaymentProvider(tokenRecord.psp.name);
-        const chargeResult = await provider.chargeToken(
-            tokenRecord.pspToken,
-            tokenRecord.agreedFee,
-            "ILS"
-        );
+        const chargeResult = await chargeParticipantToken({
+            id: tokenRecord.id,
+            userId: tokenRecord.userId,
+            pspToken: tokenRecord.pspToken,
+            pspName: tokenRecord.psp.name,
+            agreedFee: tokenRecord.agreedFee
+        });
 
-        if (chargeResult.success) {
-            await prisma.paymentToken.update({
-                where: { id: tokenRecord.id },
-                data: { status: PaymentTokenStatus.CONSUMED, consumedAt: new Date() },
-            });
-        } else {
+        if (!chargeResult.success) {
             console.error("Failed to charge penalty for canceling.", chargeResult.error);
             return NextResponse.json({ error: "שגיאה בביטול ההרשמה" }, { status: 500 });
         }
