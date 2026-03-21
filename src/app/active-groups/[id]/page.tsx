@@ -200,7 +200,6 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               id={id}
               fullWidth
               isJoined={alreadyJoined}
-              registrationTerms={ag.registrationTerms}
             />
           </Paper>
         </Box>

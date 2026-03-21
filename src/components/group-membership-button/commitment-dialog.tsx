@@ -15,6 +15,11 @@ import {
   CircularProgress,
 } from "@mui/material";
 
+const REGISTRATION_TERMS = `בשמירת פרטי אשראי אלה, אנו מבטיחים כי המשתתפים מחויבים לתהליך במעמד השלמת הרכישה על ידי העסק.
+כרטיסך יחויב בדמי ביטול על סך {penaltyAmount} ש"ח בלבד באחד משני המקרים הבאים:
+• במידה ותבטל את הרשמתך לאחר אישור הקבוצה.
+• במידה ולא תממש את הקנייה במועד שנקבע.`;
+
 interface CommitmentDialogProps {
   open: boolean;
   onClose: () => void;
@@ -100,16 +105,15 @@ export default function CommitmentDialog({
           </Box>
         ) : step === 1 ? (
           <Box>
-            <Typography variant="body1" paragraph>
-              על מנת להשתתף בקבוצה זו, עליך להסכים לתנאי ההתחייבות.
+            <Typography variant="body1">
+              על מנת להשתתף בקבוצה זו, עליך להסכים לתנאים הבאים:
             </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              בשמרת פרטי אשראי אלה, אנו מבטיחים כי המשתתפים מחויבים לתהליך במעמד השלמת הרכישה על ידי העסק.
-              כרטיסך יחויב ב<strong>דמי ביטול על סך {penaltyAmount} ש"ח</strong> בלבד באחד משני המקרים הבאים:
-            </Typography>
-            <Typography component="ul" variant="body2" color="text.secondary" sx={{ pl: 2 }}>
-              <li>במידה ותבטל את הרשמתך לאחר אישור הקבוצה.</li>
-              <li>במידה ולא תממש את הקנייה במועד שנקבע.</li>
+            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-line", maxHeight: 300, overflowY: "auto", p: 1, bgcolor: "grey.50", borderRadius: 1 }}>
+              {REGISTRATION_TERMS.split('{penaltyAmount} ש"ח')[0]}
+              <strong style={{ textDecoration: "underline" }}>
+                {penaltyAmount} ש"ח
+              </strong>
+              {REGISTRATION_TERMS.split('{penaltyAmount} ש"ח')[1]}
             </Typography>
 
             <Box mt={3}>
@@ -120,7 +124,7 @@ export default function CommitmentDialog({
                     onChange={(e) => setAgreed(e.target.checked)}
                   />
                 }
-                label="קראתי ואני מסכים לתנאי ההתחייבות ולמדיניות החיוב."
+                label="קראתי ואני מסכים/ה לתנאי ההרשמה, לתנאי ההתחייבות ולמדיניות החיוב."
               />
             </Box>
           </Box>
