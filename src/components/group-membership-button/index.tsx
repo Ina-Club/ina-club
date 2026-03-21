@@ -95,7 +95,10 @@ export default function GroupMembershipButton({
       <Dialog open={leaveDialogOpen} onClose={() => setLeaveDialogOpen(false)}>
         <DialogTitle>האם אתה בטוח שברצונך לבטל את ההרשמה?</DialogTitle>
         <DialogContent>
-          <Typography variant="body2">פעולה זו תסיר אותך מרשימת המעוניינים ותמנע ממך לקבל עדכונים על הבקשה או הקבוצה.</Typography>
+          <Typography variant="body2" gutterBottom>פעולה זו תסיר אותך מרשימת המעוניינים ותמנע ממך לקבל עדכונים על הבקשה או הקבוצה.</Typography>
+          <Typography variant="body2" color="error" fontWeight="bold" sx={{ mt: 1 }}>
+            שים לב: ביטול ההרשמה לאחר אישור הקבוצה יגרור חיוב של דמי הביטול כפי שהוסכם (מימוש התחייבות).
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setLeaveDialogOpen(false)}>ביטול</Button>
