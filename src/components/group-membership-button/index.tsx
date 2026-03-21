@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import CommitmentDialog from "./commitment-dialog";
 
 
 interface GroupMembershipButtonProps {
@@ -28,16 +29,22 @@ export default function GroupMembershipButton({
   const [loading, setLoading] = useState(false);
   const [hasJoined, setHasJoined] = useState(isJoined);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [commitmentDialogOpen, setCommitmentDialogOpen] = useState(false);
 
   useEffect(() => {
     setHasJoined(isJoined);
   }, [isJoined]);
 
-  const changeMembershipState = async () => {
+  const changeMembershipState = async (cardNumber?: string, expiry?: string, cvv?: string) => {
     // Check if user is authenticated only when joining
     if (!hasJoined && (status === "unauthenticated" || !session)) {
       const currentUrl = encodeURIComponent(window.location.href);
       router.push(`/auth/signin?message=login_required&callbackUrl=${currentUrl}`);
+      return;
+    }
+
+    if (!hasJoined && type === "active-group" && (!cardNumber || !expiry || !cvv)) {
+      setCommitmentDialogOpen(true);
       return;
     }
 
@@ -49,8 +56,12 @@ export default function GroupMembershipButton({
           ? `/api/request-groups/${id}/membership`
           : `/api/active-groups/${id}/membership`;
 
+      const payload = hasJoined ? undefined : { cardNumber, expiry, cvv };
+
       const response = await fetch(endpoint, {
         method: hasJoined ? "DELETE" : "POST",
+        headers: hasJoined ? undefined : { "Content-Type": "application/json" },
+        body: payload ? JSON.stringify(payload) : undefined,
       });
 
       if (!response.ok) {
@@ -82,14 +93,21 @@ export default function GroupMembershipButton({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setLeaveDialogOpen(false)}>ביטול</Button>
-          <Button onClick={changeMembershipState}>אישור</Button>
+          <Button onClick={() => changeMembershipState()}>אישור</Button>
         </DialogActions>
       </Dialog>
+      <CommitmentDialog
+        open={commitmentDialogOpen}
+        onClose={() => setCommitmentDialogOpen(false)}
+        onSubmitPaymentDetails={async (cardNumber, expiry, cvv) => {
+          await changeMembershipState(cardNumber, expiry, cvv);
+        }}
+      />
       <Button
         variant="contained"
         color={hasJoined ? "error" : "primary"}
         fullWidth={fullWidth}
-        onClick={hasJoined ? () => setLeaveDialogOpen(true) : changeMembershipState}
+        onClick={hasJoined ? () => setLeaveDialogOpen(true) : () => changeMembershipState()}
         disabled={loading}
       >
         {loading ? (
