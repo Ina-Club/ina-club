@@ -3,17 +3,24 @@ import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
 import { getUserIdBySession } from "@/lib/user";
 import { getPaymentProvider } from "@/lib/payments/factory";
+import { getPenaltyFeeAmount } from "@/lib/payments/config";
 
 async function processJoin(groupId: string, userId: string, req?: Request) {
     if (!req) throw new Error("Request needed to parse JSON body");
 
     const body = await req.json();
-    const { pspToken, pspName } = body;
+    const { cardNumber, expiry, cvv } = body;
 
-    if (!pspToken || !pspName) {
+    // In a real application, you'd never send raw CC to your own server (PCI DSS).
+    if (!cardNumber || !expiry || !cvv) {
         console.error("Commitment payment details required to join active group");
         return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
     }
+
+    // Since this is an MVP mock, we generate the mock token here 
+    // instead of expecting the frontend to know about the PSP.
+    const pspName = "MOCK_PSP";
+    const pspToken = `tok_test_${Math.random().toString(36).substring(7)}`;
 
     const providerRecord = await prisma.paymentServiceProvider.findUnique({
         where: { name: pspName },
@@ -40,7 +47,7 @@ async function processJoin(groupId: string, userId: string, req?: Request) {
                 activeGroupId: groupId,
                 pspId: providerRecord.id,
                 pspToken,
-                agreedFee: parseFloat(process.env.PENALTY_FEE_AMOUNT || "100"),
+                agreedFee: getPenaltyFeeAmount(),
             },
         });
     });
