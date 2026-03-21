@@ -171,8 +171,6 @@ model PaymentToken {
   
   createdAt         DateTime               @default(now())
   consumedAt        DateTime?
-  
-  @@unique([userId, activeGroupId])
 }
 
 enum GroupStatus {
