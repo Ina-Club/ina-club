@@ -7,7 +7,7 @@ import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogT
 
 
 interface GroupMembershipButtonProps {
-  type: "request-group" | "active-group";
+  type: "active-group";
   id: string;
   onJoinSuccess?: () => void;
   fullWidth?: boolean;

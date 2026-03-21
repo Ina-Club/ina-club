@@ -77,7 +77,7 @@ type NavItem = NavLinkItem | NavDropdownItem;
 
 const NAV_ITEMS: (NavLinkItem | NavDropdownItem)[] = [
   { title: "קבוצות פעילות", href: "/active-groups", icon: GroupIcon },
-  { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
+  { title: "בקשות", href: "/requests", icon: ShoppingBagIcon },
   { title: "חיפוש חכם", href: "/smart-search", icon: SearchIcon },
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
   {
