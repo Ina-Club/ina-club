@@ -1,6 +1,7 @@
 import { ActiveGroup } from "./dal";
 import { prisma } from "./prisma";
 import { LikeTargetType } from "./types/like";
+import { getClerkPublicUsersMap } from "./clerk-users";
 
 export const fetchActiveGroups = async (whereData: object, take?: number) => {
     const where: any = { ...whereData };
@@ -32,6 +33,9 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
         take
     });
 
+    const allParticipantIds = rows.flatMap((row) => row.participants.map((p) => p.userId));
+    const usersMap = await getClerkPublicUsersMap(allParticipantIds);
+
     const data = rows.map((r) => ({
         id: r.id,
         title: r.title,
@@ -43,8 +47,8 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
         deadline: r.deadline,
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
         participants: r.participants.map((p) => ({
-            firstName: "משתמש",
-            image: "",
+            firstName: usersMap.get(p.userId)?.name.split(" ")[0] ?? "משתמש",
+            image: usersMap.get(p.userId)?.imageUrl ?? "",
         })),
         minParticipants: r.minParticipants,
         maxParticipants: r.maxParticipants,

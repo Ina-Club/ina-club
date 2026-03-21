@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { validateSession } from "@/lib/auth";
 import { auth } from "@clerk/nextjs/server";
 import { LikeTargetType } from "@prisma/client";
+import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 
 export async function GET(req: NextRequest) {
   try {
@@ -50,14 +51,16 @@ export async function GET(req: NextRequest) {
       userLikedSet = new Set(userLikes.map((l) => l.targetId));
     }
 
+    const authorsMap = await getClerkPublicUsersMap(items.map((i) => i.createdById));
+
     const result = items.map((item) => ({
       id: item.id,
       text: item.text,
       targetPrice: item.targetPrice,
       categoryName: item.category?.name,
       createdAt: item.createdAt,
-      authorName: "משתמש",
-      authorAvatar: null,
+      authorName: authorsMap.get(item.createdById)?.name ?? "משתמש",
+      authorAvatar: authorsMap.get(item.createdById)?.imageUrl ?? null,
       likeCount: likeCountMap.get(item.id) ?? 0,
       isLikedByMe: userLikedSet.has(item.id),
     }));

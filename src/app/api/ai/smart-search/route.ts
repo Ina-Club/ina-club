@@ -6,6 +6,7 @@ import { ActiveGroup } from "@/lib/dal";
 import { GroupStatus } from "@/lib/types/status";
 import { prisma } from "@/lib/prisma";
 import { WishItemData } from "@/components/demand-pulse/WishItemCard";
+import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 
 // TODO: Add pagination in the future (if necessary).
 export async function POST(req: Request) {
@@ -30,6 +31,8 @@ export async function POST(req: Request) {
                 createdById: true,
             }
         });
+
+        const authorsMap = await getClerkPublicUsersMap(rawWishItems.map((item) => item.createdById));
         
         const wishItems: WishItemData[] = rawWishItems.map(item => ({
             id: item.id,
@@ -37,8 +40,8 @@ export async function POST(req: Request) {
             targetPrice: item.targetPrice,
             categoryName: item.category?.name,
             createdAt: item.createdAt.toISOString(),
-            authorName: "משתמש",
-            authorAvatar: null,
+            authorName: authorsMap.get(item.createdById)?.name ?? "משתמש",
+            authorAvatar: authorsMap.get(item.createdById)?.imageUrl ?? null,
             likeCount: 0,
             isLikedByMe: false
         }));

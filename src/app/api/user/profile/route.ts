@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession, getClerkUser } from "@/lib/auth";
+import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 
 export async function GET(request: Request) {
   try {
@@ -53,6 +54,11 @@ export async function GET(request: Request) {
       }
     });
 
+    const participantUserIds = memberships.flatMap((m) =>
+      m.activeGroup.participants.map((p) => p.userId)
+    );
+    const participantsMap = await getClerkPublicUsersMap(participantUserIds);
+
     const transformedUser = {
       ...userData,
       enrolledActiveGroups: memberships.map(m => ({
@@ -64,8 +70,8 @@ export async function GET(request: Request) {
         basePrice: m.activeGroup.basePrice,
         groupPrice: m.activeGroup.groupPrice,
         participants: m.activeGroup.participants.map(p => ({
-          name: "משתמש", // We don't have other users' names in local DB anymore
-          image: "",
+          name: participantsMap.get(p.userId)?.name ?? "משתמש",
+          image: participantsMap.get(p.userId)?.imageUrl ?? "",
         })),
         minParticipants: m.activeGroup.minParticipants,
         maxParticipants: m.activeGroup.maxParticipants,

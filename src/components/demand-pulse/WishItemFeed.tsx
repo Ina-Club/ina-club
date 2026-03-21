@@ -5,7 +5,11 @@ import { Box, Grid, Skeleton, Typography } from "@mui/material";
 import WishItemCard, { WishItemData } from "./WishItemCard";
 import WishItemComposer from "./WishItemComposer";
 
-export default function WishItemFeed() {
+interface WishItemFeedProps {
+  showComposer?: boolean;
+}
+
+export default function WishItemFeed({ showComposer = true }: WishItemFeedProps) {
   const [items, setItems] = useState<WishItemData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +43,11 @@ export default function WishItemFeed() {
 
   return (
     <Box>
-      {/* Composer */}
-      <Box sx={{ mb: 2 }}>
-        <WishItemComposer onPosted={fetchItems} />
-      </Box>
+      {showComposer && (
+        <Box sx={{ mb: 2 }}>
+          <WishItemComposer onPosted={fetchItems} />
+        </Box>
+      )}
 
       {/* Feed */}
       {loading ? (

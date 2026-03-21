@@ -1,53 +1,23 @@
-import { Box, Container, Typography } from "@mui/material";
-import dynamic from "next/dynamic";
+import { Box, Container } from "@mui/material";
 import { Metadata } from "next";
 import WishItemFeed from "@/components/demand-pulse/WishItemFeed";
+import { DefaultPageBanner } from "@/components/default-page-banner";
 
 export const metadata: Metadata = {
   title: "בקשות | INA Club",
-  description: "כאן תוכלו לראות מה הקהילה רוצה לרכוש, להוסיף בקשות משלכם ולסמן בלייק בקשות של אחרים.",
+  description: "כאן תוכלו לראות מה הקהילה רוצה לרכוש ולסמן בלייק בקשות של אחרים.",
 };
 
-// Load client component dynamically to keep section SSR-safe
-
-
 export default function RequestsPage() {
+  const headerText = "כל הבקשות";
+  const descriptionText = "גלה מה הקהילה מחפשת לקנות, סמן לייק לבקשות רלוונטיות ועזור לנו לפתוח קבוצות חדשות.";
+
   return (
-    <Box sx={{ py: { xs: 4, md: 8 }, minHeight: "100vh" }}>
-      <Container maxWidth="lg">
-        {/* Page Header */}
-        <Box sx={{ mb: 6 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-            <Typography
-              variant="h3"
-              fontWeight={800}
-              sx={{
-                fontSize: { xs: "2rem", md: "2.5rem" },
-                color: "primary.main",
-                letterSpacing: "-0.02em"
-              }}
-            >
-              לוח בקשות
-            </Typography>
-            <Typography sx={{ fontSize: "2.5rem", lineHeight: 1 }}>📡</Typography>
-          </Box>
+    <>
+      <DefaultPageBanner header={headerText} description={descriptionText} />
 
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            sx={{
-              maxWidth: "600px",
-              lineHeight: 1.6,
-              fontWeight: 400,
-              fontSize: { xs: "1rem", md: "1.1rem" }
-            }}
-          >
-            מה הקהילה רוצה לרכוש הפעם? כשמספיק אנשים מביעים עניין — אנחנו פותחים קבוצת רכישה.
-            הוסיפו בקשה משלכם או סמנו בלייק בקשות שמעניינות אתכם.
-          </Typography>
-        </Box>
-
-        {/* Feed Section */}
+      <Box sx={{ py: { xs: 4, md: 6 }, minHeight: "100vh" }}>
+        <Container maxWidth="lg">
         <Box
           sx={{
             bgcolor: "background.paper",
@@ -59,7 +29,8 @@ export default function RequestsPage() {
         >
           <WishItemFeed />
         </Box>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+    </>
   );
 }

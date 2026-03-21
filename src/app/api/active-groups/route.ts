@@ -3,6 +3,7 @@ import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
 import { validateSession } from "@/lib/auth";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -102,6 +103,9 @@ export async function GET(req: Request) {
       ...(cursor && { cursor: { id: cursor } }),
     });
 
+    const participantIds = rows.flatMap((r) => r.participants.map((p) => p.userId));
+    const usersMap = await getClerkPublicUsersMap(participantIds);
+
     let nextCursor: string | null = null;
 
     if (rows.length > limit) {
@@ -119,8 +123,8 @@ export async function GET(req: Request) {
       deadline: r.deadline,
       images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
       participants: r.participants.map((p) => ({
-        firstName: "משתמש", // No local user profile table after Clerk migration.
-        image: "",
+        firstName: usersMap.get(p.userId)?.name.split(" ")[0] ?? "משתמש",
+        image: usersMap.get(p.userId)?.imageUrl ?? "",
       })),
       minParticipants: r.minParticipants,
       maxParticipants: r.maxParticipants
