@@ -73,14 +73,7 @@ export default function CommitmentDialog({
     setLoading(true);
     try {
       await onSubmitPaymentDetails(cardNumber, expiry, cvv);
-
-      // Reset state on success
-      setStep(1);
-      setAgreed(false);
-      setCardNumber("");
-      setExpiry("");
-      setCvv("");
-      onClose();
+      handleClose();
     } catch (error) {
       console.error("Token submission failed", error);
     } finally {
@@ -89,7 +82,12 @@ export default function CommitmentDialog({
   };
 
   const handleClose = () => {
-    if (!loading) onClose();
+    setStep(1);
+    setAgreed(false);
+    setCardNumber("");
+    setExpiry("");
+    setCvv("");
+    onClose();
   };
 
   return (
