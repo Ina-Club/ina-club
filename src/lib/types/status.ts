@@ -6,3 +6,9 @@ export enum GroupStatus {
   PENDING = "PENDING",
   PREVIEW = "PREVIEW",
 }
+
+export enum PaymentTokenStatus {
+  ACTIVE = "ACTIVE",
+  CONSUMED = "CONSUMED",
+  RELEASED = "RELEASED",
+}

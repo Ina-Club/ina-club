@@ -3,6 +3,7 @@ import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
 import { getPaymentProvider } from "@/lib/payments/factory";
 import { PaymentServiceProvider } from "@/lib/payments/PaymentServiceProvider";
+import { PaymentTokenStatus } from "@/lib/types/status";
 
 async function chargeUserToken(
     tk: { id: string; userId: string; pspToken: string; agreedFee: number },
@@ -13,7 +14,7 @@ async function chargeUserToken(
         if (res.success) {
             await prisma.paymentToken.update({
                 where: { id: tk.id },
-                data: { status: "CONSUMED", consumedAt: new Date() },
+                data: { status: PaymentTokenStatus.CONSUMED, consumedAt: new Date() },
             });
             return { userId: tk.userId, action: "charge", success: true };
         } else {
@@ -35,7 +36,7 @@ async function releaseUserToken(
         if (success) {
             await prisma.paymentToken.update({
                 where: { id: tk.id },
-                data: { status: "RELEASED" },
+                data: { status: PaymentTokenStatus.RELEASED },
             });
             return { userId: tk.userId, action: "release", success: true };
         } else {
@@ -70,7 +71,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         const tokens = await prisma.paymentToken.findMany({
             where: {
                 activeGroupId: groupId,
-                status: "ACTIVE",
+                status: PaymentTokenStatus.ACTIVE,
             },
             include: { psp: true },
         });
@@ -100,7 +101,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
         return NextResponse.json({ success: true, message: "Tokens processed successfully." });
     } catch (error) {
-        console.error("charge-no-shows error:", error);
+        console.error("resolve-tokens error:", error);
         return NextResponse.json({ error: "Failed to process charge for no-shows" }, { status: 500 });
     }
 }

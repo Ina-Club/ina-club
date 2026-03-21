@@ -3,6 +3,7 @@ import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
 import { getPaymentProvider } from "@/lib/payments/factory";
 import { getPenaltyFeeAmount } from "@/lib/payments/config";
+import { PaymentTokenStatus } from "@/lib/types/status";
 
 async function processJoin(groupId: string, userId: string, req: Request) {
     const body = await req.json();
@@ -55,13 +56,13 @@ async function processJoin(groupId: string, userId: string, req: Request) {
 async function processLeave(groupId: string, userId: string) {
     // Retrieve the Payment Token to charge as penalty
     const tokenRecord = await prisma.paymentToken.findFirst({
-        where: { userId, activeGroupId: groupId, status: "ACTIVE" },
+        where: { userId, activeGroupId: groupId, status: PaymentTokenStatus.ACTIVE },
         orderBy: { createdAt: "desc" },
         include: { psp: true },
     });
 
     // Trigger Penalty Charge if ACTIVE
-    if (tokenRecord && tokenRecord.status === "ACTIVE") {
+    if (tokenRecord && tokenRecord.status === PaymentTokenStatus.ACTIVE) {
         const provider = getPaymentProvider(tokenRecord.psp.name);
         const chargeResult = await provider.chargeToken(
             tokenRecord.pspToken,
@@ -72,7 +73,7 @@ async function processLeave(groupId: string, userId: string) {
         if (chargeResult.success) {
             await prisma.paymentToken.update({
                 where: { id: tokenRecord.id },
-                data: { status: "CONSUMED", consumedAt: new Date() },
+                data: { status: PaymentTokenStatus.CONSUMED, consumedAt: new Date() },
             });
         } else {
             console.error("Failed to charge penalty for canceling.", chargeResult.error);
