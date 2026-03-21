@@ -2,8 +2,88 @@ import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
 import { getUserIdBySession } from "@/lib/user";
+import { getPaymentProvider } from "@/lib/payments/factory";
 
-async function handleMembership(groupId: string, action: "join" | "leave") {
+async function processJoin(groupId: string, userId: string, req?: Request) {
+    if (!req) throw new Error("Request needed to parse JSON body");
+
+    const body = await req.json();
+    const { pspToken, pspName } = body;
+
+    if (!pspToken || !pspName) {
+        console.error("Commitment payment details required to join active group");
+        return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
+    }
+
+    const providerRecord = await prisma.paymentServiceProvider.findUnique({
+        where: { name: pspName },
+    });
+
+    if (!providerRecord) {
+        console.error("Payment provider not found");
+        return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
+    }
+
+    // Transaction to add participant and save the vaulted token
+    await prisma.$transaction(async (tx) => {
+        await tx.activeGroupParticipant.create({
+            data: {
+                userId,
+                activeGroupId: groupId,
+                lastPing: new Date(),
+            },
+        });
+
+        await tx.paymentToken.create({
+            data: {
+                userId,
+                activeGroupId: groupId,
+                pspId: providerRecord.id,
+                pspToken,
+                agreedFee: parseFloat(process.env.PENALTY_FEE_AMOUNT || "100"),
+            },
+        });
+    });
+
+    return NextResponse.json({ success: true });
+}
+
+async function processLeave(groupId: string, userId: string) {
+    // Retrieve the Payment Token to charge as penalty
+    const tokenRecord = await prisma.paymentToken.findUnique({
+        where: { userId_activeGroupId: { userId, activeGroupId: groupId } },
+        include: { psp: true },
+    });
+
+    // Trigger Penalty Charge if ACTIVE
+    if (tokenRecord && tokenRecord.status === "ACTIVE") {
+        const provider = getPaymentProvider(tokenRecord.psp.name);
+        const chargeResult = await provider.chargeToken(
+            tokenRecord.pspToken,
+            tokenRecord.agreedFee,
+            "ILS"
+        );
+
+        if (chargeResult.success) {
+            await prisma.paymentToken.update({
+                where: { id: tokenRecord.id },
+                data: { status: "CONSUMED", consumedAt: new Date() },
+            });
+        } else {
+            console.error("Failed to charge penalty for canceling.", chargeResult.error);
+        }
+    }
+
+    await prisma.activeGroupParticipant.delete({
+        where: {
+            userId_activeGroupId: { userId, activeGroupId: groupId },
+        },
+    });
+
+    return NextResponse.json({ success: true });
+}
+
+async function handleMembership(groupId: string, action: "join" | "leave", req?: Request) {
     try {
         const { session, response } = await validateSession();
         if (response) return response;
@@ -21,34 +101,17 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
 
         const existingParticipant = await prisma.activeGroupParticipant.findUnique({
             where: {
-                userId_activeGroupId: {
-                    userId,
-                    activeGroupId: groupId,
-                },
+                userId_activeGroupId: { userId, activeGroupId: groupId },
             },
         });
 
         if (action === "join") {
             if (existingParticipant) return NextResponse.json({ error: "User is already a participant" }, { status: 400 });
-            await prisma.activeGroupParticipant.create({
-                data: {
-                    userId,
-                    activeGroupId: groupId,
-                    lastPing: new Date(),
-                },
-            });
+            return await processJoin(groupId, userId, req);
         } else {
             if (!existingParticipant) return NextResponse.json({ error: "User is not a participant" }, { status: 400 });
-            await prisma.activeGroupParticipant.delete({
-                where: {
-                    userId_activeGroupId: {
-                        userId,
-                        activeGroupId: groupId,
-                    },
-                },
-            });
+            return await processLeave(groupId, userId);
         }
-        return NextResponse.json({ success: true });
     }
     catch (error) {
         console.error(`Membership ${action} error:`, error);
@@ -57,7 +120,7 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
 }
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
-    return handleMembership(params.id, "join");
+    return handleMembership(params.id, "join", req);
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
