@@ -1,17 +1,7 @@
 import { GroupStatus } from "./types/status";
 import { LikeTargetType } from "./types/like";
 
-export interface RequestGroup {
-  id: string;
-  images: string[];
-  category: string;
-  title: string;
-  participants: User[];
-  openedGroups?: string[]; //TODO: Remove
-  status: GroupStatus;
-  description?: string;
-  rejectionReason?: string;
-}
+
 
 export interface User {
   firstName: string;
@@ -30,6 +20,7 @@ export interface ActiveGroup {
   maxParticipants?: number;
   deadline: Date;
   createdAt?: Date;
+  registrationTerms?: string;
   company?: Company;
   participants: User[];
   images: string[];

@@ -9,22 +9,23 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import type { ActiveGroup, RequestGroup } from "@/lib/dal";
-import { useSession } from "next-auth/react";
+import type { ActiveGroup, } from "@/lib/dal";
+import { useAuth } from "@clerk/nextjs";
 import { useSnackbar } from "@/contexts/snackbar-context";
+import type { WishItemData } from "@/components/demand-pulse/WishItemCard";
 
 type FavoritesState = {
-  requestGroups: RequestGroup[];
+  wishes: WishItemData[];
   activeGroups: ActiveGroup[];
 };
 
 type FavoritesContextValue = {
-  likedRequestGroups: RequestGroup[];
+  likedWishes: WishItemData[];
   likedActiveGroups: ActiveGroup[];
-  isRequestGroupLiked: (id: string) => boolean;
   isActiveGroupLiked: (id: string) => boolean;
-  toggleRequestGroupLike: (group: RequestGroup) => void;
+  isWishLiked: (id: string) => boolean;
   toggleActiveGroupLike: (group: ActiveGroup) => void;
+  toggleWishLike: (wish: WishItemData) => void;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue | undefined>(
@@ -32,12 +33,13 @@ const FavoritesContext = createContext<FavoritesContextValue | undefined>(
 );
 
 const initialState: FavoritesState = {
-  requestGroups: [],
+  wishes: [],
   activeGroups: [],
 };
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const { data: session, status } = useSession();
+  const { userId, isLoaded, isSignedIn } = useAuth();
+  const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
   const [favorites, setFavorites] = useState<FavoritesState>(initialState);
   const { showSnackbar } = useSnackbar();
 
@@ -50,9 +52,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           return res.json();
         })
         .then((data) => {
-          if (data && Array.isArray(data.requestGroups) && Array.isArray(data.activeGroups)) {
+          if (data && Array.isArray(data.wishItems) && Array.isArray(data.activeGroups)) {
             setFavorites({
-              requestGroups: data.requestGroups,
+              wishes: data.wishItems,
               activeGroups: data.activeGroups,
             });
           }
@@ -63,9 +65,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   }, [status]);
 
-  const isRequestGroupLiked = useCallback(
-    (id: string) => favorites.requestGroups.some((g) => g.id === id),
-    [favorites.requestGroups]
+  const isWishLiked = useCallback(
+    (id: string) => favorites.wishes.some((w) => w.id === id),
+    [favorites.wishes]
   );
 
   const isActiveGroupLiked = useCallback(
@@ -73,42 +75,37 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     [favorites.activeGroups]
   );
 
-  const toggleRequestGroupLike = useCallback(async (group: RequestGroup) => {
+  const toggleWishLike = useCallback(async (wish: WishItemData) => {
     if (status !== "authenticated") {
       showSnackbar("עליך להתחבר כדי לשמור מועדפים", "warning");
       return;
     }
 
-    // 1. Determine action
-    const isLiked = favorites.requestGroups.some((g) => g.id === group.id);
+    const isLiked = favorites.wishes.some((w) => w.id === wish.id);
     const method = isLiked ? "DELETE" : "PUT";
 
-    // 2. Optimistic local update
     setFavorites((prev) => {
-      const requestGroups = isLiked ? prev.requestGroups.filter((g) => g.id !== group.id) : [...prev.requestGroups, group];
-      return { ...prev, requestGroups };
+      const wishes = isLiked ? prev.wishes.filter((w) => w.id !== wish.id) : [...prev.wishes, wish];
+      return { ...prev, wishes };
     });
 
-    // 3. API call
     try {
-      const res = await fetch(`/api/likes/request-groups/${group.id}`, { method });
+      const res = await fetch(`/api/likes/wish-items/${wish.id}`, { method });
       if (!res.ok) {
-        throw new Error(`Failed to ${method} like request group`);
+        throw new Error(`Failed to ${method} like wish`);
       }
     } catch (err) {
       console.error("Like toggle failed, rolling back", err);
       showSnackbar("שגיאה בעדכון המועדפים", "error");
 
-      // 4. Rollback on failure
       setFavorites((prev) => {
-        // Revert to previous state
-        const requestGroups = isLiked
-          ? [...prev.requestGroups, group] // We removed it, add it back
-          : prev.requestGroups.filter((g) => g.id !== group.id); // We added it, remove it
-        return { ...prev, requestGroups };
+        const wishes = isLiked
+          ? [...prev.wishes, wish]
+          : prev.wishes.filter((w) => w.id !== wish.id);
+        return { ...prev, wishes };
       });
     }
-  }, [favorites.requestGroups, status, showSnackbar]);
+  }, [favorites.wishes, status, showSnackbar]);
 
   const toggleActiveGroupLike = useCallback(async (group: ActiveGroup) => {
     if (status !== "authenticated") {
@@ -146,20 +143,20 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      likedRequestGroups: favorites.requestGroups,
+      likedWishes: favorites.wishes,
       likedActiveGroups: favorites.activeGroups,
-      isRequestGroupLiked,
+      isWishLiked,
       isActiveGroupLiked,
-      toggleRequestGroupLike,
+      toggleWishLike,
       toggleActiveGroupLike,
     }),
     [
       favorites.activeGroups,
-      favorites.requestGroups,
+      favorites.wishes,
       isActiveGroupLiked,
-      isRequestGroupLiked,
+      isWishLiked,
       toggleActiveGroupLike,
-      toggleRequestGroupLike,
+      toggleWishLike,
     ]
   );
 

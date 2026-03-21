@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { validateSession } from "@/lib/auth";
-import { fetchActiveGroups, fetchRequestGroups } from "@/lib/groups";
+import { fetchActiveGroups } from "@/lib/groups";
 import { aiFilteredGroups } from "@/lib/ai/smart-search";
-import { ActiveGroup, RequestGroup } from "@/lib/dal";
+import { ActiveGroup } from "@/lib/dal";
 import { GroupStatus } from "@/lib/types/status";
+import { prisma } from "@/lib/prisma";
+import { WishItemData } from "@/components/demand-pulse/WishItemCard";
+import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 
 // TODO: Add pagination in the future (if necessary).
 export async function POST(req: Request) {
@@ -16,11 +19,36 @@ export async function POST(req: Request) {
         if (!searchText) return NextResponse.json({ error: "טקסט לחיפוש חובה" }, { status: 400 });
 
         const activeGroups: ActiveGroup[] = await fetchActiveGroups({ status: GroupStatus.OPEN });
-        const requestGroups: RequestGroup[] = await fetchRequestGroups({ status: GroupStatus.OPEN });
-        const { relevantActiveGroups, relevantRequestGroups, filtered } = await aiFilteredGroups(activeGroups, requestGroups, searchText);
-        console.log(relevantActiveGroups, relevantRequestGroups);
+        const rawWishItems = await prisma.wishItem.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 100, // Reasonable limit
+            select: {
+                id: true,
+                text: true,
+                targetPrice: true,
+                category: { select: { name: true } },
+                createdAt: true,
+                createdById: true,
+            }
+        });
 
-        return NextResponse.json({ activeGroups: relevantActiveGroups, requestGroups: relevantRequestGroups, filtered });
+        const authorsMap = await getClerkPublicUsersMap(rawWishItems.map((item) => item.createdById));
+        
+        const wishItems: WishItemData[] = rawWishItems.map(item => ({
+            id: item.id,
+            text: item.text,
+            targetPrice: item.targetPrice,
+            categoryName: item.category?.name,
+            createdAt: item.createdAt.toISOString(),
+            authorName: authorsMap.get(item.createdById)?.name ?? "משתמש",
+            authorAvatar: authorsMap.get(item.createdById)?.imageUrl ?? null,
+            likeCount: 0,
+            isLikedByMe: false
+        }));
+
+        const { relevantActiveGroups, relevantWishItems, filtered } = await aiFilteredGroups(activeGroups, wishItems, searchText);
+
+        return NextResponse.json({ activeGroups: relevantActiveGroups, wishItems: relevantWishItems, filtered });
     } catch (e) {
         console.error(e);
         return NextResponse.json({ error: "שגיאה בשליפת נתונים מAI" }, { status: 500 });

@@ -13,8 +13,7 @@ import GroupImages from "@/components/group-images/group-images";
 import NotFound from "app/not-found";
 import GroupMembershipButton from "@/components/group-membership-button";
 import UserAvatar from "@/components/user-avatar";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchActiveGroups } from "@/lib/groups";
 import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
@@ -22,9 +21,10 @@ import { LikeTargetType } from "@/lib/types/like";
 import { fetchGroupLikeCount } from "@/lib/groups";
 import ParticipantsProgress from "@/components/card/active-group-card/participations-progress-bar";
 
-export default async function ActiveGroupDetail({ params }: { params: { id: string }; }) {
-  const { id } = params;
-  const session = await getServerSession(authOptions);
+export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
+  const { id } = await params;
+  const { userId } = await auth();
+  const user = userId ? await currentUser() : null;
 
   const ag = (await fetchActiveGroups({ id }))?.[0] ?? null;
   if (!ag) {
@@ -38,8 +38,8 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
     name: p.firstName || null,
     imageUrl: p.image || undefined,
   }));
-  const viewerEmail = session?.user?.email;
-  const alreadyJoined = !!viewerEmail ? await checkUserIsActiveGroupParticipant(viewerEmail, ag.id) : false;
+  const viewerEmail = user?.emailAddresses[0]?.emailAddress;
+  const alreadyJoined = !!userId ? await checkUserIsActiveGroupParticipant(userId, ag.id) : false;
   const similarGroups = await fetchActiveGroups({ category: { name: ag.category ?? "" }, NOT: { id } }, 3);
   const likeCount = await fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP);
 
@@ -200,6 +200,7 @@ export default async function ActiveGroupDetail({ params }: { params: { id: stri
               id={id}
               fullWidth
               isJoined={alreadyJoined}
+              registrationTerms={ag.registrationTerms}
             />
           </Paper>
         </Box>

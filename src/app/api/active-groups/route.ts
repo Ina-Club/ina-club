@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { GroupStatus } from "lib/types/status";
-import { requireAuth, validateSession } from "@/lib/auth";
-import { getUserIdBySession } from "@/lib/user";
+import { validateSession } from "@/lib/auth";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
-import { RoleLevel } from "@/lib/types/role";
+import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -89,12 +88,7 @@ export async function GET(req: Request) {
         deadline: true,
         participants: {
           select: {
-            user: {
-              select: {
-                name: true,
-                profilePicture: { select: { url: true } },
-              },
-            },
+            userId: true,
           },
         },
         minParticipants: true,
@@ -108,6 +102,9 @@ export async function GET(req: Request) {
       orderBy: { createdAt: "desc" },
       ...(cursor && { cursor: { id: cursor } }),
     });
+
+    const participantIds = rows.flatMap((r) => r.participants.map((p) => p.userId));
+    const usersMap = await getClerkPublicUsersMap(participantIds);
 
     let nextCursor: string | null = null;
 
@@ -126,8 +123,8 @@ export async function GET(req: Request) {
       deadline: r.deadline,
       images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
       participants: r.participants.map((p) => ({
-        firstName: p.user.name ? p.user.name.split(" ")[0] : "", // This way we avoid sending full user names to the client.
-        image: p.user.profilePicture?.url ?? "",
+        firstName: usersMap.get(p.userId)?.name.split(" ")[0] ?? "משתמש",
+        image: usersMap.get(p.userId)?.imageUrl ?? "",
       })),
       minParticipants: r.minParticipants,
       maxParticipants: r.maxParticipants
@@ -143,7 +140,7 @@ export async function GET(req: Request) {
 // POST /api/active-groups
 export async function POST(req: Request) {
   try {
-    const { session, response } = await requireAuth(RoleLevel.BUSINESS);
+    const { userId, response } = await validateSession();
     if (response) return response;
 
     const body = await req.json();
@@ -186,7 +183,7 @@ export async function POST(req: Request) {
         groupPrice,
         deadline: new Date(deadline),
         status: GroupStatus.OPEN,
-        createdById: await getUserIdBySession(session),
+        createdById: userId!,
         minParticipants,
         maxParticipants
       },

@@ -23,7 +23,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { memo, useMemo, useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { Show, UserButton } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 import UserAvatar from "@/components/user-avatar";
@@ -76,8 +76,8 @@ type NavDropdownItem = {
 type NavItem = NavLinkItem | NavDropdownItem;
 
 const NAV_ITEMS: (NavLinkItem | NavDropdownItem)[] = [
-  { title: "בקשות", href: "/request-groups", icon: ShoppingBagIcon },
   { title: "קבוצות פעילות", href: "/active-groups", icon: GroupIcon },
+  { title: "בקשות", href: "/requests", icon: ShoppingBagIcon },
   { title: "חיפוש חכם", href: "/smart-search", icon: SearchIcon },
   { title: "מנתח מחירים", href: "/price-analyzer", icon: TrendingUpIcon },
   {
@@ -120,14 +120,14 @@ const LOGGED_IN_MENU: MenuItemConfig[] = [
 const LOGGED_OUT_MENU: MenuItemConfig[] = [
   {
     key: "signin",
-    href: "/auth/signin",
+    href: "/sign-in",
     label: "התחברות",
     icon: LoginIcon,
     color: "#64748b",
   },
   {
     key: "signup",
-    href: "/auth/signup",
+    href: "/sign-up",
     label: "הרשמה",
     icon: HowToRegIcon,
     color: "#fff",
@@ -143,7 +143,6 @@ function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { data: session, status } = useSession();
   const { profile } = useUserProfile();
 
   // compute selected tab
@@ -182,8 +181,6 @@ function Header() {
       handleMenuClose();
 
       if (item.action === "logout") {
-        // NextAuth logout
-        import("next-auth/react").then((auth) => auth.signOut());
         return;
       }
 
@@ -192,13 +189,12 @@ function Header() {
     [handleMenuClose, router]
   );
 
-  const memoUserName = profile?.name || session?.user?.name || "";
-  const memoUserIdentifier = profile?.email || session?.user?.email || "";
-  const memoUserImage = profile?.profilePicture || session?.user?.image || null;
-  const loggedIn = status === "authenticated" && !!profile;
-  const menuItems: MenuItemConfig[] = loggedIn
-    ? LOGGED_IN_MENU
-    : LOGGED_OUT_MENU;
+  const memoUserName = profile?.name || "";
+  const memoUserIdentifier = profile?.email || "";
+  const memoUserImage = profile?.profilePicture || null;
+  
+  // Note: we use Clerk's components for the actual auth state display in the toolbar
+  // but keep the menu for other links if needed.
   const goToFavorites = useCallback(() => {
     router.push("/profile?tab=liked");
   }, [router]);
@@ -288,23 +284,6 @@ function Header() {
           </List>
           <Box sx={{ mt: 'auto' }}>
             <Divider sx={{ mb: 3 }} />
-            <Button
-              component={Link}
-              href="/create"
-              variant="outlined"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                borderRadius: "999px",
-                color: "#1a2a5a",
-                borderColor: "#1a2a5a",
-                mx: 2,
-                fontWeight: 600,
-              }}
-            >
-              <AddIcon sx={{ mr: 1 }} />
-              צור בקשה
-            </Button>
           </Box>
         </Box>
       </Drawer>
@@ -419,74 +398,60 @@ function Header() {
           </Box>
 
           {/* Desktop Right */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
-            <Button
-              component={Link}
-              href="/create"
-              variant="outlined"
-              sx={{
-                borderRadius: "999px",
-                color: "#1a2a5a",
-                borderColor: "#1a2a5a",
-                px: 2,
-                fontWeight: 600,
-              }}
-            >
-              <AddIcon sx={{ mr: 1 }} />
-              צור בקשה
-            </Button>
-
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, alignItems: "center" }}>
             <IconButton sx={{ color: "#64748b" }} onClick={goToFavorites}>
               <FavoriteIcon />
             </IconButton>
 
-            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
-              {loggedIn ? (
-                <UserAvatar
-                  name={memoUserName}
-                  identifier={memoUserIdentifier}
-                  imageUrl={memoUserImage}
-                  sx={avatarSx}
-                />
-              ) : (
-                <AccountCircleIcon sx={{ color: "#64748b", fontSize: 40 }} />
-              )}
-            </IconButton>
-
-            <Menu
-              anchorEl={menuAnchor}
-              open={!!menuAnchor}
-              onClose={handleMenuClose}
-            >
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <MenuItem
-                    key={item.key}
-                    onClick={() => handleItemClick(item)}
-                  >
-                    <Icon sx={{ mr: 1 }} />
-                    {item.label}
-                  </MenuItem>
-                );
-              })}
-            </Menu>
+            <Show when="signed-in">
+              <UserButton 
+                appearance={{
+                  elements: {
+                    userButtonAvatarBox: {
+                      width: 40,
+                      height: 40
+                    }
+                  }
+                }}
+              />
+            </Show>
+            <Show when="signed-out">
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button 
+                  component={Link} 
+                  href="/sign-in" 
+                  variant="text"
+                  sx={{ color: "#64748b", fontWeight: 600 }}
+                >
+                  התחברות
+                </Button>
+                <Button 
+                  component={Link} 
+                  href="/sign-up" 
+                  variant="contained"
+                  sx={{ 
+                    bgcolor: "#1a2a5a", 
+                    borderRadius: "20px",
+                    px: 3,
+                    "&:hover": { bgcolor: "#243a7a" }
+                  }}
+                >
+                  הרשמה
+                </Button>
+              </Box>
+            </Show>
           </Box>
 
           {/* Mobile */}
-          <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
-            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
-              {loggedIn ? (
-                <UserAvatar
-                  name={memoUserName}
-                  identifier={memoUserIdentifier}
-                  imageUrl={memoUserImage}
-                  sx={avatarSx}
-                />
-              ) : (
+          <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1, alignItems: "center" }}>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
+            <Show when="signed-out">
+              <IconButton component={Link} href="/sign-in" sx={{ p: 0 }}>
                 <AccountCircleIcon sx={{ fontSize: 40, color: "#64748b" }} />
-              )}
-            </IconButton>
+              </IconButton>
+            </Show>
           </Box>
         </Toolbar>
       </AppBar>

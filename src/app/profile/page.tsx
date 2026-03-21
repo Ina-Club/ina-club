@@ -16,6 +16,7 @@ import {
   Alert,
   Skeleton,
 } from "@mui/material";
+import { Suspense } from "react";
 import {
   Edit as EditIcon,
   Email as EmailIcon,
@@ -29,13 +30,12 @@ import {
 } from "@mui/icons-material";
 import { useState, useEffect, type ReactNode } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
-import { useSession, signOut } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { useSearchParams, useRouter } from "next/navigation";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import { LoadingCircle } from "@/components/loading-circle";
-import RequestGroupCard from "@/components/card/request-group-card";
-import MinimalRequestGroupCard from "@/components/card/minimal-request-group-card";
 import ActiveGroupCard from "@/components/card/active-group-card";
+import WishItemCard from "@/components/demand-pulse/WishItemCard";
 import UserAvatar from "@/components/user-avatar";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { useFavorites } from "@/contexts/favorites-context";
@@ -62,8 +62,11 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export default function Profile() {
-  const { status } = useSession();
+function ProfileContent() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const { signOut } = useClerk();
+  const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
+  const router = useRouter();
   const searchParams = useSearchParams();
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
@@ -87,8 +90,8 @@ export default function Profile() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const {
-    likedRequestGroups,
     likedActiveGroups,
+    likedWishes,
   } = useFavorites();
 
   useEffect(() => {
@@ -237,8 +240,9 @@ export default function Profile() {
         throw new Error('Failed to delete account');
       }
 
-      // Sign out and redirect to home
-      await signOut({ callbackUrl: '/' });
+      // Sign out and redirect to home using Clerk
+      await signOut();
+      router.push('/');
     } catch (err) {
       setPageError('שגיאה במחיקת החשבון. אנא נסה שוב.');
       console.error('Delete account error:', err);
@@ -329,7 +333,7 @@ export default function Profile() {
             <Button
               color="inherit"
               size="small"
-              onClick={() => window.location.href = '/auth/complete-profile'}
+              onClick={() => router.push('/sign-in')}
             >
               השלם פרופיל
             </Button>
@@ -466,12 +470,12 @@ export default function Profile() {
           >
             <Tab
               icon={<FoundationIcon />}
-              label={isMdUp ? "סטטוס בקשות" : (tabValue === 0 ? "סטטוס בקשות" : undefined)}
+              label={isMdUp ? "הבקשות שלי" : (tabValue === 0 ? "הבקשות שלי" : undefined)}
               iconPosition={isMdUp ? "start" : undefined}
             />
             <Tab
               icon={<ShoppingBagIcon />}
-              label={isMdUp ? "בקשות" : (tabValue === 1 ? "בקשות" : undefined)}
+              label={isMdUp ? "חיסכון קבוצתי" : (tabValue === 1 ? "חיסכון קבוצתי" : undefined)}
               iconPosition={isMdUp ? "start" : undefined}
             />
             <Tab
@@ -490,17 +494,17 @@ export default function Profile() {
             {/* Owned Request Groups Tab */}
             <TabPanel value={tabValue} index={0}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות ממתינות לאישור ({detailProfile?.waitingRequestGroups.length ?? 0})
+                הבקשות שפרסמתי ({detailProfile?.wishItems.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
-                : detailProfile!.waitingRequestGroups.length === 0
+                : detailProfile!.wishItems.length === 0
                   ? (
-                    <Alert severity="info">עדיין לא יצרת בקשות</Alert>
+                    <Alert severity="info">עדיין לא פרסמת בקשות</Alert>
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                      {detailProfile!.waitingRequestGroups.map((requestGroup, index) => (
-                        <MinimalRequestGroupCard key={index} requestGroup={requestGroup} />
+                      {detailProfile!.wishItems.map((wish, index) => (
+                        <WishItemCard key={index} item={wish} />
                       ))}
                     </Box>
                   )}
@@ -509,33 +513,13 @@ export default function Profile() {
             {/* Request Groups Tab */}
             <TabPanel value={tabValue} index={1}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שאתה משתתף בהן ({detailProfile?.enrolledRequestGroups.length ?? 0})
-              </Typography>
-              {detailLoading
-                ? renderTabSkeleton()
-                : detailProfile!.enrolledRequestGroups.length === 0
-                  ? (
-                    <Alert severity="info">לא הצטרפת לבקשות</Alert>
-                  ) : (
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                      {detailProfile!.enrolledRequestGroups.map((requestGroup, index) => (
-                        <RequestGroupCard key={index} requestGroup={requestGroup} />
-                      ))}
-                    </Box>
-                  )}
-            </TabPanel>
-
-            {/* Active Groups Tab */}
-            {/* Pending Request Groups Tab */}
-            <TabPanel value={tabValue} index={2}>
-              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                קבוצות פעילות שנרשמת להן ({detailProfile?.enrolledActiveGroups.length ?? 0})
+                קבוצות רכישה שאתה משתתף בהן ({detailProfile?.enrolledActiveGroups.length ?? 0})
               </Typography>
               {detailLoading
                 ? renderTabSkeleton()
                 : detailProfile!.enrolledActiveGroups.length === 0
                   ? (
-                    <Alert severity="info">לא הצטרפת לקבוצות</Alert>
+                    <Alert severity="info">לא הצטרפת לקבוצות רכישה</Alert>
                   ) : (
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
                       {detailProfile!.enrolledActiveGroups.map((activeGroup, index) => (
@@ -545,16 +529,24 @@ export default function Profile() {
                   )}
             </TabPanel>
 
+            {/* Active Groups Tab */}
+            {/* Pending Request Groups Tab */}
+            <TabPanel value={tabValue} index={2}>
+              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
+                מידע נוסף יופיע כאן בקרוב
+              </Typography>
+            </TabPanel>
+
             <TabPanel value={tabValue} index={3}>
               <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                בקשות שסימנת ({likedRequestGroups.length})
+                בקשות שסימנת ({likedWishes.length})
               </Typography>
-              {likedRequestGroups.length === 0 ? (
+              {likedWishes.length === 0 ? (
                 <Alert severity="info">עוד לא סימנת בקשות שאהבת</Alert>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  {likedRequestGroups.map((requestGroup) => (
-                    <RequestGroupCard key={requestGroup.id} requestGroup={requestGroup} />
+                  {likedWishes.map((wish) => (
+                    <WishItemCard key={wish.id} item={wish} />
                   ))}
                 </Box>
               )}
@@ -637,5 +629,13 @@ export default function Profile() {
         </DialogActions>
       </Dialog>
     </Box>
+  );
+}
+
+export default function Profile() {
+  return (
+    <Suspense fallback={<Box sx={{ p: 3 }}><Skeleton variant="rectangular" height={180} /></Box>}>
+      <ProfileContent />
+    </Suspense>
   );
 }

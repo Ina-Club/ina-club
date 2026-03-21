@@ -10,8 +10,9 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import { useSession } from "next-auth/react";
-import type { ActiveGroup, RequestGroup } from "lib/dal";
+import { useUser } from "@clerk/nextjs";
+import type { ActiveGroup } from "lib/dal";
+import type { WishItemData } from "@/components/demand-pulse/WishItemCard";
 
 export interface UserProfileSummary {
   id: string;
@@ -23,9 +24,8 @@ export interface UserProfileSummary {
 }
 
 export interface UserProfile extends UserProfileSummary {
-  enrolledRequestGroups: Array<RequestGroup>;
   enrolledActiveGroups: Array<ActiveGroup>;
-  waitingRequestGroups: Array<RequestGroup>;
+  wishItems: Array<WishItemData>;
 }
 
 type RefreshOptions = {
@@ -52,7 +52,8 @@ export function UserProfileProvider({
 }: {
   children: ReactNode;
 }) {
-  const { data: session, status } = useSession();
+  const { user, isLoaded, isSignedIn } = useUser();
+  const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
   const [profile, setProfile] = useState<UserProfileSummary | null>(null);
   const [fullProfile, setFullProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -94,7 +95,7 @@ export function UserProfileProvider({
 
   const refreshProfile = useCallback(
     async ({ force = false }: RefreshOptions = {}) => {
-      if (status !== "authenticated" || !session?.user?.email) {
+      if (status !== "authenticated" || !user) {
         resetProfile();
         throw new Error("UNAUTHORIZED");
       }
@@ -137,12 +138,12 @@ export function UserProfileProvider({
         setLoading(false);
       }
     },
-    [resetProfile, session?.user?.email, status]
+    [resetProfile, user, status]
   );
 
   const loadFullProfile = useCallback(
     async ({ force = false }: RefreshOptions = {}) => {
-      if (status !== "authenticated" || !session?.user?.email) {
+      if (status !== "authenticated" || !user) {
         resetProfile();
         throw new Error("UNAUTHORIZED");
       }
@@ -193,7 +194,7 @@ export function UserProfileProvider({
         setFullLoading(false);
       }
     },
-    [extractSummary, resetProfile, session?.user?.email, status]
+    [extractSummary, resetProfile, user, status]
   );
 
   useEffect(() => {
