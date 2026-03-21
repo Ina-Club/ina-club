@@ -1,19 +1,19 @@
 import { Alert, Box, Container, Typography } from "@mui/material"
 import { Suspense } from "react"
 import GroupSectionSkeleton from "../skeleton/group-section-skeleton"
-import RequestGroupCard from "../card/request-group-card"
 import ActiveGroupCard from "../card/active-group-card"
-import { ActiveGroup, RequestGroup } from "@/lib/dal"
+import { ActiveGroup } from "@/lib/dal"
+import WishItemCard, { WishItemData } from "../demand-pulse/WishItemCard"
 
 interface SmartSearchComponentProps {
     filterAi: boolean;
     errorAi: string | null;
     displayedActiveGroups: ActiveGroup[];
-    displayedRequestGroups: RequestGroup[];
+    displayedWishItems: WishItemData[];
 }
 
 export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
-    filterAi, errorAi, displayedActiveGroups, displayedRequestGroups
+    filterAi, errorAi, displayedActiveGroups, displayedWishItems
 }) => {
     const filterAiText: string = "AI השמיט תוצאות פחות רלוונטיות, נסו למקד את החיפוש.";
     return (
@@ -119,7 +119,7 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                             fontWeight: 700,
                         }}
                     >
-                        בקשות מתאימות
+                        מוצרים מבוקשים (Wish Items)
                     </Typography>
                     <Box
                         sx={{
@@ -130,13 +130,13 @@ export const SmartSearchComponent: React.FC<SmartSearchComponentProps> = ({
                         }}
                     >
                         <Suspense fallback={<GroupSectionSkeleton />}>
-                            {displayedRequestGroups?.length > 0 ? (
-                                displayedRequestGroups.map((rg, i) => (
-                                    <RequestGroupCard key={i} requestGroup={rg} />
+                            {displayedWishItems?.length > 0 ? (
+                                displayedWishItems.map((wi, i) => (
+                                    <WishItemCard key={i} item={wi} />
                                 ))
                             ) : (
                                 <Typography color="text.secondary">
-                                    לא נמצאו בקשות מתאימות
+                                    לא נמצאו מוצרים מבוקשים מתאימים
                                 </Typography>
                             )}
                         </Suspense>

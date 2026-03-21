@@ -5,6 +5,7 @@ import Avatar, { type AvatarProps } from "@mui/material/Avatar";
 import { AccountCircle as AccountCircleIcon } from "@mui/icons-material";
 import { getAvatarInitials } from "lib/utils/avatar";
 import React from "react";
+import type { SxProps, Theme } from "@mui/material/styles";
 
 const COLOR_PALETTE = [
   "#1F2937",
@@ -51,14 +52,15 @@ const UserAvatarBase = forwardRef<HTMLDivElement, UserAvatarProps>(
       [identifier, name]
     );
 
-    const mergedSx = useMemo(
-      () => ({
-        bgcolor: resolvedSrc ? undefined : backgroundColor,
-        color: resolvedSrc ? undefined : "#fff",
-        fontWeight: 600,
-        textTransform: "uppercase",
-        ...sx,
-      }),
+    const mergedSx = useMemo<SxProps<Theme>>(
+      () => [
+        {
+          ...(resolvedSrc ? {} : { bgcolor: backgroundColor, color: "#fff" }),
+          fontWeight: 600,
+          textTransform: "uppercase",
+        },
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ],
       [resolvedSrc, backgroundColor, sx]
     );
 

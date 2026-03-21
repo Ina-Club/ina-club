@@ -115,11 +115,11 @@ export default function Footer() {
               <Link href="/active-groups" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 👥 קבוצות פעילות
               </Link>
-              <Link href="/request-groups" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                📋 קבוצות מבוקשות
+              <Link href="/requests" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                📋 בקשות
               </Link>
-              <Link href="/create" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                ➕ צור קבוצה חדשה
+              <Link href="/requests" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                ➕ צור בקשה
               </Link>
               <Link href="/profile" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 👤 הפרופיל שלי

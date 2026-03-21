@@ -5,17 +5,18 @@ import { Box, Button, Card } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { SearchBar } from "@/components/search-bar";
-import { ActiveGroup, RequestGroup } from "lib/dal";
+import { ActiveGroup, } from "lib/dal";
 import { LoadingCircle } from "@/components/loading-circle";
 import { SmartSearchHelper } from "@/components/smart-search/helper";
 import { SmartSearchComponent } from "@/components/smart-search";
+import { WishItemData } from "@/components/demand-pulse/WishItemCard";
 
 export default function SmartSearchPage() {
     const headerText: string = "חיפוש חכם";
     const descriptionText: string = "חפשו טקסט חופשי ונציג קבוצות פעילות ובקשות רלוונטיות בהקשר המבוקש.";
     const [searchText, setSearchText] = useState("");
     const [displayedActiveGroups, setDisplayedActiveGroups] = useState<ActiveGroup[]>([]);
-    const [displayedRequestGroups, setDisplayedRequestGroups] = useState<RequestGroup[]>([]);
+    const [displayedWishItems, setDisplayedWishItems] = useState<WishItemData[]>([]);
     const [displayHelper, setDisplayHelper] = useState(true);
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [errorAi, setErrorAi] = useState<string | null>(null);
@@ -39,11 +40,11 @@ export default function SmartSearchPage() {
                 body: JSON.stringify({ searchText }),
             });
             const data = await response.json();
-            if (!response.ok || data.requestGroups == undefined || data.activeGroups == undefined || data.filtered == undefined) {
+            if (!response.ok || data.activeGroups == undefined || data.filtered == undefined) {
                 throw new Error(`${response.status}`);
             }
             if (data.filtered) setFilterAi(true);
-            setDisplayedRequestGroups(data.requestGroups);
+            setDisplayedWishItems(data.wishItems || []);
             setDisplayedActiveGroups(data.activeGroups);
         }
         catch (err) {
@@ -103,7 +104,7 @@ export default function SmartSearchPage() {
                         filterAi={filterAi}
                         errorAi={errorAi}
                         displayedActiveGroups={displayedActiveGroups}
-                        displayedRequestGroups={displayedRequestGroups}
+                        displayedWishItems={displayedWishItems}
                     />
                     :
                     <LoadingCircle loadingText="מחפש..." />)

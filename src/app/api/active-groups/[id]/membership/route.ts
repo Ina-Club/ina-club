@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
-import { getUserIdBySession } from "@/lib/user";
 
 async function handleMembership(groupId: string, action: "join" | "leave") {
     try {
-        const { session, response } = await validateSession();
+        const { userId, response } = await validateSession();
         if (response) return response;
 
         if (!groupId) return NextResponse.json({ error: "Group ID is required" }, { status: 400 });
-
-        const userId = await getUserIdBySession(session);
 
         const activeGroup = await prisma.activeGroup.findUnique({
             where: { id: groupId },
@@ -56,10 +53,12 @@ async function handleMembership(groupId: string, action: "join" | "leave") {
     }
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
-    return handleMembership(params.id, "join");
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    return handleMembership(id, "join");
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-    return handleMembership(params.id, "leave");
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    return handleMembership(id, "leave");
 }

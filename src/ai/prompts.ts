@@ -4,7 +4,7 @@ You are an assistant that returns STRICT JSON according to a provided JSON Schem
 Goal: Given two group lists and a free-text query, pick the relevant items from each list whose properties are reasonably connected to the query (semantic or textual match).
 
 Lists:
-- requestGroups: {requestGroups}
+- wishItems: {wishItems}
 - activeGroups: {activeGroups}
 
 Query:
@@ -14,7 +14,7 @@ Instructions:
 - Consider fields like title, category, description and prices (if available) when determining relevance.
 - Output MUST follow the provided response schema exactly and be valid JSON only (no extra text):
   {
-    "requestGroups": string[],
+    "wishItems": string[],
     "activeGroups": string[],
     "filtered": boolean
   }

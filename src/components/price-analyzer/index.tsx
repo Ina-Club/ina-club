@@ -24,6 +24,8 @@ import {
 } from "@mui/icons-material";
 import { SearchBar } from "@/components/search-bar";
 import { useTheme } from "@mui/material/styles";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import type {
   NeedMoreInfoResponse,
   PriceResponse,
@@ -35,9 +37,12 @@ export default function PriceAnalyzerComponent() {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [dynamicSelects, setDynamicSelects] = useState<NeedMoreInfoResponse[]>([]);
   const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
   const [priceResult, setPriceResult] = useState<PriceResponse | null>(null);
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
 
   // Computed group price range values for the chart
   const minGroupPrice = priceResult ? Math.round((priceResult.minGroupPrice)) : 0;
@@ -141,6 +146,35 @@ export default function PriceAnalyzerComponent() {
     setSelectedValues({});
     setPriceResult(null);
     setError(null);
+    setSuccessMsg(null);
+  };
+
+  const handleCreateWishItem = async () => {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+    if (!priceResult) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/wish-items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: `מחפש ${priceResult.productName}`,
+          targetPrice: averageGroupPrice, // use the suggested group price
+        }),
+      });
+      if (res.ok) {
+        setSuccessMsg("המוצר נוסף בהצלחה ל-Wish Items של הקהילה!");
+      } else {
+        throw new Error("Failed to create wish item");
+      }
+    } catch (err) {
+      setError("אירעה שגיאה ביצירת ה-Wish Item.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -185,6 +219,13 @@ export default function PriceAnalyzerComponent() {
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
+        </Alert>
+      )}
+
+      {/* Success Message */}
+      {successMsg && (
+        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccessMsg(null)}>
+          {successMsg}
         </Alert>
       )}
 
@@ -462,6 +503,8 @@ export default function PriceAnalyzerComponent() {
             </Button>
             <Button
               variant="outlined"
+              onClick={handleCreateWishItem}
+              disabled={loading}
               sx={{
                 borderColor: "white",
                 color: "white",
@@ -471,7 +514,7 @@ export default function PriceAnalyzerComponent() {
                 },
               }}
             >
-              צור קבוצת רכישה
+              בקש מוצר זה ב-Wish Items
             </Button>
           </Box>
 

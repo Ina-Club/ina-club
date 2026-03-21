@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography, FormControlLabel, Checkbox } from "@mui/material";
 
 
 interface GroupMembershipButtonProps {
@@ -13,6 +13,7 @@ interface GroupMembershipButtonProps {
   fullWidth?: boolean;
   children?: React.ReactNode;
   isJoined?: boolean;
+  registrationTerms?: string;
 }
 
 export default function GroupMembershipButton({
@@ -22,32 +23,47 @@ export default function GroupMembershipButton({
   fullWidth = false,
   children,
   isJoined = false,
+  registrationTerms,
 }: GroupMembershipButtonProps) {
-  const { data: session, status } = useSession();
+  const { isSignedIn, isLoaded } = useAuth();
+  const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [hasJoined, setHasJoined] = useState(isJoined);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   useEffect(() => {
     setHasJoined(isJoined);
   }, [isJoined]);
 
+  const handleJoinClick = () => {
+    if (status === "unauthenticated") {
+      router.push("/sign-in");
+      return;
+    }
+    if (registrationTerms) {
+      setAgreedToTerms(false);
+      setTermsDialogOpen(true);
+    } else {
+      changeMembershipState();
+    }
+  };
+
   const changeMembershipState = async () => {
     // Check if user is authenticated only when joining
-    if (!hasJoined && (status === "unauthenticated" || !session)) {
-      const currentUrl = encodeURIComponent(window.location.href);
-      router.push(`/auth/signin?message=login_required&callbackUrl=${currentUrl}`);
+    if (!hasJoined && status === "unauthenticated") {
+      router.push("/sign-in");
       return;
     }
 
     setLoading(true);
     setLeaveDialogOpen(false);
+    setTermsDialogOpen(false);
     try {
       const endpoint =
-        type === "request-group"
-          ? `/api/request-groups/${id}/membership`
-          : `/api/active-groups/${id}/membership`;
+        `/api/active-groups/${id}/membership`;
 
       const response = await fetch(endpoint, {
         method: hasJoined ? "DELETE" : "POST",
@@ -85,17 +101,44 @@ export default function GroupMembershipButton({
           <Button onClick={changeMembershipState}>אישור</Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Terms Dialog */}
+      <Dialog open={termsDialogOpen} onClose={() => setTermsDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>תנאי הרשמה לקבוצה</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2, whiteSpace: "pre-line", maxHeight: 300, overflowY: "auto", p: 1, bgcolor: "grey.50", borderRadius: 1 }}>
+            {registrationTerms}
+          </Typography>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="קראתי ואני מסכים/ה לתנאי ההרשמה"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTermsDialogOpen(false)}>ביטול</Button>
+          <Button onClick={changeMembershipState} disabled={!agreedToTerms} variant="contained">
+            אישור והצטרפות
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Button
         variant="contained"
         color={hasJoined ? "error" : "primary"}
         fullWidth={fullWidth}
-        onClick={hasJoined ? () => setLeaveDialogOpen(true) : changeMembershipState}
+        onClick={hasJoined ? () => setLeaveDialogOpen(true) : handleJoinClick}
         disabled={loading}
       >
         {loading ? (
           <CircularProgress size={20} color="inherit" />
         ) : (
-          hasJoined ? "בטל הרשמה" : children || (type === "request-group" ? "הצטרף לבקשה" : "הצטרף לקבוצה")
+          hasJoined ? "בטל הרשמה" : children || "הצטרף לקבוצה"
         )}
       </Button>
     </>

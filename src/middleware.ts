@@ -1,36 +1,21 @@
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-import { getToken } from "next-auth/jwt";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+const isProtectedRoute = createRouteMatcher([
+  "/profile(.*)",
+  "/smart-search(.*)",
+  "/create(.*)",
+  "/price-analyzer(.*)",
+]);
 
-export async function middleware(req: NextRequest) {
-    const token = await getToken({ req });
-    const isAuth = !!token;
-    const { pathname } = req.nextUrl;
-
-    const protectedRoutes = ["/profile", "/smart-search", "/create", "/price-analyzer"];
-
-    const isProtectedRoute = protectedRoutes.some((route) =>
-        pathname === route || pathname.startsWith(`${route}/`)
-    );
-
-    if (isProtectedRoute) {
-        if (!isAuth) {
-            const url = new URL("/auth/signin", req.url);
-            url.searchParams.set("message", "login_required");
-            url.searchParams.set("callbackUrl", req.url);
-            return NextResponse.redirect(url);
-        }
-    }
-
-    return NextResponse.next();
-}
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) await auth.protect();
+});
 
 export const config = {
-    matcher: [
-        "/profile/:path*",
-        "/smart-search/:path*",
-        "/create/:path*",
-        "/price-analyzer/:path*",
-    ],
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
 };

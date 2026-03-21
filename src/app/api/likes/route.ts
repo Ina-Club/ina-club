@@ -1,37 +1,50 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchActiveGroups, fetchRequestGroups } from "@/lib/groups";
+import { fetchActiveGroups } from "@/lib/groups";
 import { validateSession } from "@/lib/auth";
 import { LikeTargetType } from "@/lib/types/like";
-import { getUserIdBySession } from "@/lib/user";
 
 export async function GET() {
-    const { session, response } = await validateSession();
+    const { userId, response } = await validateSession();
     if (response) return response;
-
-    const userId = await getUserIdBySession(session);
 
     try {
         const likes = await prisma.like.findMany({
             where: { userId },
         });
 
-        const requestGroupIds = likes
-            .filter((l) => l.targetType === LikeTargetType.REQUEST_GROUP)
-            .map((l) => l.targetId);
-
         const activeGroupIds = likes
             .filter((l) => l.targetType === LikeTargetType.ACTIVE_GROUP)
             .map((l) => l.targetId);
 
-        const [requestGroups, activeGroups] = await Promise.all([
-            fetchRequestGroups({ id: { in: requestGroupIds } }),
+        const wishItemIds = likes
+            .filter((l) => l.targetType === LikeTargetType.WISH_ITEM)
+            .map((l) => l.targetId);
+
+        const [activeGroups, wishItems] = await Promise.all([
             fetchActiveGroups({ id: { in: activeGroupIds } }),
+            prisma.wishItem.findMany({
+                where: { id: { in: wishItemIds } },
+                include: {
+                    category: { select: { name: true } },
+                },
+            }),
         ]);
 
-        return NextResponse.json({ requestGroups, activeGroups });
+        // Format wish items to match the expected structure
+        const formattedWishes = wishItems.map(item => ({
+            id: item.id,
+            text: item.text,
+            targetPrice: item.targetPrice,
+            categoryName: item.category?.name,
+            authorName: "משתמש",
+            authorAvatar: null,
+            isLikedByMe: true,
+        }));
+
+        return NextResponse.json({ activeGroups, wishItems: formattedWishes });
     } catch (error) {
         console.error("Failed to fetch likes:", error);
-        return NextResponse.json({ requestGroups: [], activeGroups: [] }, { status: 500 });
+        return NextResponse.json({ activeGroups: [], wishItems: [] }, { status: 500 });
     }
 }

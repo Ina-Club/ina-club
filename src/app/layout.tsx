@@ -1,7 +1,7 @@
 import Footer from "@/components/footer";
 import HeaderWrapper from "@/components/wrapper/header-wrapper"; // ✅ חדש
 import ThemeRegistry from "@/components/theme-registry/theme-registry";
-import SessionProviderWrapper from "@/components/wrapper/session-provider-wrapper";
+import { ClerkProvider } from "@clerk/nextjs";
 import { UserProfileProvider } from "@/contexts/user-profile-context";
 import { FavoritesProvider } from "@/contexts/favorites-context";
 import { Box } from "@mui/material";
@@ -21,29 +21,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeRegistry>
-      <html lang="he" dir="rtl">
-        <body
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            minHeight: "100vh",
-            margin: 0,
-          }}
-        >
-          <SessionProviderWrapper>
+    <ClerkProvider>
+      <ThemeRegistry>
+        <html lang="he" dir="rtl">
+          <body
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+              margin: 0,
+            }}
+          >
             <UserProfileProvider>
               <SnackbarProvider>
                 <FavoritesProvider>
-                  <HeaderWrapper /> {/* ✅ עכשיו ה-header מתנהג לפי הדף */}
+                  <HeaderWrapper />
                   <main style={{ flex: 1 }}>{children}</main>
                   <Footer />
                 </FavoritesProvider>
               </SnackbarProvider>
             </UserProfileProvider>
-          </SessionProviderWrapper>
-        </body>
-      </html>
-    </ThemeRegistry>
+          </body>
+        </html>
+      </ThemeRegistry>
+    </ClerkProvider>
   );
 }
