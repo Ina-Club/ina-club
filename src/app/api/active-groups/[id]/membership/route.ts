@@ -54,8 +54,9 @@ async function processJoin(groupId: string, userId: string, req: Request) {
 
 async function processLeave(groupId: string, userId: string) {
     // Retrieve the Payment Token to charge as penalty
-    const tokenRecord = await prisma.paymentToken.findUnique({
-        where: { userId_activeGroupId: { userId, activeGroupId: groupId } },
+    const tokenRecord = await prisma.paymentToken.findFirst({
+        where: { userId, activeGroupId: groupId, status: "ACTIVE" },
+        orderBy: { createdAt: "desc" },
         include: { psp: true },
     });
 
