@@ -76,6 +76,7 @@ async function processLeave(groupId: string, userId: string) {
             });
         } else {
             console.error("Failed to charge penalty for canceling.", chargeResult.error);
+            return NextResponse.json({ error: "שגיאה בביטול ההרשמה" }, { status: 500 });
         }
     }
 
