@@ -9,7 +9,7 @@ const WishItemFeed = dynamic(() => import("./WishItemFeed"), { ssr: false });
 
 export default function DemandPulseSection() {
   return (
-    <Box sx={{ bgcolor: "#f8f9ff", borderTop: "1px solid rgba(66,100,212,0.08)" }}>
+    <Box sx={{ borderTop: "1px solid rgba(66,100,212,0.08)" }}>
       <Container sx={{ px: { xs: "17px", md: "0px" } }}>
         <SectionWrapper
           title="הבקשות הפופולריות"
