@@ -42,7 +42,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                     userId: tk.userId,
                     pspToken: tk.pspToken,
                     pspName: tk.psp.name,
-                    agreedFee: tk.agreedFee
+                    agreedFee: tk.agreedFee,
+                    currency: tk.currency
                 }));
             } else {
                 releasePromises.push(releaseParticipantToken({

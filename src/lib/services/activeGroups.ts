@@ -7,17 +7,19 @@ export async function chargeParticipantToken({
     userId,
     pspToken,
     pspName,
-    agreedFee
+    agreedFee,
+    currency
 }: {
     id: string;
     userId: string;
     pspToken: string;
     pspName: string;
     agreedFee: number;
+    currency: string;
 }) {
     const provider = getPaymentProvider(pspName);
     try {
-        const res = await provider.chargeToken(pspToken, agreedFee, "ILS");
+        const res = await provider.chargeToken(pspToken, agreedFee, currency);
         if (res.success) {
             await prisma.paymentToken.update({
                 where: { id },

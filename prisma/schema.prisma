@@ -167,6 +167,7 @@ model PaymentToken {
   
   pspToken          String                 
   agreedFee         Float                  
+  currency          String                 @default("ILS")
   status            TokenStatus            @default(ACTIVE)
   
   createdAt         DateTime               @default(now())

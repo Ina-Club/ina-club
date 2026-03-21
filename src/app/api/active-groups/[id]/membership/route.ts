@@ -68,7 +68,8 @@ async function processLeave(groupId: string, userId: string) {
             userId: tokenRecord.userId,
             pspToken: tokenRecord.pspToken,
             pspName: tokenRecord.psp.name,
-            agreedFee: tokenRecord.agreedFee
+            agreedFee: tokenRecord.agreedFee,
+            currency: tokenRecord.currency
         });
 
         if (!chargeResult.success) {
