@@ -14,6 +14,7 @@ import {
   TextField,
   CircularProgress,
 } from "@mui/material";
+import { LoadingCircle } from "../loading-circle";
 
 const REGISTRATION_TERMS = `בשמירת פרטי אשראי אלה, אנו מבטיחים כי המשתתפים מחויבים לתהליך במעמד השלמת הרכישה על ידי העסק.
 כרטיסך יחויב בדמי ביטול על סך {penaltyAmount} ש"ח בלבד באחד משני המקרים הבאים:
@@ -99,7 +100,7 @@ export default function CommitmentDialog({
       <DialogContent dividers sx={{ minHeight: 200 }}>
         {penaltyAmount === null ? (
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-            <CircularProgress />
+            <LoadingCircle loadingText="טוען..."/>
           </Box>
         ) : step === 1 ? (
           <Box>

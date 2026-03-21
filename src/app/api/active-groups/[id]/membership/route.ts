@@ -4,9 +4,7 @@ import { validateSession } from "@/lib/auth";
 import { getPaymentProvider } from "@/lib/payments/factory";
 import { getPenaltyFeeAmount } from "@/lib/payments/config";
 
-async function processJoin(groupId: string, userId: string, req?: Request) {
-    if (!req) throw new Error("Request needed to parse JSON body");
-
+async function processJoin(groupId: string, userId: string, req: Request) {
     const body = await req.json();
     const { cardNumber, expiry, cvv } = body;
 
@@ -111,6 +109,7 @@ async function handleMembership(groupId: string, action: "join" | "leave", req?:
 
         if (action === "join") {
             if (existingParticipant) return NextResponse.json({ error: "User is already a participant" }, { status: 400 });
+            if (!req) return NextResponse.json({ error: "Request needed to parse JSON body" }, { status: 400 });
             return await processJoin(groupId, userId, req);
         } else {
             if (!existingParticipant) return NextResponse.json({ error: "User is not a participant" }, { status: 400 });
@@ -125,7 +124,7 @@ async function handleMembership(groupId: string, action: "join" | "leave", req?:
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    return handleMembership(id, "join");
+    return handleMembership(id, "join", req);
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
