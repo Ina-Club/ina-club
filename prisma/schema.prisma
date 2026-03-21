@@ -97,6 +97,7 @@ model ActiveGroup {
   company           Company                  @relation(fields: [companyId], references: [id])
   images            ActiveGroupImage[]
   participants      ActiveGroupParticipant[]
+  tokens            PaymentToken[]
 }
 
 model ActiveGroupParticipant {
@@ -148,6 +149,31 @@ model WishItem {
   @@index([createdAt])
 }
 
+model PaymentServiceProvider {
+  id                String                 @id @default(uuid())
+  name              String                 @unique // E.g., "STRIPE", "MOCK_PSP"
+  isActive          Boolean                @default(true)
+  
+  tokens            PaymentToken[]
+}
+
+model PaymentToken {
+  id                String                 @id @default(uuid())
+  userId            String
+  activeGroupId     String
+  activeGroup       ActiveGroup            @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+  pspId             String
+  psp               PaymentServiceProvider @relation(fields: [pspId], references: [id], onDelete: Restrict)
+  
+  pspToken          String                 
+  agreedFee         Float                  
+  currency          String                 @default("ILS")
+  status            TokenStatus            @default(ACTIVE)
+  
+  createdAt         DateTime               @default(now())
+  consumedAt        DateTime?
+}
+
 enum GroupStatus {
   OPEN
   CLOSED
@@ -179,4 +205,10 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum TokenStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
 }
