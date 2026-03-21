@@ -47,6 +47,12 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum TokenStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
+}
+
 // ----------------------------------------------------
 // Core: User, Company, Category
 // ----------------------------------------------------
@@ -349,4 +355,35 @@ model Testimonial {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+// Commitment Mechanism (Payment Tokens)
+// ----------------------------------------------------
+
+model PaymentServiceProvider {
+  id                String                 @id @default(uuid())
+  name              String                 @unique // E.g., "STRIPE", "MOCK_PSP"
+  isActive          Boolean                @default(true)
+  
+  tokens            PaymentToken[]
+}
+
+model PaymentToken {
+  id                String                 @id @default(uuid())
+  userId            String
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeGroupId     String
+  activeGroup       ActiveGroup            @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+  pspId             String
+  psp               PaymentServiceProvider @relation(fields: [pspId], references: [id], onDelete: Restrict)
+  
+  pspToken          String                 
+  agreedFee         Float                  
+  status            TokenStatus            @default(ACTIVE)
+  
+  createdAt         DateTime               @default(now())
+  consumedAt        DateTime?
+  
+  @@unique([userId, activeGroupId])
 }
