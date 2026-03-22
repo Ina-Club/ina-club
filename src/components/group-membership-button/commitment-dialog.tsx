@@ -83,6 +83,7 @@ export default function CommitmentDialog({
   };
 
   const handleClose = () => {
+    if (loading) return;
     setStep(1);
     setAgreed(false);
     setCardNumber("");
@@ -136,6 +137,7 @@ export default function CommitmentDialog({
               label="מספר כרטיס"
               variant="outlined"
               fullWidth
+              disabled={loading}
               value={cardNumber}
               onChange={(e) => setCardNumber(e.target.value)}
               placeholder="0000 0000 0000 0000"
@@ -145,6 +147,7 @@ export default function CommitmentDialog({
                 label="תוקף"
                 variant="outlined"
                 fullWidth
+                disabled={loading}
                 value={expiry}
                 onChange={(e) => setExpiry(e.target.value)}
                 placeholder="MM/YY"
@@ -153,6 +156,7 @@ export default function CommitmentDialog({
                 label="CVV"
                 variant="outlined"
                 fullWidth
+                disabled={loading}
                 value={cvv}
                 onChange={(e) => setCvv(e.target.value)}
                 placeholder="123"
