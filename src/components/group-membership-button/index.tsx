@@ -56,7 +56,6 @@ export default function GroupMembershipButton({
       return;
     }
 
-    setLoading(true);
     setLeaveDialogOpen(false);
     try {
       const endpoint =
@@ -70,18 +69,21 @@ export default function GroupMembershipButton({
         body: payload ? JSON.stringify(payload) : undefined,
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || (hasJoined ? "שגיאה בביטול ההרשמה" : "שגיאה בהצטרפות"));
       }
 
+      // TODO: fix this reload thing
       setHasJoined(!hasJoined);
       // Refresh the page to show updated participants
-      if (onJoinSuccess) {
-        onJoinSuccess();
-      } else {
-        window.location.reload();
-      }
+      // if (onJoinSuccess) {
+      //   onJoinSuccess();
+      // } else {
+      //   window.location.reload();
+      // }
+
+      return data.coupon ?? null;
     } catch (error: any) {
       console.error("Change Membership error:", error);
       alert(hasJoined ? "שגיאה בביטול ההרשמה" : "שגיאה בהצטרפות");
@@ -109,7 +111,7 @@ export default function GroupMembershipButton({
         open={commitmentDialogOpen}
         onClose={() => setCommitmentDialogOpen(false)}
         onSubmitPaymentDetails={async (cardNumber, expiry, cvv) => {
-          await changeMembershipState(cardNumber, expiry, cvv);
+          return await changeMembershipState(cardNumber, expiry, cvv);
         }}
       />
 
