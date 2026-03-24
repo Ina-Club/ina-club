@@ -98,6 +98,7 @@ model ActiveGroup {
   images            ActiveGroupImage[]
   participants      ActiveGroupParticipant[]
   tokens            PaymentToken[]
+  coupons           Coupon[]
 }
 
 model ActiveGroupParticipant {
@@ -174,6 +175,20 @@ model PaymentToken {
   consumedAt        DateTime?
 }
 
+model Coupon {
+  id          String       @id @default(uuid())
+  code        String       @unique
+  groupId     String
+  userId      String
+  validTo     DateTime
+  status      CouponStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  activeGroup ActiveGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([userId])
+}
+
 enum GroupStatus {
   OPEN
   CLOSED
@@ -211,4 +226,10 @@ enum TokenStatus {
   ACTIVE
   CONSUMED
   RELEASED
+}
+
+enum CouponStatus {
+  ACTIVE
+  EXPIRED
+  USED
 }
