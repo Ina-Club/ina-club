@@ -123,7 +123,7 @@ export default function CommitmentDialog({
   const stepTitles: Record<number, string> = {
     1: "הסכם התחייבות הקבוצה",
     2: "פרטי אשראי להתחייבות",
-    3: "הצטרפת בהצלחה! 🎉",
+    3: "הצטרפת בהצלחה!",
   };
 
   return (
