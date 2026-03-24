@@ -15,6 +15,7 @@ import {
   DialogActions,
   Alert,
   Skeleton,
+  Chip,
 } from "@mui/material";
 import { Suspense } from "react";
 import {
@@ -27,6 +28,7 @@ import {
   Delete as DeleteIcon,
   Warning as WarningIcon,
   Favorite as FavoriteIcon,
+  LocalOffer as LocalOfferIcon,
 } from "@mui/icons-material";
 import { useState, useEffect, type ReactNode } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
@@ -39,6 +41,7 @@ import WishItemCard from "@/components/demand-pulse/WishItemCard";
 import UserAvatar from "@/components/user-avatar";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { useFavorites } from "@/contexts/favorites-context";
+import CouponCard from "@/components/card/coupon-card";
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -144,6 +147,7 @@ function ProfileContent() {
       requests: 1,
       pending: 2,
       liked: 3,
+      coupons: 4,
     };
     if (tabParam && mapping[tabParam] !== undefined) {
       setTabValue(mapping[tabParam]);
@@ -488,6 +492,11 @@ function ProfileContent() {
               label={isMdUp ? "מועדפים" : (tabValue === 3 ? "מועדפים" : undefined)}
               iconPosition={isMdUp ? "start" : undefined}
             />
+            <Tab
+              icon={<LocalOfferIcon />}
+              label={isMdUp ? "הקופונים שלי" : (tabValue === 4 ? "הקופונים שלי" : undefined)}
+              iconPosition={isMdUp ? "start" : undefined}
+            />
           </Tabs>
           {/* Panels */}
           <Box sx={{ flex: 1 }}>
@@ -563,6 +572,25 @@ function ProfileContent() {
                   ))}
                 </Box>
               )}
+            </TabPanel>
+
+            {/* Coupons Tab */}
+            <TabPanel value={tabValue} index={4}>
+              <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
+                הקופונים שלי ({detailProfile?.coupons?.length ?? 0})
+              </Typography>
+              {detailLoading
+                ? renderTabSkeleton()
+                : !detailProfile?.coupons?.length
+                  ? (
+                    <Alert severity="info">עדיין אין לך קופונים. הצטרף לקבוצה כדי לקבל קופון!</Alert>
+                  ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {detailProfile.coupons.map((coupon) => (
+                        <CouponCard key={coupon.id} coupon={coupon} />
+                      ))}
+                    </Box>
+                  )}
             </TabPanel>
           </Box>
         </Box>

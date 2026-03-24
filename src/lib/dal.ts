@@ -1,7 +1,6 @@
 import { GroupStatus } from "./types/status";
 import { LikeTargetType } from "./types/like";
-
-
+import type { CouponStatus } from "@/lib/types/status";
 
 export interface User {
   firstName: string;
@@ -49,4 +48,14 @@ export interface Like {
     userId: string;
     targetId: string;
     targetType: LikeTargetType;
+}
+
+export interface CouponData {
+  id: string;
+  code: string;
+  groupId: string;
+  groupTitle: string;
+  validTo: string;
+  status: CouponStatus;
+  createdAt: string;
 }

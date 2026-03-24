@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { useUser } from "@clerk/nextjs";
 import type { ActiveGroup } from "lib/dal";
 import type { WishItemData } from "@/components/demand-pulse/WishItemCard";
+import type { CouponData } from "@/lib/dal";
 
 export interface UserProfileSummary {
   id: string;
@@ -26,6 +27,7 @@ export interface UserProfileSummary {
 export interface UserProfile extends UserProfileSummary {
   enrolledActiveGroups: Array<ActiveGroup>;
   wishItems: Array<WishItemData>;
+  coupons: Array<CouponData>;
 }
 
 type RefreshOptions = {
