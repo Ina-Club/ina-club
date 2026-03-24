@@ -10,7 +10,8 @@ import { Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogConten
 interface GroupMembershipButtonProps {
   type: "active-group";
   id: string;
-  onJoinSuccess?: () => void;
+  onJoin?: () => void;
+  onLeave?: () => void;
   fullWidth?: boolean;
   children?: React.ReactNode;
   isJoined?: boolean;
@@ -19,7 +20,8 @@ interface GroupMembershipButtonProps {
 export default function GroupMembershipButton({
   type,
   id,
-  onJoinSuccess,
+  onJoin,
+  onLeave,
   fullWidth = false,
   children,
   isJoined = false,
@@ -31,6 +33,7 @@ export default function GroupMembershipButton({
   const [hasJoined, setHasJoined] = useState(isJoined);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [commitmentDialogOpen, setCommitmentDialogOpen] = useState(false);
+  const [pendingJoinCallback, setPendingJoinCallback] = useState(false);
 
   useEffect(() => {
     setHasJoined(isJoined);
@@ -44,6 +47,7 @@ export default function GroupMembershipButton({
     changeMembershipState();
   };
 
+  // TODO: Fix avatar list not updating right after join button finishes loading
   const changeMembershipState = async (cardNumber?: string, expiry?: string, cvv?: string) => {
     // Check if user is authenticated only when joining
     if (!hasJoined && status === "unauthenticated") {
@@ -57,6 +61,7 @@ export default function GroupMembershipButton({
     }
 
     setLeaveDialogOpen(false);
+    if (hasJoined) setLoading(true);
     try {
       const endpoint =
         `/api/active-groups/${id}/membership`;
@@ -74,14 +79,15 @@ export default function GroupMembershipButton({
         throw new Error(data.error || (hasJoined ? "שגיאה בביטול ההרשמה" : "שגיאה בהצטרפות"));
       }
 
-      // TODO: fix this reload thing
-      setHasJoined(!hasJoined);
-      // Refresh the page to show updated participants
-      // if (onJoinSuccess) {
-      //   onJoinSuccess();
-      // } else {
-      //   window.location.reload();
-      // }
+      const joining = !hasJoined;
+      setHasJoined(joining);
+
+      if (joining) {
+        // Defer participant list update until user closes the coupon dialog
+        setPendingJoinCallback(true);
+      } else {
+        onLeave?.();
+      }
 
       return data.coupon ?? null;
     } catch (error: any) {
@@ -103,13 +109,25 @@ export default function GroupMembershipButton({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setLeaveDialogOpen(false)}>ביטול</Button>
-          <Button onClick={() => changeMembershipState()}>אישור</Button>
+          <Button onClick={() => setLeaveDialogOpen(false)} disabled={loading}>ביטול</Button>
+          <Button
+            onClick={() => changeMembershipState()}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
+          >
+            {loading ? "מבטל..." : "אישור"}
+          </Button>
         </DialogActions>
       </Dialog>
       <CommitmentDialog
         open={commitmentDialogOpen}
-        onClose={() => setCommitmentDialogOpen(false)}
+        onClose={() => {
+          setCommitmentDialogOpen(false);
+          if (pendingJoinCallback) {
+            setPendingJoinCallback(false);
+            onJoin?.();
+          }
+        }}
         onSubmitPaymentDetails={async (cardNumber, expiry, cvv) => {
           return await changeMembershipState(cardNumber, expiry, cvv);
         }}
