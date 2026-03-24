@@ -12,3 +12,9 @@ export enum PaymentTokenStatus {
   CONSUMED = "CONSUMED",
   RELEASED = "RELEASED",
 }
+
+export enum CouponStatus {
+  ACTIVE = "ACTIVE",
+  EXPIRED = "EXPIRED",
+  USED = "USED",
+}
