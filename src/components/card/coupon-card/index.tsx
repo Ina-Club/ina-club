@@ -1,7 +1,7 @@
 import { Box, Chip, Typography } from "@mui/material";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import Link from "next/link";
-import type { CouponData } from "@/contexts/user-profile-context";
+import { CouponData } from "@/lib/dal";
 import { CouponStatus } from "@/lib/types/status";
 
 interface CouponCardProps {
