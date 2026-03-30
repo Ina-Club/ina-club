@@ -6,12 +6,14 @@ import UserAvatar from "@/components/user-avatar";
 import GroupMembershipButton from "@/components/group-membership-button";
 
 import type { User } from "@/lib/dal";
+import { GroupStatus } from "@/lib/types/status";
 
 interface GroupMembershipPanelProps {
   groupId: string;
   initialParticipants: User[];
   currentUser: User | null; // null when not signed in
   isJoined: boolean;
+  status?: GroupStatus | string;
 }
 
 export default function GroupMembershipPanel({
@@ -19,6 +21,7 @@ export default function GroupMembershipPanel({
   initialParticipants,
   currentUser,
   isJoined,
+  status,
 }: GroupMembershipPanelProps) {
   const [participants, setParticipants] = useState<User[]>(initialParticipants);
 
@@ -88,6 +91,7 @@ export default function GroupMembershipPanel({
           id={groupId}
           fullWidth
           isJoined={isJoined}
+          isActivated={status === "ACTIVATED"}
           onJoin={handleJoin}
           onLeave={handleLeave}
         />

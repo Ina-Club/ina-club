@@ -67,6 +67,9 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
         </Typography>
         <Box sx={{ display: "flex", gap: 1, mt: { xs: 1, md: 0 } }}>
           <Chip label={ag.category || "קטגוריה"} size="small" />
+          {ag.status === GroupStatus.ACTIVATED && (
+            <Chip label="קבוצה הופעלה" color="success" size="small" />
+          )}
         </Box>
       </Box>
 
@@ -164,6 +167,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               initialParticipants={ag.participants}
               currentUser={currentUserForPanel}
               isJoined={alreadyJoined}
+              status={ag.status}
             />
           </Paper>
         </Box>

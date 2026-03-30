@@ -13,6 +13,7 @@ import GroupSectionSkeleton from "@/components/skeleton/group-section-skeleton";
 import { DEFAULT_PAGINATION } from "../config/pagination";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import ResponsiveVerticalCardWrapper from "@/components/wrapper/responsive-vertical-card-wrapper";
+import { GroupStatus } from "lib/types/status";
 
 export default function Page() {
   const headerText = "כל הקבוצות";
@@ -38,7 +39,7 @@ export default function Page() {
 
   const buildParams = useCallback((nextCursor?: string | null) => {
     const params = new URLSearchParams({
-      status: "open",
+      status: [GroupStatus.OPEN, GroupStatus.ACTIVATED],
       limit: DEFAULT_PAGINATION.toString(),
     });
     const trimmedSearch = debouncedParams.searchText.trim();

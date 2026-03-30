@@ -57,6 +57,21 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
           }}
         />
 
+        {activeGroup.status === "ACTIVATED" && (
+          <Chip
+            label="הופעלה"
+            color="success"
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              fontWeight: "bold",
+              zIndex: 1,
+            }}
+          />
+        )}
+
         {/* Floating Like button */}
         <GenericEntityLikeButton
           entity={activeGroup}

@@ -15,6 +15,7 @@ interface GroupMembershipButtonProps {
   fullWidth?: boolean;
   children?: React.ReactNode;
   isJoined?: boolean;
+  isActivated?: boolean;
 }
 
 export default function GroupMembershipButton({
@@ -25,6 +26,7 @@ export default function GroupMembershipButton({
   fullWidth = false,
   children,
   isJoined = false,
+  isActivated = false,
 }: GroupMembershipButtonProps) {
   const { isSignedIn, isLoaded } = useAuth();
   const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
@@ -114,12 +116,12 @@ export default function GroupMembershipButton({
         color={hasJoined ? "error" : "primary"}
         fullWidth={fullWidth}
         onClick={hasJoined ? () => setLeaveDialogOpen(true) : () => setCommitmentDialogOpen(true)}
-        disabled={loading}
+        disabled={loading || (!hasJoined && isActivated)}
       >
         {loading ? (
           <CircularProgress size={20} color="inherit" />
         ) : (
-          hasJoined ? "בטל הרשמה" : children || "הצטרף לקבוצה"
+          hasJoined ? "בטל הרשמה" : (isActivated ? "קבוצה הופעלה" : (children || "הצטרף לקבוצה"))
         )}
       </Button>
     </>
