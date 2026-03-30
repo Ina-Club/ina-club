@@ -1,6 +1,7 @@
 export enum GroupStatus {
   OPEN = "OPEN",
-  CLOSED = "CLOSED",
+  ACTIVATED = "ACTIVATED",
+  RESOLVED = "RESOLVED",
   CANCELED = "CANCELED",
   EXPIRED = "EXPIRED",
   PENDING = "PENDING",

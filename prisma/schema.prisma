@@ -191,7 +191,8 @@ model Coupon {
 
 enum GroupStatus {
   OPEN
-  CLOSED
+  ACTIVATED
+  RESOLVED
   CANCELED
   EXPIRED
   PENDING
