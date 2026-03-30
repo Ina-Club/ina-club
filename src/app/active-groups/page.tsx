@@ -39,9 +39,10 @@ export default function Page() {
 
   const buildParams = useCallback((nextCursor?: string | null) => {
     const params = new URLSearchParams({
-      status: [GroupStatus.OPEN, GroupStatus.ACTIVATED],
       limit: DEFAULT_PAGINATION.toString(),
     });
+    params.append("statuses", GroupStatus.OPEN);
+    params.append("statuses", GroupStatus.ACTIVATED);
     const trimmedSearch = debouncedParams.searchText.trim();
     if (nextCursor) params.set("cursor", nextCursor);
     if (trimmedSearch) params.set("search", trimmedSearch);
