@@ -16,18 +16,12 @@ import {
   Chip,
 } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { LoadingCircle } from "../loading-circle";
 
 const REGISTRATION_TERMS = `בשמירת פרטי אשראי אלה, אנו מבטיחים כי המשתתפים מחויבים לתהליך במעמד השלמת הרכישה על ידי העסק.
 כרטיסך יחויב בדמי ביטול על סך {penaltyAmount} ש"ח בלבד באחד משני המקרים הבאים:
 • במידה ותבטל את הרשמתך לאחר אישור הקבוצה.
 • במידה ולא תממש את הקנייה במועד שנקבע.`;
-
-interface CouponCreatedData {
-  code: string;
-  validTo: string;
-}
 
 interface CommitmentDialogProps {
   open: boolean;
@@ -36,7 +30,7 @@ interface CommitmentDialogProps {
     cardNumber: string,
     expiry: string,
     cvv: string
-  ) => Promise<CouponCreatedData>;
+  ) => Promise<void>;
 }
 
 export default function CommitmentDialog({
@@ -48,8 +42,6 @@ export default function CommitmentDialog({
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [penaltyAmount, setPenaltyAmount] = useState<number | null>(null);
-  const [coupon, setCoupon] = useState<CouponCreatedData | null>(null);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (open && penaltyAmount === null) {
@@ -83,8 +75,7 @@ export default function CommitmentDialog({
 
     setLoading(true);
     try {
-      const result = await onSubmitPaymentDetails(cardNumber, expiry, cvv);
-      setCoupon(result);
+      await onSubmitPaymentDetails(cardNumber, expiry, cvv);
       setStep(3);
     } catch (error) {
       console.error("Token submission failed", error);
@@ -100,25 +91,8 @@ export default function CommitmentDialog({
     setCardNumber("");
     setExpiry("");
     setCvv("");
-    setCoupon(null);
-    setCopied(false);
     onClose();
   };
-
-  const handleCopy = () => {
-    if (coupon) {
-      navigator.clipboard.writeText(coupon.code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString("he-IL", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
 
   const stepTitles: Record<number, string> = {
     1: "הסכם התחייבות הקבוצה",
@@ -208,51 +182,11 @@ export default function CommitmentDialog({
               הצטרפת לקבוצה בהצלחה!
             </Typography>
             <Typography variant="body2" color="text.secondary" textAlign="center">
-              קופון ההנחה שלך נוצר ונשמר בפרופיל שלך.
+              קוד ההנחה שלך יווצר ויוצג בפרופיל האישי שלך ברגע שהקבוצה תופעל על ידי העסק.
             </Typography>
 
-            {coupon && (
-              <Box
-                sx={{
-                  border: "2px dashed",
-                  borderColor: "primary.main",
-                  borderRadius: 3,
-                  px: 4,
-                  py: 3,
-                  textAlign: "center",
-                  bgcolor: "primary.50",
-                  width: "100%",
-                }}
-              >
-                <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-                  קוד הקופון שלך
-                </Typography>
-                <Typography
-                  variant="h4"
-                  fontFamily="monospace"
-                  fontWeight="bold"
-                  letterSpacing={4}
-                  color="primary.main"
-                >
-                  {coupon.code}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-                  בתוקף עד: {formatDate(coupon.validTo)}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<ContentCopyIcon />}
-                  onClick={handleCopy}
-                  sx={{ mt: 2 }}
-                >
-                  {copied ? "הועתק!" : "העתק קוד"}
-                </Button>
-              </Box>
-            )}
-
             <Chip
-              label="הקופון שמור בפרופיל שלך → הקופונים שלי"
+              label="הקופון יישמר בפרופיל שלך ← הקופונים שלי"
               color="success"
               variant="outlined"
               size="small"

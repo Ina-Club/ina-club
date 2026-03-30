@@ -4,7 +4,6 @@ import { validateSession } from "@/lib/auth";
 import { getPenaltyFeeAmount } from "@/lib/payments/config";
 import { PaymentTokenStatus } from "@/lib/types/status";
 import { chargeParticipantToken } from "@/lib/services/activeGroups";
-import { createGroupCoupon } from "@/lib/services/coupon";
 
 async function commitJoinTransaction(
     groupId: string,
@@ -33,11 +32,11 @@ async function commitJoinTransaction(
     });
 }
 
-async function processJoin(groupId: string, userId: string, groupDeadline: Date, req: Request) {
+async function processJoin(groupId: string, userId: string, req: Request) {
     const body = await req.json();
     const { cardNumber, expiry, cvv } = body;
 
-    // In a real application, you'd never send raw CC to your own server (PCI DSS).
+    // TODO: Add validation for payment details + DONT SEND RAW CC TO SERVER
     if (!cardNumber || !expiry || !cvv) {
         console.error("Commitment payment details required to join active group");
         return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
@@ -58,9 +57,8 @@ async function processJoin(groupId: string, userId: string, groupDeadline: Date,
     }
 
     await commitJoinTransaction(groupId, userId, providerRecord.id, pspToken);
-    const coupon = await createGroupCoupon(userId, groupId, groupDeadline);
 
-    return NextResponse.json({ success: true, coupon });
+    return NextResponse.json({ success: true });
 }
 
 async function processLeave(groupId: string, userId: string) {
@@ -126,7 +124,7 @@ async function handleMembership(groupId: string, action: "join" | "leave", req?:
         if (action === "join") {
             if (existingParticipant) return NextResponse.json({ error: "User is already a participant" }, { status: 400 });
             if (!req) return NextResponse.json({ error: "Request needed to parse JSON body" }, { status: 400 });
-            return await processJoin(groupId, userId, activeGroup.deadline, req);
+            return await processJoin(groupId, userId, req);
         } else {
             if (!existingParticipant) return NextResponse.json({ error: "User is not a participant" }, { status: 400 });
             return await processLeave(groupId, userId);
