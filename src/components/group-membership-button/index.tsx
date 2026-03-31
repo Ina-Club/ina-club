@@ -40,12 +40,15 @@ export default function GroupMembershipButton({
     setHasJoined(isJoined);
   }, [isJoined]);
 
-  const changeMembershipState = async (cardNumber?: string, expiry?: string, cvv?: string) => {
+  const handleCommitmentDialogOpen = () => {
     if (status === "unauthenticated") {
       router.push("/sign-in");
       return;
     }
+    setCommitmentDialogOpen(true);
+  };
 
+  const changeMembershipState = async (cardNumber?: string, expiry?: string, cvv?: string) => {
     setLeaveDialogOpen(false);
     if (hasJoined) setLoading(true);
     try {
@@ -115,13 +118,13 @@ export default function GroupMembershipButton({
         variant="contained"
         color={hasJoined ? "error" : "primary"}
         fullWidth={fullWidth}
-        onClick={hasJoined ? () => setLeaveDialogOpen(true) : () => setCommitmentDialogOpen(true)}
+        onClick={hasJoined ? () => setLeaveDialogOpen(true) : handleCommitmentDialogOpen}
         disabled={loading || (!hasJoined && isActivated)}
       >
         {loading ? (
           <CircularProgress size={20} color="inherit" />
         ) : (
-          hasJoined ? "בטל הרשמה" : (isActivated ? "קבוצה הופעלה" : (children || "הצטרף לקבוצה"))
+          hasJoined ? "בטל הרשמה" : children || "הצטרף לקבוצה"
         )}
       </Button>
     </>
