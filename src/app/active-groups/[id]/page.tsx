@@ -34,7 +34,6 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
   const alreadyJoined = !!userId ? await checkUserIsActiveGroupParticipant(userId, ag.id) : false;
   const similarGroups = await fetchActiveGroups({ category: { name: ag.category ?? "" }, NOT: { id } }, 3);
   const likeCount = await fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP);
-  // TODO: fix users with no first name or image
   const currentUserForPanel = userId && user
     ? {
         firstName: user.firstName ?? "משתמש",
