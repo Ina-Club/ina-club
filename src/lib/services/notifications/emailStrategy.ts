@@ -7,6 +7,7 @@ export class EmailNotificationStrategy implements INotificationStrategy {
   async send(context: NotificationContext): Promise<boolean> {
     if (!context.email) return false;
 
+    // TODO: Change to generic email template
     try {
       const { data, error } = await resend.emails.send({
         from: process.env.EMAIL_FROM || 'INA Club <noreply@ina.club>',
