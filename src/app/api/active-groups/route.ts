@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const titleParam = searchParams.get('title');
-    const statusesParams = searchParams.getAll('statuses');
+    const statusesParams = searchParams.getAll('status');
     const lastWeekParam = searchParams.get('lastWeek');
     const searchParam = searchParams.get("search");
     const categoryParams = searchParams.getAll("category").filter(Boolean);

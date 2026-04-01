@@ -34,7 +34,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
       lastWeek: "true",
       limit: DEFAULT_PAGINATION.toString()
     });
-    params.append("statuses", GroupStatus.OPEN);
+    params.append("status", GroupStatus.OPEN);
     if (nextCursor) params.set("cursor", nextCursor);
 
     try {
