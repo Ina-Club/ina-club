@@ -5,14 +5,11 @@ import {
   Chip,
   Divider,
   Paper,
-  Avatar,
 } from "@mui/material";
 import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import GroupImages from "@/components/group-images/group-images";
 import NotFound from "app/not-found";
-import GroupMembershipButton from "@/components/group-membership-button";
-import UserAvatar from "@/components/user-avatar";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchActiveGroups } from "@/lib/groups";
@@ -20,6 +17,7 @@ import GenericEntityLikeButton from "@/components/floating-like-button/generic-e
 import { LikeTargetType } from "@/lib/types/like";
 import { fetchGroupLikeCount } from "@/lib/groups";
 import ParticipantsProgress from "@/components/card/active-group-card/participations-progress-bar";
+import GroupMembershipPanel from "@/components/group-membership-button/group-membership-panel";
 
 export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
   const { id } = await params;
@@ -33,15 +31,15 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
     );
   }
 
-  const participantsCount = ag.participants.length;
-  const participantAvatars = ag.participants.slice(0, 10).map((p) => ({
-    name: p.firstName || null,
-    imageUrl: p.image || undefined,
-  }));
-  const viewerEmail = user?.emailAddresses[0]?.emailAddress;
   const alreadyJoined = !!userId ? await checkUserIsActiveGroupParticipant(userId, ag.id) : false;
   const similarGroups = await fetchActiveGroups({ category: { name: ag.category ?? "" }, NOT: { id } }, 3);
   const likeCount = await fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP);
+  const currentUserForPanel = userId && user
+    ? {
+        firstName: user.firstName ?? "משתמש",
+        image: user.imageUrl ?? "",
+      }
+    : null;
 
   return (
     <Box
@@ -68,6 +66,9 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
         </Typography>
         <Box sx={{ display: "flex", gap: 1, mt: { xs: 1, md: 0 } }}>
           <Chip label={ag.category || "קטגוריה"} size="small" />
+          {ag.status === GroupStatus.ACTIVATED && (
+            <Chip label="קבוצה הופעלה" color="success" size="small" />
+          )}
         </Box>
       </Box>
 
@@ -160,46 +161,12 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
             <Typography variant="subtitle2">
               {likeCount} אנשים כבר סימנו בלייק את הקבוצה!
             </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" fontWeight={700} mb={1}>
-              משתתפים ({participantsCount})
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.75,
-                flexWrap: "wrap",
-                mb: 3,
-              }}
-            >
-              {participantAvatars.map((p, index) => (
-                <UserAvatar
-                  key={index}
-                  name={p.name}
-                  identifier={index.toString()}
-                  imageUrl={p.imageUrl}
-                  sx={{ width: 36, height: 36 }}
-                />
-              ))}
-              {participantsCount > participantAvatars.length && (
-                <Avatar
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    bgcolor: "grey.300",
-                    color: "text.primary",
-                  }}
-                >
-                  +{participantsCount - participantAvatars.length}
-                </Avatar>
-              )}
-            </Box>
-            <GroupMembershipButton
-              type="active-group"
-              id={id}
-              fullWidth
+            <GroupMembershipPanel
+              groupId={id}
+              initialParticipants={ag.participants}
+              currentUser={currentUserForPanel}
               isJoined={alreadyJoined}
+              status={ag.status}
             />
           </Paper>
         </Box>

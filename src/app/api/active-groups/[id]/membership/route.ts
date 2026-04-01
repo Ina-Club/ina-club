@@ -5,31 +5,12 @@ import { getPenaltyFeeAmount } from "@/lib/payments/config";
 import { PaymentTokenStatus } from "@/lib/types/status";
 import { chargeParticipantToken } from "@/lib/services/activeGroups";
 
-async function processJoin(groupId: string, userId: string, req: Request) {
-    const body = await req.json();
-    const { cardNumber, expiry, cvv } = body;
-
-    // In a real application, you'd never send raw CC to your own server (PCI DSS).
-    if (!cardNumber || !expiry || !cvv) {
-        console.error("Commitment payment details required to join active group");
-        return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
-    }
-
-    // Since this is an MVP mock, we generate the mock token here 
-    // instead of expecting the frontend to know about the PSP.
-    const pspName = "MOCK_PSP";
-    const pspToken = `tok_test_${Math.random().toString(36).substring(7)}`;
-
-    const providerRecord = await prisma.paymentServiceProvider.findUnique({
-        where: { name: pspName },
-    });
-
-    if (!providerRecord) {
-        console.error("Payment provider not found");
-        return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
-    }
-
-    // Transaction to add participant and save the vaulted token
+async function commitJoinTransaction(
+    groupId: string,
+    userId: string,
+    pspId: string,
+    pspToken: string,
+) {
     await prisma.$transaction(async (tx) => {
         await tx.activeGroupParticipant.create({
             data: {
@@ -43,12 +24,39 @@ async function processJoin(groupId: string, userId: string, req: Request) {
             data: {
                 userId,
                 activeGroupId: groupId,
-                pspId: providerRecord.id,
+                pspId,
                 pspToken,
                 agreedFee: getPenaltyFeeAmount(),
             },
         });
     });
+}
+
+async function processJoin(groupId: string, userId: string, req: Request) {
+    const body = await req.json();
+    const { cardNumber, expiry, cvv } = body;
+
+    // TODO: Add validation for payment details + DONT SEND RAW CC TO SERVER
+    if (!cardNumber || !expiry || !cvv) {
+        console.error("Commitment payment details required to join active group");
+        return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
+    }
+
+    // Since this is an MVP mock, we generate the mock token here
+    // instead of expecting the frontend to know about the PSP.
+    const pspName = "MOCK_PSP";
+    const pspToken = `tok_test_${Math.random().toString(36).substring(7)}`;
+
+    const providerRecord = await prisma.paymentServiceProvider.findUnique({
+        where: { name: pspName },
+    });
+
+    if (!providerRecord) {
+        console.error("Payment provider not found");
+        return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
+    }
+
+    await commitJoinTransaction(groupId, userId, providerRecord.id, pspToken);
 
     return NextResponse.json({ success: true });
 }
@@ -83,6 +91,12 @@ async function processLeave(groupId: string, userId: string) {
             userId_activeGroupId: { userId, activeGroupId: groupId },
         },
     });
+    await prisma.coupon.deleteMany({
+        where: {
+            userId,
+            groupId,
+        }
+    })
 
     return NextResponse.json({ success: true });
 }
@@ -96,7 +110,7 @@ async function handleMembership(groupId: string, action: "join" | "leave", req?:
 
         const activeGroup = await prisma.activeGroup.findUnique({
             where: { id: groupId },
-            select: { id: true, status: true },
+            select: { id: true, status: true, deadline: true },
         });
 
         if (!activeGroup) return NextResponse.json({ error: "קבוצה לא נמצאה" }, { status: 404 });

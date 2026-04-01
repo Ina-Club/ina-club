@@ -30,14 +30,16 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
         flex: 1,
         overflowWrap: "anywhere",
         overflow: "hidden",
-        transition: "transform 0.25s, box-shadow 0.25s",
+        transition: "transform 0.25s, box-shadow 0.25s, opacity 0.25s",
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
+        opacity: activeGroup.status === "ACTIVATED" ? 0.65 : 1,
         "&:hover": {
           transform: "translateY(-6px)",
           boxShadow: 8,
           cursor: "pointer",
+          opacity: activeGroup.status === "ACTIVATED" ? 0.85 : 1,
         },
       }}
       onClick={goToActiveGroup}
@@ -56,6 +58,21 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
             objectFit: "cover",
           }}
         />
+
+        {activeGroup.status === "ACTIVATED" && (
+          <Chip
+            label="הופעלה"
+            color="success"
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              fontWeight: "bold",
+              zIndex: 1,
+            }}
+          />
+        )}
 
         {/* Floating Like button */}
         <GenericEntityLikeButton

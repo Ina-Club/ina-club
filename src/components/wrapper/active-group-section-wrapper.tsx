@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { ActiveGroup } from "lib/dal";
 import ActiveGroupCardSkeleton from "../skeleton/active-group-card-skeleton";
 import { DEFAULT_PAGINATION } from "@/app/config/pagination";
+import { GroupStatus } from "lib/types/status";
 
 interface GroupSectionWrapperProps { }
 
@@ -30,10 +31,10 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
     }
 
     const params = new URLSearchParams({
-      status: "open",
       lastWeek: "true",
       limit: DEFAULT_PAGINATION.toString()
     });
+    params.append("status", GroupStatus.OPEN);
     if (nextCursor) params.set("cursor", nextCursor);
 
     try {

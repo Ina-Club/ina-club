@@ -4,25 +4,29 @@ import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CommitmentDialog from "./commitment-dialog";
-import { Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Typography } from "@mui/material";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 
 
 interface GroupMembershipButtonProps {
   type: "active-group";
   id: string;
-  onJoinSuccess?: () => void;
+  onJoin?: () => void;
+  onLeave?: () => void;
   fullWidth?: boolean;
   children?: React.ReactNode;
   isJoined?: boolean;
+  isActivated?: boolean;
 }
 
 export default function GroupMembershipButton({
   type,
   id,
-  onJoinSuccess,
+  onJoin,
+  onLeave,
   fullWidth = false,
   children,
   isJoined = false,
+  isActivated = false,
 }: GroupMembershipButtonProps) {
   const { isSignedIn, isLoaded } = useAuth();
   const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
@@ -36,28 +40,17 @@ export default function GroupMembershipButton({
     setHasJoined(isJoined);
   }, [isJoined]);
 
-  const handleJoinClick = () => {
+  const handleCommitmentDialogOpen = () => {
     if (status === "unauthenticated") {
       router.push("/sign-in");
       return;
     }
-    changeMembershipState();
+    setCommitmentDialogOpen(true);
   };
 
   const changeMembershipState = async (cardNumber?: string, expiry?: string, cvv?: string) => {
-    // Check if user is authenticated only when joining
-    if (!hasJoined && status === "unauthenticated") {
-      router.push("/sign-in");
-      return;
-    }
-
-    if (!hasJoined && type === "active-group" && (!cardNumber || !expiry || !cvv)) {
-      setCommitmentDialogOpen(true);
-      return;
-    }
-
-    setLoading(true);
     setLeaveDialogOpen(false);
+    if (hasJoined) setLoading(true);
     try {
       const endpoint =
         `/api/active-groups/${id}/membership`;
@@ -70,18 +63,20 @@ export default function GroupMembershipButton({
         body: payload ? JSON.stringify(payload) : undefined,
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || (hasJoined ? "שגיאה בביטול ההרשמה" : "שגיאה בהצטרפות"));
       }
 
-      setHasJoined(!hasJoined);
-      // Refresh the page to show updated participants
-      if (onJoinSuccess) {
-        onJoinSuccess();
+      const joining = !hasJoined;
+      setHasJoined(joining);
+
+      if (joining) {
+        onJoin?.();
       } else {
-        window.location.reload();
+        onLeave?.();
       }
+
     } catch (error: any) {
       console.error("Change Membership error:", error);
       alert(hasJoined ? "שגיאה בביטול ההרשמה" : "שגיאה בהצטרפות");
@@ -101,15 +96,21 @@ export default function GroupMembershipButton({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setLeaveDialogOpen(false)}>ביטול</Button>
-          <Button onClick={() => changeMembershipState()}>אישור</Button>
+          <Button onClick={() => setLeaveDialogOpen(false)} disabled={loading}>ביטול</Button>
+          <Button
+            onClick={() => changeMembershipState()}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={18} color="inherit" /> : null}
+          >
+            {loading ? "מבטל..." : "אישור"}
+          </Button>
         </DialogActions>
       </Dialog>
       <CommitmentDialog
         open={commitmentDialogOpen}
         onClose={() => setCommitmentDialogOpen(false)}
         onSubmitPaymentDetails={async (cardNumber, expiry, cvv) => {
-          await changeMembershipState(cardNumber, expiry, cvv);
+          return await changeMembershipState(cardNumber, expiry, cvv);
         }}
       />
 
@@ -117,8 +118,8 @@ export default function GroupMembershipButton({
         variant="contained"
         color={hasJoined ? "error" : "primary"}
         fullWidth={fullWidth}
-        onClick={hasJoined ? () => setLeaveDialogOpen(true) : handleJoinClick}
-        disabled={loading}
+        onClick={hasJoined ? () => setLeaveDialogOpen(true) : handleCommitmentDialogOpen}
+        disabled={loading || (!hasJoined && isActivated)}
       >
         {loading ? (
           <CircularProgress size={20} color="inherit" />

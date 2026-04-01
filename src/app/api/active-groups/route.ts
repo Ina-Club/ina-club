@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const titleParam = searchParams.get('title');
-    const statusParam = searchParams.get('status');
+    const statusesParams = searchParams.getAll('status');
     const lastWeekParam = searchParams.get('lastWeek');
     const searchParam = searchParams.get("search");
     const categoryParams = searchParams.getAll("category").filter(Boolean);
@@ -29,12 +29,14 @@ export async function GET(req: Request) {
       });
       return NextResponse.json({ exists: !!exists });
     }
-    if (statusParam) {
-      const status: GroupStatus = GroupStatus[statusParam.toUpperCase() as keyof typeof GroupStatus]
-      if (!status) {
+    if (statusesParams.length > 0) {
+      const statuses: GroupStatus[] = statusesParams
+        .map(s => GroupStatus[s.toUpperCase() as keyof typeof GroupStatus])
+        .filter(Boolean);
+      if (statuses.length === 0) {
         return NextResponse.json({ error: "Incorrect status provided!" }, { status: 400 });
       }
-      filters.push({ status });
+      filters.push({ status: { in: statuses } });
     }
     if (lastWeekParam === 'true') {
       const oneWeekAgo = new Date();

@@ -54,6 +54,12 @@ export async function GET(request: Request) {
       }
     });
 
+    const coupons = await prisma.coupon.findMany({
+      where: { userId },
+      include: { activeGroup: { select: { id: true, title: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+
     const participantUserIds = memberships.flatMap((m) =>
       m.activeGroup.participants.map((p) => p.userId)
     );
@@ -92,6 +98,16 @@ export async function GET(request: Request) {
         authorAvatar: userData.profilePicture,
         likeCount: 0,
         isLikedByMe: false,
+      })),
+
+      coupons: coupons.map(c => ({
+        id: c.id,
+        code: c.code,
+        groupId: c.groupId,
+        groupTitle: c.activeGroup.title,
+        validTo: c.validTo,
+        status: c.status,
+        createdAt: c.createdAt,
       }))
     };
 

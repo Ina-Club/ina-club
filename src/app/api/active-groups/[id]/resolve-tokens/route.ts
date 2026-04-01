@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession } from "@/lib/auth";
-import { PaymentTokenStatus } from "@/lib/types/status";
+import { PaymentTokenStatus, GroupStatus } from "@/lib/types/status";
 import { chargeParticipantToken, releaseParticipantToken } from "@/lib/services/activeGroups";
 
 
@@ -64,6 +64,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                 { status: 207 }
             );
         }
+
+        await prisma.activeGroup.update({
+            where: { id: groupId },
+            data: { status: GroupStatus.RESOLVED }
+        });
 
         return NextResponse.json({ success: true, message: "Tokens processed successfully." });
     } catch (error) {
