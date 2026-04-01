@@ -9,12 +9,12 @@ import { chargeParticipantToken, releaseParticipantToken } from "@/lib/services/
  * Endpoint for B2B. Receives {"noShowUserIds": ["uuid-1", "uuid-2"]}
  * Charges the no-shows, and detaches/releases tokens for the rest.
  */
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { response } = await validateSession();
         if (response) return response;
 
-        const groupId = params.id;
+        const { id: groupId } = await params;
         if (!groupId) return NextResponse.json({ error: "Group ID required" }, { status: 400 });
 
         const body = await req.json();
