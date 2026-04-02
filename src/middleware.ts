@@ -5,15 +5,10 @@ const isProtectedRoute = createRouteMatcher([
   "/smart-search(.*)",
   "/create(.*)",
   "/price-analyzer(.*)",
-]);
-
-const isPublicApiRoute = createRouteMatcher([
-  "/api/webhooks(.*)",
+  "/onboarding(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Webhook routes must be fully public (server-to-server from Clerk)
-  if (isPublicApiRoute(req)) return;
   if (isProtectedRoute(req)) await auth.protect();
 });
 
