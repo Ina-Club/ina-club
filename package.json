@@ -22,8 +22,7 @@
     "react-dom": "19.1.1",
     "react-number-format": "^5.4.4",
     "resend": "^6.0.2",
-    "stylis-plugin-rtl": "^2.1.1",
-    "svix": "^1.89.0"
+    "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
     "@types/node": "^20",
