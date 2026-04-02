@@ -21,6 +21,24 @@ export default function OnboardingPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backgroundUploadStarted = useRef(false);
+
+  const setRandomAvatar = async () => {
+    if (!user || backgroundUploadStarted.current) return;
+    backgroundUploadStarted.current = true;
+
+    try {
+      const url = `https://api.dicebear.com/9.x/bottts-neutral/png?seed=${encodeURIComponent(user.id)}&size=256`;
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const file = new File([blob], `${user.id}-avatar.png`, { type: "image/png" });
+      await user.setProfileImage({ file });
+    } catch (err) {
+      backgroundUploadStarted.current = false;
+      throw err;
+    }
+  };
+
 
   useEffect(() => {
     const checkUser = async () => {
@@ -37,10 +55,14 @@ export default function OnboardingPage() {
         router.push("/");
       }
 
-      else setIsChecking(false);
+      else {
+        setRandomAvatar().catch(console.error);
+        setIsChecking(false);
+      }
     };
 
     checkUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isLoaded, router]);
 
   if (!isLoaded || !user || isChecking) {
@@ -81,14 +103,6 @@ export default function OnboardingPage() {
       setIsUploading(false);
     }
   };
-
-  const setRandomAvatar = async () => {
-    const url = `https://api.dicebear.com/9.x/bottts-neutral/png?seed=${encodeURIComponent(user.id)}&size=256`;
-    const res = await fetch(url);
-    const blob = await res.blob();
-    const file = new File([blob], `${user.id}-avatar.png`, { type: "image/png" });
-    await user.setProfileImage({ file });
-  }
 
   const handleSaveAndContinue = async () => {
     if (!selectedFile) {
