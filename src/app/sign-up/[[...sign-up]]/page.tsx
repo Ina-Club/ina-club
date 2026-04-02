@@ -94,6 +94,8 @@ export default function SignUpPage() {
           },
         }}
         signInUrl="/sign-in"
+        fallbackRedirectUrl="/onboarding"
+        forceRedirectUrl="/onboarding"
       />
     </Box>
   );

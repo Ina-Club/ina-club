@@ -5,6 +5,7 @@ const isProtectedRoute = createRouteMatcher([
   "/smart-search(.*)",
   "/create(.*)",
   "/price-analyzer(.*)",
+  "/onboarding(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

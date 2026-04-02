@@ -73,6 +73,7 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  // TODO: Handle Clerk's delete account flow (Enrolled groups, created wish items, liked items, coupons).
   const {
     profile: profileSummary,
     fullProfile,
