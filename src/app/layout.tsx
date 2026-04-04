@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 import { SnackbarProvider } from "@/contexts/snackbar-context";
+import { CLERK_APPEARANCE_CONFIG, CLERK_LOCALIZATION_CONFIG } from "@/lib/clerk-config";
 
 export default function RootLayout({
   children,
@@ -21,7 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={CLERK_APPEARANCE_CONFIG}
+      localization={CLERK_LOCALIZATION_CONFIG}
+      signUpUrl="/sign-up"
+      signInUrl="/sign-in"
+    >
+      {" "}
       <ThemeRegistry>
         <html lang="he" dir="rtl">
           <body
