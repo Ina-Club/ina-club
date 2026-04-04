@@ -91,6 +91,7 @@ export default function PrivacyPolicyPage() {
     <StaticPageLayout
       header="מדיניות פרטיות"
       description="איך אנו מגנים על המידע שלכם ומאפשרים שימוש בטוח ב-INA Club."
+
       sections={sections}
     />
   );

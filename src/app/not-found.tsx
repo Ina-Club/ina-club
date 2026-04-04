@@ -19,10 +19,10 @@ export default function NotFound() {
       <Typography variant="h3" component="h1" color="text.primary">
         הדף לא נמצא
       </Typography>
-      <Typography variant="body1" color="text.secondary">
-        מצטערים, לא הצלחנו למצוא את הדף שחיפשת.
+      <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 420, lineHeight: 1.7 }}>
+        ייתכן שהקישור ישן או שהדף הוזז. מדף הבית אפשר להגיע לבקשות, לקבוצות פעילות ולחיפוש החכם.
       </Typography>
-      <Button component={Link} href="/" variant="contained" color="primary">
+      <Button component={Link} href="/" variant="contained" color="primary" sx={{ borderRadius: 2, px: 3 }}>
         חזרה לדף הבית
       </Button>
     </Box>

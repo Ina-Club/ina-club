@@ -42,6 +42,7 @@ import UserAvatar from "@/components/user-avatar";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { useFavorites } from "@/contexts/favorites-context";
 import CouponCard from "@/components/card/coupon-card";
+import { DefaultPageBanner } from "@/components/default-page-banner";
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -328,6 +329,16 @@ function ProfileContent() {
   );
 
   return (
+    <>
+      <DefaultPageBanner
+        header="הפרופיל שלי"
+        description="כאן מרוכזות הבקשות שפרסמתם, הקבוצות שאתם בהן, מועדפים וקופונים — ועריכת פרטי החשבון."
+        hintBullets={[
+          "הטאבים מחליפים בין בקשות שפרסמתם, קבוצות שבהן אתם משתתפים, מועדפים וקופונים.",
+          "«ערוך פרופיל» מעדכן שם ותמונה.",
+          "מועדפים מסונכרנים עם לייקים מדפי בקשות וקבוצות.",
+        ]}
+      />
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
       {/* Incomplete Profile Alert */}
       {hasIncompleteProfile && (
@@ -658,6 +669,7 @@ function ProfileContent() {
         </DialogActions>
       </Dialog>
     </Box>
+    </>
   );
 }
 

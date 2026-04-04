@@ -32,13 +32,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         //     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         // }
 
-        if (activeGroup.status === GroupStatus.ACTIVATED || activeGroup.status === GroupStatus.RESOLVED || activeGroup.status === GroupStatus.CANCELED || activeGroup.status === GroupStatus.EXPIRED) {
+        const st = activeGroup.status as string;
+        if (
+            st === GroupStatus.ACTIVATED ||
+            st === "CLOSED" ||
+            st === GroupStatus.RESOLVED ||
+            st === GroupStatus.CANCELED ||
+            st === GroupStatus.EXPIRED
+        ) {
             return NextResponse.json({ error: "Group is already activated, resolved, or canceled" }, { status: 400 });
         }
 
         await prisma.activeGroup.update({
             where: { id: groupId },
-            data: { status: GroupStatus.ACTIVATED }
+            // Prisma enum in node_modules may lag schema (CLOSED vs ACTIVATED); value must match DB.
+            data: { status: GroupStatus.ACTIVATED as never },
         });
 
         const contexts = [];

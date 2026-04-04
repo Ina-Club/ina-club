@@ -5,7 +5,9 @@ import {
   Chip,
   Divider,
   Paper,
+  Stack,
 } from "@mui/material";
+import { AppPageHeader } from "@/components/page-shell/AppPageHeader";
 import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import GroupImages from "@/components/group-images/group-images";
@@ -42,35 +44,27 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
     : null;
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 1200,
-        mx: "auto",
-        px: { xs: 2, md: 3 },
-        py: { xs: 3, md: 5 },
-        overflowWrap: "anywhere",
-      }}
-    >
+    <>
+      <AppPageHeader
+        title={ag.title}
+        description="למעלה: תמונות ותיאור המוצר ואז מחירים והצטרפות בלוח הצמוד. למטה מופיעות קבוצות דומות."
+      />
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          mb: 2,
+          width: "100%",
+          maxWidth: 1200,
+          mx: "auto",
+          px: { xs: 2, md: 3 },
+          py: { xs: 2, md: 3 },
+          overflowWrap: "anywhere",
         }}
       >
-        <Typography variant="h4" fontWeight={800} color="primary">
-          {ag.title}
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1, mt: { xs: 1, md: 0 } }}>
-          <Chip label={ag.category || "קטגוריה"} size="small" />
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+          <Chip label={ag.category || "קטגוריה"} size="small" variant="outlined" />
           {ag.status === GroupStatus.ACTIVATED && (
             <Chip label="קבוצה הופעלה" color="success" size="small" />
           )}
-        </Box>
-      </Box>
+        </Stack>
 
       <Box
         sx={{
@@ -205,6 +199,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
           </Box>
         </Box>
       )}
-    </Box>
+      </Box>
+    </>
   );
 }

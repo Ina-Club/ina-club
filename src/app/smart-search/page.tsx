@@ -58,7 +58,15 @@ export default function SmartSearchPage() {
 
     return (
         <>
-            <DefaultPageBanner header={headerText} description={descriptionText} />
+            <DefaultPageBanner
+                header={headerText}
+                description={descriptionText}
+                hintBullets={[
+                    "מזינים משפט בעברית ולוחצים חיפוש או Enter.",
+                    "מוצגות עד ארבע קבוצות ועד ארבע בקשות רלוונטיות.",
+                    "ממשיכים מכאן בלחיצה על כרטיס לדף קבוצה או בקשה.",
+                ]}
+            />
             <Box sx={{ width: "100%", maxWidth: 800, mx: "auto", px: { xs: 2, md: 0 }, bgcolor: "white" }}>
                 <Card
                     sx={{
