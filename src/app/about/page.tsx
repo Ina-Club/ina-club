@@ -2,15 +2,15 @@ import { StaticPageLayout, StaticPageSection } from "@/components/static-page/st
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "מי אנחנו | INA Club",
-  description: "קצת על החזון של INA Club, הערכים והדרך שבה אנחנו בונים קניות קבוצתיות חכמות.",
+  title: "מי אנחנו | Ina Club",
+  description: "קצת על החזון של Ina Club, הערכים והדרך שבה אנחנו בונים קניות קבוצתיות חכמות.",
 };
 
 const sections: StaticPageSection[] = [
   {
     title: "מי אנחנו",
     paragraphs: [
-      "INA Club נולדה מתוך הרצון להפוך קניות קבוצתיות לכלי פשוט, בטוח ומשתלם לכולם. אנחנו מחברים בין אנשים שמחפשים לרכוש יחד, לבין ספקים שמתחייבים להנחות משמעותיות כשיש ביקוש מרוכז.",
+      "Ina Club נולדה מתוך הרצון להפוך קניות קבוצתיות לכלי פשוט, בטוח ומשתלם לכולם. אנחנו מחברים בין אנשים שמחפשים לרכוש יחד, לבין ספקים שמתחייבים להנחות משמעותיות כשיש ביקוש מרוכז.",
     ],
   },
   {
@@ -59,7 +59,7 @@ export default function AboutPage() {
   return (
     <StaticPageLayout
       header="מי אנחנו"
-      description="החזון, הערכים והצוות שמאחורי INA Club."
+      description="החזון, הערכים והצוות שמאחורי Ina Club."
       sections={sections}
     />
   );

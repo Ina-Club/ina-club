@@ -10,7 +10,7 @@ export class EmailNotificationStrategy implements INotificationStrategy {
     // TODO: Change to generic email template
     try {
       const { data, error } = await resend.emails.send({
-        from: process.env.EMAIL_FROM || 'INA Club <noreply@ina.club>',
+        from: process.env.EMAIL_FROM || 'Ina Club <noreply@ina.club>',
         to: [context.email],
         subject: `קבוצת ${context.groupTitle} הופעלה! קוד ההנחה שלך בפנים`,
         html: `
@@ -22,7 +22,7 @@ export class EmailNotificationStrategy implements INotificationStrategy {
               ${context.couponCode}
             </div>
             <p><small>הקוד בתוקף עד: ${new Date(context.validTo).toLocaleDateString('he-IL')}</small></p>
-            <p>תודה,<br>צוות INA Club</p>
+            <p>תודה,<br>צוות Ina Club</p>
           </div>
         `
       });

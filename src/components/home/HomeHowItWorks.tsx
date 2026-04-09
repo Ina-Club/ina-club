@@ -83,7 +83,7 @@ export function HomeHowItWorks({ elevatedSurface = true }: HomeHowItWorksProps) 
             fontSize: { xs: "1.5rem", md: "1.85rem" },
           }}
         >
-          איך עובדים עם INA Club?
+          איך עובדים עם Ina Club?
         </Typography>
         <Typography
           variant="body1"

@@ -2,8 +2,8 @@ import { StaticPageLayout, StaticPageSection } from "@/components/static-page/st
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "צור קשר | INA Club",
-  description: "כל הדרכים ליצור קשר עם צוות INA Club לשאלות, תמיכה ושיתופי פעולה.",
+  title: "צור קשר | Ina Club",
+  description: "כל הדרכים ליצור קשר עם צוות Ina Club לשאלות, תמיכה ושיתופי פעולה.",
 };
 
 const sections: StaticPageSection[] = [
@@ -60,7 +60,7 @@ export default function ContactPage() {
   return (
     <StaticPageLayout
       header="צור קשר"
-      description="צוות INA Club כאן בשבילכם — תמיכה, שיתופי פעולה ושאלות כלליות."
+      description="צוות Ina Club כאן בשבילכם — תמיכה, שיתופי פעולה ושאלות כלליות."
       sections={sections}
     />
   );

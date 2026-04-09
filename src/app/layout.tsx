@@ -8,7 +8,7 @@ import { Box } from "@mui/material";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "INA Club — קניות קבוצתיות חכמות",
+  title: "Ina Club — קניות קבוצתיות חכמות",
   description:
     "בקשות מהקהילה, קבוצות רכישה פעילות, חיפוש חכם ומנתח מחירים — הכל במקום אחד.",
   icons: { icon: "/InaAppLogo.png" },
