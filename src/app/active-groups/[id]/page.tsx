@@ -7,7 +7,7 @@ import {
   Paper,
   Stack,
 } from "@mui/material";
-import { AppPageHeader } from "@/components/page-shell/AppPageHeader";
+import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupStatus } from "lib/types/status";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import GroupImages from "@/components/group-images/group-images";
@@ -45,9 +45,14 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
 
   return (
     <>
-      <AppPageHeader
-        title={ag.title}
-        description="למעלה: תמונות ותיאור המוצר ואז מחירים והצטרפות בלוח הצמוד. למטה מופיעות קבוצות דומות."
+      <DefaultPageBanner
+        header={ag.title}
+        description="פרטי קבוצה, הצטרפות וקבוצות דומות"
+                hintBullets={[
+          "בודקים מחיר ליחידה מול מחיר קבוצתי ואת מספר המשתתפים הנדרש.",
+          "מצטרפים דרך הלוח בצד (נדרש להתחבר).",
+          "אפשר לסמן לייק על הקבוצה כדי לעזור לאחרים לגלות אותה.",
+        ]}
       />
       <Box
         sx={{

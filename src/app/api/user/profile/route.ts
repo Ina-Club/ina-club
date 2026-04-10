@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession, getClerkUser } from "@/lib/auth";
 import { getClerkPublicUsersMap } from "@/lib/clerk-users";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export async function GET(request: Request) {
   try {
@@ -14,12 +15,18 @@ export async function GET(request: Request) {
 
     const clerkUser = await getClerkUser();
     if (!clerkUser) {
-      return NextResponse.json({ error: "משתמש לא נמצא ב-Clerk" }, { status: 404 });
+      return NextResponse.json(
+        { error: "משתמש לא נמצא ב-Clerk" },
+        { status: 404 },
+      );
     }
 
     const userData = {
       id: clerkUser.id,
-      name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || clerkUser.username || "משתמש",
+      name:
+        `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ||
+        clerkUser.username ||
+        "משתמש",
       email: clerkUser.emailAddresses[0]?.emailAddress,
       profilePicture: clerkUser.imageUrl,
       createdAt: new Date(clerkUser.createdAt).toISOString(),
@@ -39,19 +46,19 @@ export async function GET(request: Request) {
             company: true,
             images: {
               include: { image: true },
-              orderBy: { order: 'asc' }
+              orderBy: { order: "asc" },
             },
-            participants: true // Only IDs now
-          }
-        }
-      }
+            participants: true, // Only IDs now
+          },
+        },
+      },
     });
 
     const wishItems = await prisma.wishItem.findMany({
       where: { createdById: userId },
       include: {
-        category: true
-      }
+        category: true,
+      },
     });
 
     const coupons = await prisma.coupon.findMany({
@@ -61,13 +68,13 @@ export async function GET(request: Request) {
     });
 
     const participantUserIds = memberships.flatMap((m) =>
-      m.activeGroup.participants.map((p) => p.userId)
+      m.activeGroup.participants.map((p) => p.userId),
     );
     const participantsMap = await getClerkPublicUsersMap(participantUserIds);
 
     const transformedUser = {
       ...userData,
-      enrolledActiveGroups: memberships.map(m => ({
+      enrolledActiveGroups: memberships.map((m) => ({
         id: m.activeGroup.id,
         title: m.activeGroup.title,
         description: m.activeGroup.description,
@@ -75,7 +82,7 @@ export async function GET(request: Request) {
         company: m.activeGroup.company?.title,
         basePrice: m.activeGroup.basePrice,
         groupPrice: m.activeGroup.groupPrice,
-        participants: m.activeGroup.participants.map(p => ({
+        participants: m.activeGroup.participants.map((p) => ({
           name: participantsMap.get(p.userId)?.name ?? "משתמש",
           image: participantsMap.get(p.userId)?.imageUrl ?? "",
         })),
@@ -85,10 +92,10 @@ export async function GET(request: Request) {
         status: m.activeGroup.status,
         createdAt: m.activeGroup.createdAt,
         joinedAt: m.joinedAt,
-        images: m.activeGroup.images.map(img => img.image.url)
+        images: m.activeGroup.images.map((img) => img.image.url),
       })),
 
-      wishItems: wishItems.map(item => ({
+      wishItems: wishItems.map((item) => ({
         id: item.id,
         text: item.text,
         targetPrice: item.targetPrice,
@@ -100,7 +107,7 @@ export async function GET(request: Request) {
         isLikedByMe: false,
       })),
 
-      coupons: coupons.map(c => ({
+      coupons: coupons.map((c) => ({
         id: c.id,
         code: c.code,
         groupId: c.groupId,
@@ -108,7 +115,7 @@ export async function GET(request: Request) {
         validTo: c.validTo,
         status: c.status,
         createdAt: c.createdAt,
-      }))
+      })),
     };
 
     return NextResponse.json(transformedUser);
@@ -119,5 +126,37 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(req: Request) {
-  return NextResponse.json({ error: "עדכון פרופיל מתבצע דרך Clerk" }, { status: 405 });
+  try {
+    const { userId } = await validateSession();
+    const body = await req.json();
+    const { name, profilePictureUrl } = body;
+
+    if (!name && !profilePictureUrl) {
+      return NextResponse.json({ error: "אין נתונים לעדכון" }, { status: 400 });
+    }
+
+    const [firstName, ...lastNameArr] = name?.split(" ") || [];
+    const lastName = lastNameArr.join(" ");
+
+    const updateData: any = {};
+
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
+
+    if (profilePictureUrl) {
+      const res = await fetch(profilePictureUrl);
+      const arrayBuffer = await res.arrayBuffer();
+
+      const file = new Blob([arrayBuffer]);
+      await (await clerkClient()).users.updateUserProfileImage(userId!, {
+        file,
+      });
+    }
+
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "שגיאה בעדכון פרופיל" }, { status: 500 });
+  }
 }

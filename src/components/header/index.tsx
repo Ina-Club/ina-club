@@ -44,6 +44,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
+import ProfileButton from "../profile-button";
 
 // -----------------------------
 // STATIC — DOES NOT RECREATE
@@ -94,9 +95,8 @@ const NAV_ITEMS: (NavLinkItem | NavDropdownItem)[] = [
 ];
 
 const MOBILE_ITEMS = [
-  { title: "פרופיל", href: "/profile", icon: PersonIcon },
-  { title: "מועדפים", href: "/profile?tab=liked", icon: FavoriteIcon },
   ...NAV_ITEMS,
+  { title: "מועדפים", href: "/profile?tab=liked", icon: FavoriteIcon },
 ];
 
 const LOGGED_IN_MENU: MenuItemConfig[] = [
@@ -148,7 +148,7 @@ function Header() {
   // compute selected tab
   const currentTab = useMemo(
     () => NAV_ITEMS.findIndex((i) => i.href === pathname),
-    [pathname]
+    [pathname],
   );
 
   // anchor states
@@ -158,8 +158,12 @@ function Header() {
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
 
   const avatarSx = useMemo(
-    () => ({ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 }, borderColor: "primary.main" }),
-    []
+    () => ({
+      width: { xs: 32, sm: 40 },
+      height: { xs: 32, sm: 40 },
+      borderColor: "primary.main",
+    }),
+    [],
   );
 
   const handleMenuOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -186,13 +190,13 @@ function Header() {
 
       if (item.href) router.push(item.href);
     },
-    [handleMenuClose, router]
+    [handleMenuClose, router],
   );
 
   const memoUserName = profile?.name || "";
   const memoUserIdentifier = profile?.email || "";
   const memoUserImage = profile?.profilePicture || null;
-  
+
   // Note: we use Clerk's components for the actual auth state display in the toolbar
   // but keep the menu for other links if needed.
   const goToFavorites = useCallback(() => {
@@ -202,18 +206,26 @@ function Header() {
   return (
     <>
       {/* Mobile Drawer */}
-      <Drawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      >
-        <Box sx={{ width: 250, height: "100%", display: "flex", flexDirection: "column", pb: 4, bgcolor: "#f5f7fa" }}>
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+        <Box
+          sx={{
+            width: 250,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            pb: 4,
+            bgcolor: "#f5f7fa",
+          }}
+        >
           <Box sx={{ bgcolor: "#f5f7fa", py: 1 }}>
-            <Box sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mx: 1,
-            }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mx: 1,
+              }}
+            >
               <Box sx={{ display: "flex" }}>
                 <Image
                   src="/InaClubLogo.png"
@@ -222,9 +234,7 @@ function Header() {
                   height={60}
                 />
               </Box>
-              <IconButton
-                onClick={() => setDrawerOpen(false)}
-              >
+              <IconButton onClick={() => setDrawerOpen(false)}>
                 <CloseIcon />
               </IconButton>
             </Box>
@@ -239,12 +249,18 @@ function Header() {
                 const subItems = item.menuItems ?? [];
                 return (
                   <Box key={item.title}>
-                    <ListItemButton onClick={() => setMobileMoreOpen((prev) => !prev)}>
+                    <ListItemButton
+                      onClick={() => setMobileMoreOpen((prev) => !prev)}
+                    >
                       <ListItemIcon>
-                        <Icon sx={{
-                          transform: mobileMoreOpen ? "rotate(180deg)" : "rotate(0deg)",
-                          transition: "0.3s",
-                        }} />
+                        <Icon
+                          sx={{
+                            transform: mobileMoreOpen
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                            transition: "0.3s",
+                          }}
+                        />
                       </ListItemIcon>
                       <ListItemText primary={item.title} />
                     </ListItemButton>
@@ -282,7 +298,7 @@ function Header() {
               );
             })}
           </List>
-          <Box sx={{ mt: 'auto' }}>
+          <Box sx={{ mt: "auto" }}>
             <Divider sx={{ mb: 3 }} />
           </Box>
         </Box>
@@ -383,7 +399,7 @@ function Header() {
               transformOrigin={{ vertical: "top", horizontal: "left" }}
             >
               {NAV_ITEMS.find(
-                (i): i is NavDropdownItem => "menuItems" in i
+                (i): i is NavDropdownItem => "menuItems" in i,
               )?.menuItems?.map((sub) => (
                 <MenuItem
                   key={sub.href}
@@ -398,42 +414,41 @@ function Header() {
           </Box>
 
           {/* Desktop Right */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              gap: 1,
+              alignItems: "center",
+            }}
+          >
             <IconButton sx={{ color: "#64748b" }} onClick={goToFavorites}>
               <FavoriteIcon />
             </IconButton>
 
             <Show when="signed-in">
-              <UserButton 
-                appearance={{
-                  elements: {
-                    userButtonAvatarBox: {
-                      width: 40,
-                      height: 40
-                    }
-                  }
-                }}
+              <ProfileButton
+
               />
             </Show>
             <Show when="signed-out">
               <Box sx={{ display: "flex", gap: 1 }}>
-                <Button 
-                  component={Link} 
-                  href="/sign-in" 
+                <Button
+                  component={Link}
+                  href="/sign-in"
                   variant="text"
                   sx={{ color: "#64748b", fontWeight: 600 }}
                 >
                   התחברות
                 </Button>
-                <Button 
-                  component={Link} 
-                  href="/sign-up" 
+                <Button
+                  component={Link}
+                  href="/sign-up"
                   variant="contained"
-                  sx={{ 
-                    bgcolor: "#1a2a5a", 
+                  sx={{
+                    bgcolor: "#1a2a5a",
                     borderRadius: "20px",
                     px: 3,
-                    "&:hover": { bgcolor: "#243a7a" }
+                    "&:hover": { bgcolor: "#243a7a" },
                   }}
                 >
                   הרשמה
@@ -443,9 +458,15 @@ function Header() {
           </Box>
 
           {/* Mobile */}
-          <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: { xs: "flex", md: "none" },
+              gap: 1,
+              alignItems: "center",
+            }}
+          >
             <Show when="signed-in">
-              <UserButton />
+              <ProfileButton/>
             </Show>
             <Show when="signed-out">
               <IconButton component={Link} href="/sign-in" sx={{ p: 0 }}>

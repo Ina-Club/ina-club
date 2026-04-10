@@ -4,6 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "מדיניות פרטיות | Ina Club",
   description: "מידע על הדרך שבה Ina Club מגנה על פרטיות המשתמשים והשותפים.",
+  icons: { icon: "/InaClubAppLogo.png" },
 };
 
 const sections: StaticPageSection[] = [

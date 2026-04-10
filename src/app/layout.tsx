@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Ina Club — קניות קבוצתיות חכמות",
   description:
     "בקשות מהקהילה, קבוצות רכישה פעילות, חיפוש חכם ומנתח מחירים — הכל במקום אחד.",
-  icons: { icon: "/InaAppLogo.png" },
+  icons: { icon: "/InaClubAppLogo.png" },
 };
 
 import { SnackbarProvider } from "@/contexts/snackbar-context";
@@ -28,6 +28,7 @@ export default function RootLayout({
       localization={CLERK_LOCALIZATION_CONFIG}
       signUpUrl="/sign-up"
       signInUrl="/sign-in"
+      afterSignOutUrl="/"
     >
       {" "}
       <ThemeRegistry>

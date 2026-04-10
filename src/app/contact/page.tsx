@@ -4,6 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "צור קשר | Ina Club",
   description: "כל הדרכים ליצור קשר עם צוות Ina Club לשאלות, תמיכה ושיתופי פעולה.",
+  icons: { icon: "/InaClubAppLogo.png" },
 };
 
 const sections: StaticPageSection[] = [

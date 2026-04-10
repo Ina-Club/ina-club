@@ -4,6 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "תנאי שימוש | Ina Club",
   description: "תנאי השימוש המחייבים עבור פעילות משתמשים ושותפים ב-Ina Club.",
+  icons: { icon: "/InaClubAppLogo.png" },
 };
 
 const sections: StaticPageSection[] = [
