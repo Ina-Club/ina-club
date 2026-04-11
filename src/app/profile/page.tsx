@@ -88,6 +88,7 @@ function ProfileContent() {
   const [pageLoading, setPageLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
+  const [nameError, setNameError] = useState(false);
   const [editProfilePicture, setEditProfilePicture] = useState<File[]>([]);
   const [tabValue, setTabValue] = useState(0);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -184,7 +185,7 @@ function ProfileContent() {
 
   const validateProfileData = () => {
     if (!editName.trim()) {
-      setPageError('שם לא יכול להיות ריק');
+      setNameError(true);
       return false;
     }
     return true;
@@ -443,7 +444,12 @@ function ProfileContent() {
                       fullWidth
                       label="שם מלא"
                       value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
+                      onChange={(e) => {
+                        setEditName(e.target.value);
+                        setNameError(false);
+                      }}
+                      error={nameError}
+                      helperText={nameError ? "שם לא יכול להיות ריק" : ""}
                       variant="outlined"
                     />
                   </Box>
