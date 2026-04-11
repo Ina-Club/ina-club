@@ -20,7 +20,7 @@ export default function NotFound() {
         הדף לא נמצא
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 420, lineHeight: 1.7 }}>
-        ייתכן שהקישור ישן או שהדף הוזז. מדף הבית אפשר להגיע לבקשות, לקבוצות פעילות ולחיפוש החכם.
+        ייתכן שהקישור ישן או שהדף הוזז.
       </Typography>
       <Button component={Link} href="/" variant="contained" color="primary" sx={{ borderRadius: 2, px: 3 }}>
         חזרה לדף הבית
