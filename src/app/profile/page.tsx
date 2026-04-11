@@ -15,7 +15,7 @@ import {
   DialogActions,
   Alert,
   Skeleton,
-  Chip,
+  CircularProgress,
 } from "@mui/material";
 import { Suspense } from "react";
 import {
@@ -35,7 +35,6 @@ import { useTheme, useMediaQuery } from "@mui/material";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { useSearchParams, useRouter } from "next/navigation";
 import { UploadDropzone } from '@/components/upload-dropzone';
-import { LoadingCircle } from "@/components/loading-circle";
 import ActiveGroupCard from "@/components/card/active-group-card";
 import WishItemCard from "@/components/demand-pulse/WishItemCard";
 import UserAvatar from "@/components/user-avatar";
@@ -446,7 +445,7 @@ function ProfileContent() {
                 onClick={handleSave}
                 disabled={updateLoading}
               >
-                {updateLoading ? <LoadingCircle loadingText={""} /> : 'שמור'}
+                {updateLoading ? <CircularProgress size={24} color="inherit" /> : 'שמור'}
               </Button>
             </DialogActions>
           </Dialog>
@@ -662,7 +661,7 @@ function ProfileContent() {
             color="error"
             onClick={handleDeleteAccount}
             disabled={deleteLoading || deleteConfirmation !== 'מחק את חשבוני'}
-            startIcon={deleteLoading ? <LoadingCircle loadingText="" /> : <DeleteIcon />}
+            startIcon={deleteLoading ? <CircularProgress size={24} color="inherit" /> : <DeleteIcon />}
           >
             {deleteLoading ? 'מוחק...' : 'מחק חשבון'}
           </Button>

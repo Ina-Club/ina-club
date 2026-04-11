@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession, getClerkUser } from "@/lib/auth";
 import { getClerkPublicUsersMap } from "@/lib/clerk-users";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export async function GET(request: Request) {
   try {
@@ -127,7 +127,9 @@ export async function GET(request: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const { userId } = await validateSession();
+    const { userId, response } = await validateSession();
+    if (response) return response;
+
     const body = await req.json();
     const { name, profilePictureUrl } = body;
 
@@ -135,6 +137,8 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "אין נתונים לעדכון" }, { status: 400 });
     }
 
+    const promises = [];
+    const client = await clerkClient();
     const [firstName, ...lastNameArr] = name?.split(" ") || [];
     const lastName = lastNameArr.join(" ");
 
@@ -143,17 +147,21 @@ export async function PUT(req: Request) {
     if (firstName) updateData.firstName = firstName;
     if (lastName) updateData.lastName = lastName;
 
+    if (Object.keys(updateData).length > 0) {
+      promises.push(client.users.updateUser(userId!, updateData));
+    }
+
     if (profilePictureUrl) {
       const res = await fetch(profilePictureUrl);
       const arrayBuffer = await res.arrayBuffer();
 
       const file = new Blob([arrayBuffer]);
-      await (await clerkClient()).users.updateUserProfileImage(userId!, {
+      promises.push(client.users.updateUserProfileImage(userId!, {
         file,
-      });
+      }));
     }
 
-
+    await Promise.all(promises);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);
