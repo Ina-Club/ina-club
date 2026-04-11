@@ -32,7 +32,7 @@ import {
 } from "@mui/icons-material";
 import { useState, useEffect, type ReactNode } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
-import { useAuth, useClerk } from "@clerk/nextjs";
+import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 import { useSearchParams, useRouter } from "next/navigation";
 import { UploadDropzone } from '@/components/upload-dropzone';
 import ActiveGroupCard from "@/components/card/active-group-card";
@@ -68,6 +68,7 @@ function TabPanel(props: TabPanelProps) {
 function ProfileContent() {
   const { isLoaded, isSignedIn } = useAuth();
   const { signOut } = useClerk();
+  const { user } = useUser();
   const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -206,16 +207,20 @@ function ProfileContent() {
       }
 
       await response.json();
-      await loadFullProfile({ force: true });
-
-      setEditing(false);
-      setEditProfilePicture([]);
+      await updateUserData();
     } catch (err) {
       setPageError('שגיאה בעדכון הפרופיל');
       console.error('Profile update error:', err);
     } finally {
       setUpdateLoading(false);
     }
+  };
+
+  const updateUserData = async () => {
+    await loadFullProfile({ force: true });
+    await user?.reload();
+    setEditing(false);
+    setEditProfilePicture([]);
   };
 
   const formatDate = (dateString: string) => {
