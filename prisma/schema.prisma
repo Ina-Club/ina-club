@@ -10,7 +10,8 @@ datasource db {
 
 model B2BPackage {
   id          String      @id @default(uuid())
-  userId      String      @unique
+  userId      String?     @unique
+  email       String?     @unique
   packageType PackageType
   maxGroups   Int
   price       Float
