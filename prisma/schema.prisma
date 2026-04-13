@@ -10,8 +10,7 @@ datasource db {
 
 model B2BPackage {
   id          String      @id @default(uuid())
-  userId      String?     @unique
-  email       String?     @unique
+  userId      String      @unique
   packageType PackageType
   maxGroups   Int
   price       Float
@@ -35,6 +34,7 @@ model Payment {
 
 model Company {
   id           String        @id @default(uuid())
+  ownerId      String        @unique // Clerk User ID
   title        String
   address      String?
   city         String?
@@ -46,7 +46,6 @@ model Company {
   websiteUrl   String?       @unique
   logoId       String?       @unique
   updatedAt    DateTime?     @updatedAt
-  ownerId      String?       @unique // Clerk User ID
   activeGroups ActiveGroup[]
   logo         Image?        @relation("CompanyLogo", fields: [logoId], references: [id])
   testimonials Testimonial[]
@@ -234,4 +233,22 @@ enum CouponStatus {
   ACTIVE
   EXPIRED
   USED
+}
+
+model B2BInvitation {
+  id              String      @id @default(uuid())
+  email           String      @unique
+
+  // Package Data
+  packageType     PackageType
+  maxGroups       Int
+  price           Float
+  endDate         DateTime?
+
+  // Company Data
+  companyTitle    String
+  companyAddress  String?
+  companyCity     String?
+
+  createdAt       DateTime    @default(now())
 }
