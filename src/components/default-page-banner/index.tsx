@@ -1,34 +1,44 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
+"use client";
 
-interface DefaultPageBannerProps {
+import React from "react";
+import { Box, Typography, Stack } from "@mui/material";
+import { PageHintButton } from "@/components/page-shell/PageHintButton";
+
+export interface DefaultPageBannerProps {
   header: string;
   description: string;
   mainSx?: object;
+  /** אייקון עזרה עדין → חלון קטן (דפים קריטיים) */
+  hintBullets?: string[];
 }
 
-export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({ header, description, mainSx }) => {
+export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({
+  header,
+  description,
+  mainSx,
+  hintBullets,
+}) => {
+  const showHint = hintBullets && hintBullets.length > 0;
+
   return (
     <Box
       component="section"
       sx={{
         position: "relative",
-        bgcolor: "#1a2a5a",
-        color: "white",
         overflow: "hidden",
         background:
           "linear-gradient(140deg,rgba(255, 255, 255, 1) 0%, rgba(211, 224, 235, 1) 100%)",
-        pt: { xs: 2, md: 4 }, // רק padding-top, כדי שהפילטרים יישבו על החצי התחתון
+        pt: { xs: 2, md: 4 },
         px: { xs: 2, md: 4 },
-        ...mainSx
+        ...mainSx,
       }}
     >
-      {/* רקעים מטושטשים */}
       <Box
         sx={{
           position: "absolute",
           inset: 0,
           opacity: 0.1,
+          pointerEvents: "none",
         }}
       >
         <Box
@@ -57,34 +67,47 @@ export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({ header, de
         />
       </Box>
 
-      {/* תוכן */}
       <Box
         sx={{
           position: "relative",
           maxWidth: 1280,
           mx: "auto",
           textAlign: "left",
-          direction: "rtl",
+          direction: "ltr",
         }}
       >
-        <Typography
-          sx={{
-            fontWeight: "bold",
-            fontSize: { md: "3.75rem", xs: "2.4rem" },
-            lineHeight: 1,
-            mb: 2,
-            color: "#1a2a5a",
-          }}
+        <Stack
+          direction="row"
+          alignItems="flex-end"
+          justifyContent="space-between"
+          gap={1}
+          sx={{ mb: 1 }}
         >
-          {header}
-        </Typography>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              component="h1"
+              sx={{
+                fontWeight: 800,
+                fontSize: { md: "2.75rem", xs: "2rem" },
+                lineHeight: 1.1,
+                color: "#1a2a5a",
+              }}
+            >
+              {header}
+            </Typography>
+          </Box>
+          {showHint && <PageHintButton bullets={hintBullets!} />}
+        </Stack>
+
         <Typography
           variant="h5"
           sx={{
             color: "#1a2a5a",
             mb: 6,
-            fontSize: { md: "1.5rem", xs: "1rem" },
-            direction: "ltr"
+            fontSize: { md: "1.25rem", xs: "1rem" },
+            fontWeight: 400,
+            lineHeight: 1.6,
+            opacity: 0.92,
           }}
         >
           {description}

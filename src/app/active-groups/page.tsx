@@ -132,7 +132,14 @@ export default function Page() {
     <>
       <DefaultPageBanner
         mainSx={{ top: -66, zIndex: 900, position: "sticky" }}
-        header={headerText} description={descriptionText} />
+        header={headerText}
+        description={descriptionText}
+        hintBullets={[
+          "משתמשים בשורת החיפוש ובסינון (במובייל דרך הסינון) כדי לצמצם תוצאות.",
+          "לוחצים על כרטיס כדי לראות פרטים מלאים ולהצטרף לקבוצה.",
+          "התקדמות רישום ומחירים מופיעים בכרטיס ובדף הקבוצה.",
+        ]}
+      />
 
       {/* Top bar: Search + Mobile filters trigger */}
       <Box

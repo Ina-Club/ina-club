@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
-import { GroupStatus } from "lib/types/status";
+import { GroupStatus } from "@prisma/client";
 import { validateSession } from "@/lib/auth";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
 import { getClerkPublicUsersMap } from "@/lib/clerk-users";

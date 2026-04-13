@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { Box, Button, Typography } from "@mui/material";
 import { ShoppingBag, People } from "@mui/icons-material";
 
@@ -89,12 +90,25 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
           variant="h5"
           sx={{
             color: "#1a2a5a",
-            mb: 4,
+            mb: 2,
             fontSize: { md: "1.5rem", xs: "1rem" },
           }}
         >
           הצטרפו למהפכת הקניות הקבוצתיות. קונים יחד, חוסכים יחד, ומקבלים את
           המחירים הטובים ביותר.
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "rgba(26, 42, 90, 0.75)",
+            mb: 4,
+            maxWidth: 640,
+            mx: "auto",
+            lineHeight: 1.75,
+            fontSize: { xs: "0.95rem", md: "1.05rem" },
+          }}
+        >
+          מתחילים בבקשה או בחיפוש, מצטרפים לקבוצה פעילה — ומנהלים הכל מפרופיל אחד.
         </Typography>
 
         {/* Buttons */}
@@ -110,6 +124,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
         >
           <Button
             variant="contained"
+            component={Link}
+            href="/requests"
             onClick={onOpenQuickRequest}
             startIcon={<ShoppingBag />}
             sx={{
@@ -129,6 +145,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
 
           <Button
             variant="outlined"
+            component={Link}
+            href="/active-groups"
             startIcon={<People />}
             sx={{
               borderColor: "rgba(255,255,255,0.3)",

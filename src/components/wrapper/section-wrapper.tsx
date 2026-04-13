@@ -34,14 +34,16 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
           <Typography
             sx={{
               fontSize: {
-                xs: "34px",
-                md: "38px",
+                xs: "28px",
+                md: "32px",
               },
-              mb: subTitle ? "5px" : "10.5px", // smaller margin if subtitle exists
-              fontWeight: 500,
+              mb: subTitle ? "5px" : "10.5px",
+              fontWeight: 800,
               paddingTop: "5px",
+              color: "primary.main",
             }}
             variant="h2"
+            component="h2"
           >
             {title}
           </Typography>

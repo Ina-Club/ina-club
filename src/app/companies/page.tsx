@@ -40,7 +40,10 @@ export default function Page() {
 
     return (
         <>
-            <DefaultPageBanner header={headerText} description={descriptionText} />
+            <DefaultPageBanner
+                header={headerText}
+                description={descriptionText}
+            />
             {/* Content area */}
             <Box
                 sx={{

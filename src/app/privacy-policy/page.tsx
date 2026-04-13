@@ -2,15 +2,16 @@ import { StaticPageLayout, StaticPageSection } from "@/components/static-page/st
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "מדיניות פרטיות | INA Club",
-  description: "מידע על הדרך שבה INA Club מגנה על פרטיות המשתמשים והשותפים.",
+  title: "מדיניות פרטיות | Ina Club",
+  description: "מידע על הדרך שבה Ina Club מגנה על פרטיות המשתמשים והשותפים.",
+  icons: { icon: "/InaClubAppLogo.png" },
 };
 
 const sections: StaticPageSection[] = [
   {
     title: "מבוא",
     paragraphs: [
-      "אנחנו ב-INA Club מחויבים לשמור על פרטיות המשתמשים, הספקים והשותפים הקהילתיים שלנו. במדיניות זו נסביר אילו סוגי מידע נאספים, איך אנו משתמשים בהם, למי אנחנו עשויים לשתף אותם, ומהן הזכויות שלכם.",
+      "אנחנו ב-Ina Club מחויבים לשמור על פרטיות המשתמשים, הספקים והשותפים הקהילתיים שלנו. במדיניות זו נסביר אילו סוגי מידע נאספים, איך אנו משתמשים בהם, למי אנחנו עשויים לשתף אותם, ומהן הזכויות שלכם.",
       "השימוש באפליקציה או באתר מהווה הסכמה למדיניות זו. אם אינכם מסכימים, אנא הימנעו משימוש בשירות.",
     ],
   },
@@ -90,7 +91,8 @@ export default function PrivacyPolicyPage() {
   return (
     <StaticPageLayout
       header="מדיניות פרטיות"
-      description="איך אנו מגנים על המידע שלכם ומאפשרים שימוש בטוח ב-INA Club."
+      description="איך אנו מגנים על המידע שלכם ומאפשרים שימוש בטוח ב-Ina Club."
+
       sections={sections}
     />
   );

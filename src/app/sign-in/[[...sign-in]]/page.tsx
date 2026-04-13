@@ -1,5 +1,5 @@
 import { SignIn } from "@clerk/nextjs";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 export default function SignInPage() {
   return (
@@ -7,12 +7,21 @@ export default function SignInPage() {
       sx={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         p: 2,
-        background: "linear-gradient(135deg, #f8fafc, #eef2ff)",
+        gap: 2,
+        background: "linear-gradient(145deg, #f3f5fa 0%, #e8eef6 100%)",
       }}
     >
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ textAlign: "center", maxWidth: 360, lineHeight: 1.65 }}
+      >
+        התחברות לחשבון קיים. אחרי ההתחברות תוכלו לפרסם בקשות, להצטרף לקבוצות ולנהל מועדפים בפרופיל.
+      </Typography>
       <SignIn
         appearance={{
           variables: {
@@ -93,6 +102,8 @@ export default function SignInPage() {
             },
           },
         }}
+        path="/sign-in"
+        routing="path"
         signUpUrl="/sign-up"
       />
     </Box>

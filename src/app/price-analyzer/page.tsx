@@ -10,7 +10,14 @@ export default function PriceAnalyzerPage() {
 
   return (
     <>
-      <DefaultPageBanner header={headerText} description={descriptionText} />
+      <DefaultPageBanner
+        header={headerText}
+        description={descriptionText}
+        hintBullets={[
+          "מתארים מוצר או מדביקים קישור — המערכת מציעה הערכת מחיר והשוואה לרכישה קבוצתית.",
+          "התוצאה אינפורמטיבית; לפני רכישה כדאי לוודא מול הספק או הקבוצה.",
+        ]}
+      />
       <Container
         sx={{
           px: { xs: "17px", md: "0px" },

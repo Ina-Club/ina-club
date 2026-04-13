@@ -27,10 +27,11 @@ export default function Footer() {
     <Box
       component="footer"
       sx={{
-        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+        background: `linear-gradient(145deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 55%, #243a7a 100%)`,
         color: "white",
         py: { xs: 3, md: 6 },
-        mt: { xs: 4, md: 8 },
+        mt: "auto",
+        borderTop: "1px solid rgba(255,255,255,0.12)",
       }}
     >
       <Container maxWidth="lg">
@@ -116,10 +117,7 @@ export default function Footer() {
                 👥 קבוצות פעילות
               </Link>
               <Link href="/requests" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                📋 בקשות
-              </Link>
-              <Link href="/requests" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                ➕ צור בקשה
+                📋 בקשות ויצירת בקשה
               </Link>
               <Link href="/profile" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 👤 הפרופיל שלי
