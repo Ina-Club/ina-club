@@ -23,7 +23,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { memo, useMemo, useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Show, UserButton } from "@clerk/nextjs";
+import { Show, useAuth, UserButton } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 import UserAvatar from "@/components/user-avatar";
@@ -99,42 +99,6 @@ const MOBILE_ITEMS = [
   { title: "מועדפים", href: "/profile?tab=liked", icon: FavoriteIcon },
 ];
 
-const LOGGED_IN_MENU: MenuItemConfig[] = [
-  {
-    key: "profile",
-    href: "/profile",
-    label: "פרופיל",
-    icon: PersonIcon,
-    color: "#64748b",
-  },
-  {
-    key: "logout",
-    href: null,
-    label: "התנתק",
-    icon: LogoutIcon,
-    color: "#dc2626",
-    action: "logout",
-  },
-];
-
-const LOGGED_OUT_MENU: MenuItemConfig[] = [
-  {
-    key: "signin",
-    href: "/sign-in",
-    label: "התחברות",
-    icon: LoginIcon,
-    color: "#64748b",
-  },
-  {
-    key: "signup",
-    href: "/sign-up",
-    label: "הרשמה",
-    icon: HowToRegIcon,
-    color: "#fff",
-    bg: "#1a2a5a",
-  },
-];
-
 // -----------------------------
 // COMPONENT START
 // -----------------------------
@@ -156,6 +120,7 @@ function Header() {
   const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const { isSignedIn } = useAuth();
 
   const avatarSx = useMemo(
     () => ({
@@ -165,6 +130,17 @@ function Header() {
     }),
     [],
   );
+
+  const mobileItems = useMemo(() => {
+    if (isSignedIn) {
+      return [
+        ...NAV_ITEMS,
+        { title: "מועדפים", href: "/profile?tab=liked", icon: FavoriteIcon },
+      ];
+    }
+  
+    return NAV_ITEMS;
+  }, [isSignedIn]);
 
   const handleMenuOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(e.currentTarget);
@@ -241,7 +217,7 @@ function Header() {
             <Divider />
           </Box>
           <List>
-            {MOBILE_ITEMS.map((item) => {
+            {mobileItems.map((item) => {
               const Icon = item.icon;
 
               // mobile sub-menu for "עוד"
@@ -421,13 +397,12 @@ function Header() {
               alignItems: "center",
             }}
           >
+
+            <Show when="signed-in">
             <IconButton sx={{ color: "#64748b" }} onClick={goToFavorites}>
               <FavoriteIcon />
             </IconButton>
-
-            <Show when="signed-in">
               <ProfileButton
-
               />
             </Show>
             <Show when="signed-out">

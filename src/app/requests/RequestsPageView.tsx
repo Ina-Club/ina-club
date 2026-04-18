@@ -28,7 +28,7 @@ export function RequestsPageView() {
         sx={{
           maxWidth: 800,
           width: "100%",
-          mx: { xs: 2, md: "auto" },
+          px: { xs: 2, md: "auto" },
           mt: { xs: -4, md: -3 },
           mb: 2,
           boxShaow: 3,
