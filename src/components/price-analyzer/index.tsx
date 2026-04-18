@@ -33,25 +33,79 @@ import type {
 
 export default function PriceAnalyzerComponent() {
   const theme = useTheme();
-  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [dynamicSelects, setDynamicSelects] = useState<NeedMoreInfoResponse[]>([]);
-  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({});
+  const [dynamicSelects, setDynamicSelects] = useState<NeedMoreInfoResponse[]>(
+    [],
+  );
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
+    {},
+  );
   const [priceResult, setPriceResult] = useState<PriceResponse | null>(null);
   const { isSignedIn } = useAuth();
   const router = useRouter();
 
   // Computed group price range values for the chart
-  const minGroupPrice = priceResult ? Math.round((priceResult.minGroupPrice)) : 0;
-  const averageGroupPrice = priceResult ? Math.round(priceResult.averageGroupPrice) : 0;
-  const maxGroupPrice = priceResult ? Math.round((priceResult.maxGroupPrice)) : 0;
+  const minGroupPrice = priceResult ? Math.round(priceResult.minGroupPrice) : 0;
+  const averageGroupPrice = priceResult
+    ? Math.round(priceResult.averageGroupPrice)
+    : 0;
+  const maxGroupPrice = priceResult ? Math.round(priceResult.maxGroupPrice) : 0;
   // Making sure to extract the maximum price for the chart
-  const highestPrice = Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
-  const calculateChartFillPercentage = (v: number) => `${Math.max(5, Math.round((v / highestPrice) * 100))}%`;
+  const highestPrice =
+    Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
+  const calculateChartFillPercentage = (v: number) =>
+    `${Math.max(5, Math.round((v / highestPrice) * 100))}%`;
   const readyForSearch: boolean = !!searchText.trim() && !loading;
+
+  // if (!isSignedIn) {
+  //   return (
+  //     <Box
+  //       sx={{
+  //         display: "flex",
+  //         alignItems: "center",
+  //         gap: 1.5,
+  //         p: "12px 16px",
+  //         borderRadius: "14px",
+  //         border: "1.5px dashed rgba(0,0,0,0.15)",
+  //         cursor: "pointer",
+  //         bgcolor: "rgba(66,100,212,0.03)",
+  //         "&:hover": { bgcolor: "rgba(66,100,212,0.07)" },
+  //         transition: "background 0.2s",
+  //       }}
+  //       onClick={() => router.push("/sign-in")}
+  //     >
+  //       <Box
+  //         sx={{
+  //           width: 32,
+  //           height: 32,
+  //           borderRadius: "50%",
+  //           bgcolor: "rgba(66,100,212,0.12)",
+  //           display: "flex",
+  //           alignItems: "center",
+  //           justifyContent: "center",
+  //           fontSize: "1rem",
+  //         }}
+  //       >
+  //         ✦
+  //       </Box>
+  //       <Typography variant="body2" color="text.secondary">
+  //         <Typography
+  //           component="span"
+  //           variant="body2"
+  //           color="primary.main"
+  //           fontWeight={600}
+  //         >
+  //           התחבר
+  //         </Typography>{" "}
+  //         כדי להתחיל לנתח מחירים
+  //       </Typography>
+  //     </Box>
+  //   );
+  // }
 
   const handleSearch = async () => {
     if (!searchText.trim()) {
@@ -122,7 +176,7 @@ export default function PriceAnalyzerComponent() {
       if (data.needsMoreInfo) {
         // צריך עוד מידע - הוסף select נוסף
         const alreadyExists = dynamicSelects.some(
-          (opt) => opt.category === data.category
+          (opt) => opt.category === data.category,
         );
         if (!alreadyExists) {
           setDynamicSelects((prev) => [...prev, data as NeedMoreInfoResponse]);
@@ -179,41 +233,89 @@ export default function PriceAnalyzerComponent() {
 
   return (
     <Box sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>
-      {/* Search Bar */}
-      <Card
-        sx={{
-          p: 1,
-          mb: 3,
-          boxShadow: 3,
-          borderRadius: "12px",
-          border: "2px solid transparent",
-          "&:hover": { borderColor: "#1a2a5a" },
-        }}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === "Enter" && readyForSearch) handleSearch();
-        }}
-      >
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Box sx={{ flexGrow: 1 }}>
-            <SearchBar
-              searchText={searchText}
-              placeholderText={isMdUp ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)" : "חפשו מוצר..."}
-              handleSearchTextChange={setSearchText}
-            />
+      {isSignedIn ? (
+        <Card
+          sx={{
+            p: 1,
+            mb: 3,
+            boxShadow: 3,
+            borderRadius: "12px",
+            border: "2px solid transparent",
+            "&:hover": { borderColor: "#1a2a5a" },
+          }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === "Enter" && readyForSearch) handleSearch();
+          }}
+        >
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <SearchBar
+                searchText={searchText}
+                placeholderText={
+                  isMdUp
+                    ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)"
+                    : "חפשו מוצר..."
+                }
+                handleSearchTextChange={setSearchText}
+              />
+            </Box>
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              disabled={!readyForSearch}
+              startIcon={
+                loading ? <CircularProgress size={20} /> : <SearchIcon />
+              }
+              sx={{ minWidth: 120 }}
+            >
+              {loading ? "מחפש..." : "חפשו"}
+            </Button>
           </Box>
-          <Button
-            variant="contained"
-            onClick={handleSearch}
-            disabled={!readyForSearch}
-            startIcon={
-              loading ? <CircularProgress size={20} /> : <SearchIcon />
-            }
-            sx={{ minWidth: 120 }}
+        </Card>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 3,
+            p: "12px 16px",
+            borderRadius: "14px",
+            border: "1.5px dashed rgba(0,0,0,0.15)",
+            cursor: "pointer",
+            bgcolor: "rgba(66,100,212,0.03)",
+            "&:hover": { bgcolor: "rgba(66,100,212,0.07)" },
+            transition: "background 0.2s",
+          }}
+          onClick={() => router.push("/sign-in")}
+        >
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              bgcolor: "rgba(66,100,212,0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1rem",
+            }}
           >
-            {loading ? "מחפש..." : "חפשו"}
-          </Button>
+            ✦
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            <Typography
+              component="span"
+              variant="body2"
+              color="primary.main"
+              fontWeight={600}
+            >
+              התחבר
+            </Typography>{" "}
+            כדי להתחיל לנתח מחירים
+          </Typography>
         </Box>
-      </Card>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -224,7 +326,11 @@ export default function PriceAnalyzerComponent() {
 
       {/* Success Message */}
       {successMsg && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccessMsg(null)}>
+        <Alert
+          severity="success"
+          sx={{ mb: 3 }}
+          onClose={() => setSuccessMsg(null)}
+        >
           {successMsg}
         </Alert>
       )}
@@ -257,7 +363,7 @@ export default function PriceAnalyzerComponent() {
                       onChange={(e) =>
                         handleSelectChange(
                           option.category || "",
-                          e.target.value
+                          e.target.value,
                         )
                       }
                       disabled={loading}
@@ -277,7 +383,7 @@ export default function PriceAnalyzerComponent() {
                     onClick={() =>
                       handleSelectChange(
                         option.category || "",
-                        "__SKIP_DETAILS__"
+                        "__SKIP_DETAILS__",
                       )
                     }
                     disabled={loading}
@@ -317,7 +423,7 @@ export default function PriceAnalyzerComponent() {
                     onClick={() =>
                       handleSelectChange(
                         option.category || "",
-                        "__SKIP_DETAILS__"
+                        "__SKIP_DETAILS__",
                       )
                     }
                     disabled={loading}
@@ -384,7 +490,10 @@ export default function PriceAnalyzerComponent() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+              gridTemplateColumns: {
+                xs: "repeat(2, 1fr)",
+                md: "repeat(3, 1fr)",
+              },
               gap: 3,
               mb: 3,
             }}
@@ -452,34 +561,98 @@ export default function PriceAnalyzerComponent() {
             </Typography>
 
             <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                <Typography variant="caption" sx={{ minWidth: 80, opacity: 0.9 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ minWidth: 80, opacity: 0.9 }}
+                >
                   מחיר מינימלי
                 </Typography>
-                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
-                  <Box sx={{ width: calculateChartFillPercentage(minGroupPrice), height: "100%", backgroundColor: "#ffd700", borderRadius: 1 }} />
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    height: 8,
+                    backgroundColor: "rgba(255,255,255,0.25)",
+                    borderRadius: 1,
+                    position: "relative",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: calculateChartFillPercentage(minGroupPrice),
+                      height: "100%",
+                      backgroundColor: "#ffd700",
+                      borderRadius: 1,
+                    }}
+                  />
                 </Box>
-                <Typography variant="caption">₪{minGroupPrice.toLocaleString()}</Typography>
+                <Typography variant="caption">
+                  ₪{minGroupPrice.toLocaleString()}
+                </Typography>
               </Box>
 
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                <Typography variant="caption" sx={{ minWidth: 80, opacity: 0.9 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ minWidth: 80, opacity: 0.9 }}
+                >
                   מחיר צפוי
                 </Typography>
-                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
-                  <Box sx={{ width: calculateChartFillPercentage(averageGroupPrice), height: "100%", backgroundColor: "#4ade80", borderRadius: 1 }} />
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    height: 8,
+                    backgroundColor: "rgba(255,255,255,0.25)",
+                    borderRadius: 1,
+                    position: "relative",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: calculateChartFillPercentage(averageGroupPrice),
+                      height: "100%",
+                      backgroundColor: "#4ade80",
+                      borderRadius: 1,
+                    }}
+                  />
                 </Box>
-                <Typography variant="caption">₪{averageGroupPrice.toLocaleString()}</Typography>
+                <Typography variant="caption">
+                  ₪{averageGroupPrice.toLocaleString()}
+                </Typography>
               </Box>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography variant="caption" sx={{ minWidth: 80, opacity: 0.9 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ minWidth: 80, opacity: 0.9 }}
+                >
                   מחיר מקסימלי
                 </Typography>
-                <Box sx={{ flexGrow: 1, height: 8, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 1, position: "relative" }}>
-                  <Box sx={{ width: calculateChartFillPercentage(maxGroupPrice), height: "100%", backgroundColor: "#f87171", borderRadius: 1 }} />
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    height: 8,
+                    backgroundColor: "rgba(255,255,255,0.25)",
+                    borderRadius: 1,
+                    position: "relative",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: calculateChartFillPercentage(maxGroupPrice),
+                      height: "100%",
+                      backgroundColor: "#f87171",
+                      borderRadius: 1,
+                    }}
+                  />
                 </Box>
-                <Typography variant="caption">₪{maxGroupPrice.toLocaleString()}</Typography>
+                <Typography variant="caption">
+                  ₪{maxGroupPrice.toLocaleString()}
+                </Typography>
               </Box>
             </Box>
           </Box>
@@ -518,11 +691,19 @@ export default function PriceAnalyzerComponent() {
             </Button>
           </Box>
 
-          <Divider sx={{ mt: 3, mb: 1.5, bgcolor: "rgba(255, 255, 255, 0.3)" }} />
+          <Divider
+            sx={{ mt: 3, mb: 1.5, bgcolor: "rgba(255, 255, 255, 0.3)" }}
+          />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <InfoOutlinedIcon sx={{ fontSize: 16, color: "rgba(255,255,255,0.85)" }} />
-            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.85)" }}>
-              מידע שנוצר על ידי בינה מלאכותית עלול להכיל אי־דיוקים והוא מיועד למטרות מידע בלבד. מומלץ לאמת פרטים ומחירים מול מקורות רשמיים.
+            <InfoOutlinedIcon
+              sx={{ fontSize: 16, color: "rgba(255,255,255,0.85)" }}
+            />
+            <Typography
+              variant="caption"
+              sx={{ color: "rgba(255,255,255,0.85)" }}
+            >
+              מידע שנוצר על ידי בינה מלאכותית עלול להכיל אי־דיוקים והוא מיועד
+              למטרות מידע בלבד. מומלץ לאמת פרטים ומחירים מול מקורות רשמיים.
             </Typography>
           </Box>
         </Card>
@@ -536,127 +717,125 @@ export default function PriceAnalyzerComponent() {
       )}
 
       {/* Welcome Section - מוצג רק כשאין חיפוש פעיל */}
-      {!loading &&
-        dynamicSelects.length === 0 &&
-        !priceResult && (
-          <Card
-            sx={{
-              p: 4,
-              mb: 3,
-              textAlign: "center",
-              background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-              border: "2px solid",
-              borderColor: "primary.light",
-            }}
+      {!loading && dynamicSelects.length === 0 && !priceResult && (
+        <Card
+          sx={{
+            p: 4,
+            mb: 3,
+            textAlign: "center",
+            background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+            border: "2px solid",
+            borderColor: "primary.light",
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}
           >
-            <Typography
-              variant="h5"
-              sx={{ mb: 2, color: "primary.main", fontWeight: 600 }}
+            מה תרצה לחפש היום?
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
+            השתמש בחיפוש החכם שלנו כדי למצוא את המוצר המושלם ולהצטרף לקבוצת
+            רכישה שתחסוך לך כסף
+          </Typography>
+
+          {/* Popular Categories */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+              קטגוריות פופולריות
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1,
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
             >
-              מה תרצה לחפש היום?
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
-              השתמש בחיפוש החכם שלנו כדי למצוא את המוצר המושלם ולהצטרף לקבוצת
-              רכישה שתחסוך לך כסף
-            </Typography>
-
-            {/* Popular Categories */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-                קטגוריות פופולריות
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                }}
-              >
-                {[
-                  "סמארטפונים",
-                  "מחשבים ניידים",
-                  "טלוויזיות",
-                  "מכונות כביסה",
-                  "מקררים",
-                  "מזגנים",
-                  "רכבים",
-                  "אופניים חשמליים",
-                ].map((category) => (
-                  <Chip
-                    key={category}
-                    label={category}
-                    onClick={() => setSearchText(category)}
-                    sx={{
-                      bgcolor: "primary.light",
-                      color: "primary.main",
-                      "&:hover": {
-                        bgcolor: "primary.main",
-                        color: "white",
-                      },
-                      cursor: "pointer",
-                      fontSize: "0.875rem",
-                      py: 1,
-                    }}
-                  />
-                ))}
-              </Box>
+              {[
+                "סמארטפונים",
+                "מחשבים ניידים",
+                "טלוויזיות",
+                "מכונות כביסה",
+                "מקררים",
+                "מזגנים",
+                "רכבים",
+                "אופניים חשמליים",
+              ].map((category) => (
+                <Chip
+                  key={category}
+                  label={category}
+                  onClick={() => setSearchText(category)}
+                  sx={{
+                    bgcolor: "primary.light",
+                    color: "primary.main",
+                    "&:hover": {
+                      bgcolor: "primary.main",
+                      color: "white",
+                    },
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                    py: 1,
+                  }}
+                />
+              ))}
             </Box>
+          </Box>
 
-            {/* Search Examples */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
-                דוגמאות לחיפוש
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                }}
-              >
-                {[
-                  "אייפון 15 פרו מקס",
-                  "מקבוק אייר M3",
-                  "טלוויזיה 65 אינץ' Samsung",
-                  "מכונת כביסה 9 ק״ג",
-                  "מקרר דלת צרדה",
-                  "מזגן 1.5 כ״ס",
-                ].map((example) => (
-                  <Chip
-                    key={example}
-                    label={example}
-                    onClick={() => setSearchText(example)}
-                    variant="outlined"
-                    sx={{
+          {/* Search Examples */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+              דוגמאות לחיפוש
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
+              {[
+                "אייפון 15 פרו מקס",
+                "מקבוק אייר M3",
+                "טלוויזיה 65 אינץ' Samsung",
+                "מכונת כביסה 9 ק״ג",
+                "מקרר דלת צרדה",
+                "מזגן 1.5 כ״ס",
+              ].map((example) => (
+                <Chip
+                  key={example}
+                  label={example}
+                  onClick={() => setSearchText(example)}
+                  variant="outlined"
+                  sx={{
+                    borderColor: "secondary.main",
+                    color: "secondary.main",
+                    "&:hover": {
+                      bgcolor: "secondary.main",
+                      color: "white",
                       borderColor: "secondary.main",
-                      color: "secondary.main",
-                      "&:hover": {
-                        bgcolor: "secondary.main",
-                        color: "white",
-                        borderColor: "secondary.main",
-                      },
-                      cursor: "pointer",
-                      fontSize: "0.8rem",
-                    }}
-                  />
-                ))}
-              </Box>
+                    },
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                  }}
+                />
+              ))}
             </Box>
+          </Box>
 
-            {/* How it works */}
-            <Box sx={{ mt: 3, p: 2, bgcolor: "#fff7ec", borderRadius: 2 }}>
-              <Typography
-                variant="body2"
-                sx={{ color: "secondary.main", fontWeight: 500 }}
-              >
-                איך זה עובד? פשוט תחפש את המוצר שמעניין אותך, ואנחנו נעזור לך
-                למצוא את המחיר הטוב ביותר דרך קבוצת רכישה
-              </Typography>
-            </Box>
-          </Card>
-        )}
+          {/* How it works */}
+          <Box sx={{ mt: 3, p: 2, bgcolor: "#fff7ec", borderRadius: 2 }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "secondary.main", fontWeight: 500 }}
+            >
+              איך זה עובד? פשוט תחפש את המוצר שמעניין אותך, ואנחנו נעזור לך
+              למצוא את המחיר הטוב ביותר דרך קבוצת רכישה
+            </Typography>
+          </Box>
+        </Card>
+      )}
     </Box>
   );
 }
