@@ -136,7 +136,7 @@ export default function SmartSearchPage() {
               borderRadius: "14px",
               border: "1.5px dashed rgba(0,0,0,0.15)",
               cursor: "pointer",
-              bgcolor: "rgba(66,100,212,0.03)",
+              background: "linear-gradient(-135deg, #ffffff, #f0f4ff)",
               "&:hover": { bgcolor: "rgba(66,100,212,0.07)" },
               transition: "background 0.2s",
             }}

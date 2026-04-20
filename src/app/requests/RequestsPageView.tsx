@@ -18,7 +18,6 @@ export function RequestsPageView() {
   return (
     <>
       <DefaultPageBanner
-        mainSx={{ top: -66, zIndex: 900, position: "sticky" }}
         header="כל הבקשות"
         description="גלה מה הקהילה מחפשת לקנות, סמן לייק לבקשות רלוונטיות ועזור לנו לפתוח קבוצות חדשות."
         hintBullets={HINT}
@@ -26,18 +25,17 @@ export function RequestsPageView() {
 
       <Box
         sx={{
-          maxWidth: 800,
           width: "100%",
-          px: { xs: 2, md: "auto" },
+          maxWidth: 800,
+          mx: "auto",
+          px: { xs: 2, md: 0 },
           mt: { xs: -4, md: -3 },
           mb: 2,
           boxShaow: 3,
           borderRadius: "14px",
           //p: 1.5,
           display: "flex",
-          position: "sticky",
-          top: 82,
-          zIndex: 1000,
+          position: "relative",
           alignItems: "center",
          // border: "2px solid transparent",
           //"&:hover": { borderColor: "#1a2a5a" },
