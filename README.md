@@ -34,3 +34,33 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Auth setup
+
+Uses NextAuth with Google and Email (magic link) via Resend, with Prisma Adapter.
+
+Add to `.env.local`:
+
+```
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-long-random-secret
+
+DATABASE_URL=postgres://...
+DIRECT_URL=postgres://...
+
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+
+RESEND_API_KEY=...
+EMAIL_FROM=InaClub <no-reply@yourdomain.com>
+
+# Optional: Cloudinary unsigned upload for profile images
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dqqez4og6
+NEXT_PUBLIC_CLOUDINARY_UNSIGNED_PRESET=unsigned_preset
+```
+
+Notes:
+
+- Create a free Resend account and get an API key. You can use a free test domain or a verified custom domain for production.
+- The Email provider sends a magic link (OTP-like). First login creates the user automatically via Prisma Adapter.
+- Ensure Prisma migrations are applied: `npx prisma migrate dev`.

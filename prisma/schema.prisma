@@ -1,0 +1,254 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model B2BPackage {
+  id          String      @id @default(uuid())
+  userId      String      @unique
+  packageType PackageType
+  maxGroups   Int
+  price       Float
+  startDate   DateTime    @default(now())
+  endDate     DateTime?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  payments    Payment[]
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  b2bPackageId  String
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  paymentDate   DateTime      @default(now())
+  transactionId String?
+  createdAt     DateTime      @default(now())
+  b2bPackage    B2BPackage    @relation(fields: [b2bPackageId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id           String        @id @default(uuid())
+  ownerId      String        @unique // Clerk User ID
+  title        String
+  address      String?
+  city         String?
+  createdAt    DateTime      @default(now())
+  description  String?
+  email        String?
+  phone        String?
+  verified     Boolean       @default(false)
+  websiteUrl   String?       @unique
+  logoId       String?       @unique
+  updatedAt    DateTime?     @updatedAt
+  activeGroups ActiveGroup[]
+  logo         Image?        @relation("CompanyLogo", fields: [logoId], references: [id])
+  testimonials Testimonial[]
+  categories   Category[]    @relation("CompanyCategories")
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  activeGroups ActiveGroup[] @relation("ActiveGroupCategory")
+  wishItems    WishItem[]    @relation("WishItemCategory")
+  companies    Company[]     @relation("CompanyCategories")
+}
+
+model Image {
+  id                 String             @id @default(uuid())
+  url                String
+  activeGroupImages  ActiveGroupImage[]
+  companyLogo        Company?           @relation("CompanyLogo")
+}
+
+model ActiveGroupImage {
+  id            String      @id @default(uuid())
+  activeGroupId String
+  imageId       String
+  order         Int?
+  activeGroup   ActiveGroup @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+  image         Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([activeGroupId, imageId])
+}
+
+model ActiveGroup {
+  id                String                   @id @default(uuid())
+  categoryId        String
+  title             String
+  deadline          DateTime
+  companyId         String
+  basePrice         Float
+  createdAt         DateTime                 @default(now())
+  createdById       String                   // Clerk User ID
+  description       String
+  groupPrice        Float
+  maxParticipants   Int?
+  minParticipants   Int?
+  status            GroupStatus              @default(OPEN)
+  registrationTerms String                   @default("")
+  category          Category                 @relation("ActiveGroupCategory", fields: [categoryId], references: [id])
+  company           Company                  @relation(fields: [companyId], references: [id])
+  images            ActiveGroupImage[]
+  participants      ActiveGroupParticipant[]
+  tokens            PaymentToken[]
+  coupons           Coupon[]
+}
+
+model ActiveGroupParticipant {
+  id            String      @id @default(uuid())
+  userId        String      // Clerk User ID
+  activeGroupId String
+  joinedAt      DateTime    @default(now())
+  lastPing      DateTime
+  activeGroup   ActiveGroup @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activeGroupId])
+}
+
+model Like {
+  id         String         @id @default(uuid())
+  userId     String         // Clerk User ID
+  targetType LikeTargetType
+  targetId   String
+  createdAt  DateTime       @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId, createdAt])
+  @@index([targetType, targetId])
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  role        String
+  quote       String
+  name        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  companyId   String?
+  companyName String
+  company     Company? @relation(fields: [companyId], references: [id])
+}
+
+model WishItem {
+  id          String    @id @default(uuid())
+  text        String
+  targetPrice Float?
+  createdAt   DateTime  @default(now())
+  createdById String    // Clerk User ID
+  categoryId  String?
+  category    Category? @relation("WishItemCategory", fields: [categoryId], references: [id])
+
+  @@index([createdAt])
+}
+
+model PaymentServiceProvider {
+  id                String                 @id @default(uuid())
+  name              String                 @unique // E.g., "STRIPE", "MOCK_PSP"
+  isActive          Boolean                @default(true)
+  
+  tokens            PaymentToken[]
+}
+
+model PaymentToken {
+  id                String                 @id @default(uuid())
+  userId            String
+  activeGroupId     String
+  activeGroup       ActiveGroup            @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+  pspId             String
+  psp               PaymentServiceProvider @relation(fields: [pspId], references: [id], onDelete: Restrict)
+  
+  pspToken          String                 
+  agreedFee         Float                  
+  currency          String                 @default("ILS")
+  status            TokenStatus            @default(ACTIVE)
+  
+  createdAt         DateTime               @default(now())
+  consumedAt        DateTime?
+}
+
+model Coupon {
+  id          String       @id @default(uuid())
+  code        String       @unique
+  groupId     String
+  userId      String
+  validTo     DateTime
+  status      CouponStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  activeGroup ActiveGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([userId])
+}
+
+enum GroupStatus {
+  OPEN
+  ACTIVATED
+  RESOLVED
+  CANCELED
+  EXPIRED
+  PENDING
+  PREVIEW
+}
+
+enum Role {
+  USER
+  BUSINESS
+  ADMIN
+}
+
+enum LikeTargetType {
+  ACTIVE_GROUP
+  WISH_ITEM
+}
+
+enum PackageType {
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum TokenStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
+}
+
+enum CouponStatus {
+  ACTIVE
+  EXPIRED
+  USED
+}
+
+model B2BInvitation {
+  id              String      @id @default(uuid())
+  email           String      @unique
+
+  // Package Data
+  packageType     PackageType
+  maxGroups       Int
+  price           Float
+  endDate         DateTime?
+
+  // Company Data
+  companyTitle    String
+  companyAddress  String?
+  companyCity     String?
+
+  createdAt       DateTime    @default(now())
+}
