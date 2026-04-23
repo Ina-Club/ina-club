@@ -15,7 +15,6 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import SendIcon from "@mui/icons-material/Send";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -162,7 +161,7 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
                   }}
                   title="הוסף מחיר יעד"
                 >
-                  <ShekelIcon sx={{ fontSize: 18 }} />
+                  <ShekelIcon />
                 </IconButton>
                 <Button
                   size="small"
@@ -209,7 +208,7 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
               disableUnderline: true,
               startAdornment: (
                 <InputAdornment position="start">
-                  <ShekelIcon sx={{ fontSize: 16, color: "text.disabled" }} />
+                  <ShekelIcon />
                 </InputAdornment>
               ),
             }}

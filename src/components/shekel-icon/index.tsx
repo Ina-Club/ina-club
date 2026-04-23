@@ -1,9 +1,9 @@
 import { SvgIcon } from '@mui/material';
 
-export default function ShekelIcon(props) {
+export default function ShekelIcon() {
 
   return (
-    <SvgIcon {...props}>
+    <SvgIcon>
       <text
         x="50%"
         y="50%"
