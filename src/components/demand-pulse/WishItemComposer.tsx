@@ -15,10 +15,10 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import SendIcon from "@mui/icons-material/Send";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import ShekelIcon from "../shekel-icon";
 
 interface WishItemComposerProps {
   onPosted: () => void;
@@ -139,7 +139,7 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
         fullWidth
         multiline
         maxRows={3}
-        placeholder="מה אתם רוצים לקנות? (לדוג׳: מחפש AirPods Pro באזור 120$)"
+        placeholder="מה אתם רוצים לקנות? (לדוג׳: מחפש AirPods Pro באזור 120 ש״ח)"
         value={text}
         onChange={(e) => setText(e.target.value.slice(0, 200))}
         onKeyDown={handleKeyDown}
@@ -161,7 +161,7 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
                   }}
                   title="הוסף מחיר יעד"
                 >
-                  <AttachMoneyIcon sx={{ fontSize: 18 }} />
+                  <ShekelIcon />
                 </IconButton>
                 <Button
                   size="small"
@@ -208,7 +208,7 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
               disableUnderline: true,
               startAdornment: (
                 <InputAdornment position="start">
-                  <AttachMoneyIcon sx={{ fontSize: 16, color: "text.disabled" }} />
+                  <ShekelIcon />
                 </InputAdornment>
               ),
             }}

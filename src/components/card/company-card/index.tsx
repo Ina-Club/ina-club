@@ -44,7 +44,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
       >
         <CardMedia
           component="img"
-          image={company.logo?.url ?? "/public/InaClubLogo.png"}
+          image={company.logo?.url ?? "/InaClubLogo.png"}
           alt={company.title}
           sx={{
             width: 60,

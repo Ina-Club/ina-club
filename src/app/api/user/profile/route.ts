@@ -3,6 +3,7 @@ import { prisma } from "lib/prisma";
 import { validateSession, getClerkUser } from "@/lib/auth";
 import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 import { clerkClient } from "@clerk/nextjs/server";
+import { fetchWishItemCards } from "@/lib/wish-items";
 
 export async function GET(request: Request) {
   try {
@@ -54,11 +55,9 @@ export async function GET(request: Request) {
       },
     });
 
-    const wishItems = await prisma.wishItem.findMany({
+    const wishItems = await fetchWishItemCards({
       where: { createdById: userId },
-      include: {
-        category: true,
-      },
+      currentUserId: userId,
     });
 
     const coupons = await prisma.coupon.findMany({
@@ -95,17 +94,7 @@ export async function GET(request: Request) {
         images: m.activeGroup.images.map((img) => img.image.url),
       })),
 
-      wishItems: wishItems.map((item) => ({
-        id: item.id,
-        text: item.text,
-        targetPrice: item.targetPrice,
-        categoryName: item.category?.name,
-        createdAt: item.createdAt,
-        authorName: userData.name,
-        authorAvatar: userData.profilePicture,
-        likeCount: 0,
-        isLikedByMe: false,
-      })),
+      wishItems,
 
       coupons: coupons.map((c) => ({
         id: c.id,

@@ -1,69 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { validateSession } from "@/lib/auth";
 import { auth } from "@clerk/nextjs/server";
-import { LikeTargetType } from "@prisma/client";
-import { getClerkPublicUsersMap } from "@/lib/clerk-users";
+import { prisma } from "@/lib/prisma";
+import { fetchWishItemCards } from "@/lib/wish-items";
 
 export async function GET(req: NextRequest) {
   try {
     // Feed is public, personalization is optional.
     const { userId } = await auth();
 
-    const items = await prisma.wishItem.findMany({
-      orderBy: { createdAt: "desc" },
+    const result = await fetchWishItemCards({
+      currentUserId: userId,
       take: 30,
-      select: {
-        id: true,
-        text: true,
-        targetPrice: true,
-        category: { select: { name: true } },
-        createdAt: true,
-        createdById: true,
-      },
     });
-
-    // Fetch like counts for all items in one query
-    const likeCounts = await prisma.like.groupBy({
-      by: ["targetId"],
-      where: {
-        targetType: LikeTargetType.WISH_ITEM,
-        targetId: { in: items.map((i) => i.id) },
-      },
-      _count: { id: true },
-    });
-
-    const likeCountMap = new Map(
-      likeCounts.map((l) => [l.targetId, l._count.id])
-    );
-
-    // Fetch user's own likes if signed in
-    let userLikedSet = new Set<string>();
-    if (userId) {
-      const userLikes = await prisma.like.findMany({
-        where: {
-          userId,
-          targetType: LikeTargetType.WISH_ITEM,
-          targetId: { in: items.map((i) => i.id) },
-        },
-        select: { targetId: true },
-      });
-      userLikedSet = new Set(userLikes.map((l) => l.targetId));
-    }
-
-    const authorsMap = await getClerkPublicUsersMap(items.map((i) => i.createdById));
-
-    const result = items.map((item) => ({
-      id: item.id,
-      text: item.text,
-      targetPrice: item.targetPrice,
-      categoryName: item.category?.name,
-      createdAt: item.createdAt,
-      authorName: authorsMap.get(item.createdById)?.name ?? "משתמש",
-      authorAvatar: authorsMap.get(item.createdById)?.imageUrl ?? null,
-      likeCount: likeCountMap.get(item.id) ?? 0,
-      isLikedByMe: userLikedSet.has(item.id),
-    }));
 
     return NextResponse.json(result);
   } catch (error) {

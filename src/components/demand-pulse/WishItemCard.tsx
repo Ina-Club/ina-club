@@ -15,6 +15,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { formatShekelAmount } from "@/lib/utils/currency";
 
 export interface WishItemData {
   id: string;
@@ -181,7 +182,7 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
             )}
             {item.targetPrice && (
               <Chip
-                label={`~$${item.targetPrice.toLocaleString("he-IL")}`}
+                label={`~${formatShekelAmount(item.targetPrice, { compact: true })}`}
                 size="small"
                 sx={{
                   height: 22,

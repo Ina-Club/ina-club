@@ -20,6 +20,7 @@ import { LikeTargetType } from "@/lib/types/like";
 import { fetchGroupLikeCount } from "@/lib/groups";
 import ParticipantsProgress from "@/components/card/active-group-card/participations-progress-bar";
 import GroupMembershipPanel from "@/components/group-membership-button/group-membership-panel";
+import { formatShekelAmount } from "@/lib/utils/currency";
 
 export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
   const { id } = await params;
@@ -153,8 +154,8 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               ניתוח מחיר
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              מחיר יחידה: ₪{ag.basePrice} <br />
-              מחיר קבוצתי: ₪{ag.groupPrice} <br />
+              מחיר יחידה: {formatShekelAmount(ag.basePrice)} <br />
+              מחיר קבוצתי: {formatShekelAmount(ag.groupPrice)} <br />
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2">

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Ina Club — קניות קבוצתיות חכמות",
   description:
     "בקשות מהקהילה, קבוצות רכישה פעילות, חיפוש חכם ומנתח מחירים — הכל במקום אחד.",
-  icons: { icon: "/InaClubAppLogo.png" },
+  icons: { icon: "/InaclubAppLogo.png" },
 };
 
 import { SnackbarProvider } from "@/contexts/snackbar-context";
