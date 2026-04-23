@@ -7,6 +7,7 @@ import { useState } from "react";
 import ParticipantsProgress from "./participations-progress-bar";
 import Countdown from "./countdown";
 import { useRouter } from "next/navigation";
+import { formatShekelAmount } from "@/lib/utils/currency";
 
 
 interface ActiveGroupCardProps {
@@ -163,10 +164,10 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
               color="text.secondary"
               sx={{ textDecoration: "line-through" }}
             >
-              ₪{activeGroup.basePrice}
+              {formatShekelAmount(activeGroup.basePrice)}
             </Typography>
             <Typography variant="subtitle1" fontWeight={700} color="primary.main">
-              ₪{activeGroup.groupPrice}
+              {formatShekelAmount(activeGroup.groupPrice)}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">

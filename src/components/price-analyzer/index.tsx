@@ -26,6 +26,7 @@ import { SearchBar } from "@/components/search-bar";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { formatShekelAmount } from "@/lib/utils/currency";
 import type {
   NeedMoreInfoResponse,
   PriceResponse,
@@ -466,26 +467,43 @@ export default function PriceAnalyzerComponent() {
       {priceResult && (
         <Card
           sx={{
-            p: 3,
-            boxShadow: 4,
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-            color: "white",
+            p: { xs: 2, md: 3 },
+            boxShadow: "0 18px 42px rgba(26, 42, 90, 0.12)",
+            background:
+              "linear-gradient(180deg, #ffffff 0%, rgba(230, 239, 245, 0.72) 100%)",
+            borderRadius: "24px",
+            border: "1px solid rgba(190, 214, 233, 0.9)",
+            color: "text.primary",
           }}
         >
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-            {priceResult.productName}
-          </Typography>
-
-          <Chip
-            label={priceResult.category}
+          <Box
             sx={{
               mb: 3,
-              bgcolor: "rgba(255, 255, 255, 0.2)",
+              p: { xs: 2, md: 2.5 },
+              borderRadius: "20px",
+              background:
+                "linear-gradient(135deg, rgba(26, 42, 90, 0.96) 0%, rgba(36, 58, 122, 0.96) 100%)",
               color: "white",
             }}
-          />
+          >
+            <Typography variant="overline" sx={{ opacity: 0.8, letterSpacing: 1 }}>
+              סיכום ניתוח
+            </Typography>
+            <Typography variant="h5" sx={{ mt: 0.5, mb: 1, fontWeight: 700 }}>
+              {priceResult.productName}
+            </Typography>
 
-          <Divider sx={{ mb: 3, bgcolor: "rgba(255, 255, 255, 0.3)" }} />
+            <Chip
+              label={priceResult.category}
+              sx={{
+                bgcolor: "rgba(255, 255, 255, 0.14)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.18)",
+              }}
+            />
+          </Box>
+
+          <Divider sx={{ mb: 3, borderColor: "rgba(26, 42, 90, 0.12)" }} />
 
           <Box
             sx={{
@@ -498,16 +516,30 @@ export default function PriceAnalyzerComponent() {
               mb: 3,
             }}
           >
-            <Box>
-              <Typography variant="body2" sx={{ mb: 0.5, opacity: 0.9 }}>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: "18px",
+                backgroundColor: "rgba(255,255,255,0.72)",
+                border: "1px solid rgba(190, 214, 233, 0.8)",
+              }}
+            >
+              <Typography variant="body2" sx={{ mb: 0.5, color: "text.secondary" }}>
                 מחיר מקורי
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                ₪{priceResult.estimatedPrice.toLocaleString()}
+              <Typography variant="h5" sx={{ fontWeight: 700, color: "primary.main" }}>
+                {formatShekelAmount(priceResult.estimatedPrice)}
               </Typography>
             </Box>
 
-            <Box>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: "18px",
+                backgroundColor: "rgba(255,255,255,0.72)",
+                border: "1px solid rgba(190, 214, 233, 0.8)",
+              }}
+            >
               <Box
                 sx={{
                   display: "flex",
@@ -516,20 +548,27 @@ export default function PriceAnalyzerComponent() {
                   mb: 0.5,
                 }}
               >
-                <LocalOfferIcon sx={{ fontSize: 18 }} />
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                <LocalOfferIcon sx={{ fontSize: 18, color: "secondary.main" }} />
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   הנחה קבוצתית
                 </Typography>
               </Box>
               <Typography
                 variant="h5"
-                sx={{ fontWeight: 600, color: "#ffd700" }}
+                sx={{ fontWeight: 700, color: "secondary.dark" }}
               >
                 {priceResult.groupDiscount}%
               </Typography>
             </Box>
 
-            <Box>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: "18px",
+                backgroundColor: "rgba(255,255,255,0.72)",
+                border: "1px solid rgba(190, 214, 233, 0.8)",
+              }}
+            >
               <Box
                 sx={{
                   display: "flex",
@@ -538,25 +577,25 @@ export default function PriceAnalyzerComponent() {
                   mb: 0.5,
                 }}
               >
-                <TrendingUpIcon sx={{ fontSize: 18 }} />
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                <TrendingUpIcon sx={{ fontSize: 18, color: "primary.main" }} />
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   מחיר סופי
                 </Typography>
               </Box>
               <Typography
                 variant="h5"
-                sx={{ fontWeight: 600, color: "#4ade80" }}
+                sx={{ fontWeight: 700, color: "primary.main" }}
               >
-                ₪{priceResult.averageGroupPrice.toLocaleString()}
+                {formatShekelAmount(priceResult.averageGroupPrice)}
               </Typography>
             </Box>
           </Box>
 
-          <Divider sx={{ mb: 2, bgcolor: "rgba(255, 255, 255, 0.3)" }} />
+          <Divider sx={{ mb: 2, borderColor: "rgba(26, 42, 90, 0.12)" }} />
 
           {/* Expected Group Price Range */}
           <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: "primary.main" }}>
               טווח מחירים צפוי
             </Typography>
 
@@ -566,7 +605,7 @@ export default function PriceAnalyzerComponent() {
               >
                 <Typography
                   variant="caption"
-                  sx={{ minWidth: 80, opacity: 0.9 }}
+                  sx={{ minWidth: 80, color: "text.secondary" }}
                 >
                   מחיר מינימלי
                 </Typography>
@@ -574,7 +613,7 @@ export default function PriceAnalyzerComponent() {
                   sx={{
                     flexGrow: 1,
                     height: 8,
-                    backgroundColor: "rgba(255,255,255,0.25)",
+                    backgroundColor: "rgba(190, 214, 233, 0.45)",
                     borderRadius: 1,
                     position: "relative",
                   }}
@@ -583,13 +622,13 @@ export default function PriceAnalyzerComponent() {
                     sx={{
                       width: calculateChartFillPercentage(minGroupPrice),
                       height: "100%",
-                      backgroundColor: "#ffd700",
+                      backgroundColor: theme.palette.secondary.main,
                       borderRadius: 1,
                     }}
                   />
                 </Box>
-                <Typography variant="caption">
-                  ₪{minGroupPrice.toLocaleString()}
+                <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600 }}>
+                  {formatShekelAmount(minGroupPrice)}
                 </Typography>
               </Box>
 
@@ -598,7 +637,7 @@ export default function PriceAnalyzerComponent() {
               >
                 <Typography
                   variant="caption"
-                  sx={{ minWidth: 80, opacity: 0.9 }}
+                  sx={{ minWidth: 80, color: "text.secondary" }}
                 >
                   מחיר צפוי
                 </Typography>
@@ -606,7 +645,7 @@ export default function PriceAnalyzerComponent() {
                   sx={{
                     flexGrow: 1,
                     height: 8,
-                    backgroundColor: "rgba(255,255,255,0.25)",
+                    backgroundColor: "rgba(190, 214, 233, 0.45)",
                     borderRadius: 1,
                     position: "relative",
                   }}
@@ -615,20 +654,20 @@ export default function PriceAnalyzerComponent() {
                     sx={{
                       width: calculateChartFillPercentage(averageGroupPrice),
                       height: "100%",
-                      backgroundColor: "#4ade80",
+                      backgroundColor: theme.palette.primary.main,
                       borderRadius: 1,
                     }}
                   />
                 </Box>
-                <Typography variant="caption">
-                  ₪{averageGroupPrice.toLocaleString()}
+                <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600 }}>
+                  {formatShekelAmount(averageGroupPrice)}
                 </Typography>
               </Box>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography
                   variant="caption"
-                  sx={{ minWidth: 80, opacity: 0.9 }}
+                  sx={{ minWidth: 80, color: "text.secondary" }}
                 >
                   מחיר מקסימלי
                 </Typography>
@@ -636,7 +675,7 @@ export default function PriceAnalyzerComponent() {
                   sx={{
                     flexGrow: 1,
                     height: 8,
-                    backgroundColor: "rgba(255,255,255,0.25)",
+                    backgroundColor: "rgba(190, 214, 233, 0.45)",
                     borderRadius: 1,
                     position: "relative",
                   }}
@@ -645,29 +684,40 @@ export default function PriceAnalyzerComponent() {
                     sx={{
                       width: calculateChartFillPercentage(maxGroupPrice),
                       height: "100%",
-                      backgroundColor: "#f87171",
+                      backgroundColor: "#d9822b",
                       borderRadius: 1,
                     }}
                   />
                 </Box>
-                <Typography variant="caption">
-                  ₪{maxGroupPrice.toLocaleString()}
+                <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600 }}>
+                  {formatShekelAmount(maxGroupPrice)}
                 </Typography>
               </Box>
             </Box>
           </Box>
 
-          <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.6 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              mb: 3,
+              lineHeight: 1.8,
+              color: "text.secondary",
+              backgroundColor: "rgba(255,255,255,0.68)",
+              border: "1px solid rgba(190, 214, 233, 0.7)",
+              borderRadius: "18px",
+              p: 2,
+            }}
+          >
             {priceResult.notes}
           </Typography>
 
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", sm: "row" } }}>
             <Button
               variant="contained"
               sx={{
-                bgcolor: "white",
-                color: "primary.main",
-                "&:hover": { bgcolor: "grey.100" },
+                bgcolor: "primary.main",
+                color: "white",
+                "&:hover": { bgcolor: "primary.dark" },
                 flexGrow: 1,
               }}
               onClick={handleReset}
@@ -679,11 +729,11 @@ export default function PriceAnalyzerComponent() {
               onClick={handleCreateWishItem}
               disabled={loading}
               sx={{
-                borderColor: "white",
-                color: "white",
+                borderColor: "primary.main",
+                color: "primary.main",
                 "&:hover": {
-                  borderColor: "white",
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                  borderColor: "primary.dark",
+                  bgcolor: "rgba(26, 42, 90, 0.04)",
                 },
               }}
             >
@@ -692,15 +742,15 @@ export default function PriceAnalyzerComponent() {
           </Box>
 
           <Divider
-            sx={{ mt: 3, mb: 1.5, bgcolor: "rgba(255, 255, 255, 0.3)" }}
+            sx={{ mt: 3, mb: 1.5, borderColor: "rgba(26, 42, 90, 0.12)" }}
           />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <InfoOutlinedIcon
-              sx={{ fontSize: 16, color: "rgba(255,255,255,0.85)" }}
+              sx={{ fontSize: 16, color: "rgba(26, 42, 90, 0.72)" }}
             />
             <Typography
               variant="caption"
-              sx={{ color: "rgba(255,255,255,0.85)" }}
+              sx={{ color: "rgba(26, 42, 90, 0.72)" }}
             >
               מידע שנוצר על ידי בינה מלאכותית עלול להכיל אי־דיוקים והוא מיועד
               למטרות מידע בלבד. מומלץ לאמת פרטים ומחירים מול מקורות רשמיים.

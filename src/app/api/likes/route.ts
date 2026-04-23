@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { fetchActiveGroups } from "@/lib/groups";
 import { validateSession } from "@/lib/auth";
 import { LikeTargetType } from "@/lib/types/like";
+import { fetchWishItemCards } from "@/lib/wish-items";
 
 export async function GET() {
     const { userId, response } = await validateSession();
@@ -23,26 +24,13 @@ export async function GET() {
 
         const [activeGroups, wishItems] = await Promise.all([
             fetchActiveGroups({ id: { in: activeGroupIds } }),
-            prisma.wishItem.findMany({
+            fetchWishItemCards({
                 where: { id: { in: wishItemIds } },
-                include: {
-                    category: { select: { name: true } },
-                },
+                currentUserId: userId,
             }),
         ]);
 
-        // Format wish items to match the expected structure
-        const formattedWishes = wishItems.map(item => ({
-            id: item.id,
-            text: item.text,
-            targetPrice: item.targetPrice,
-            categoryName: item.category?.name,
-            authorName: "משתמש",
-            authorAvatar: null,
-            isLikedByMe: true,
-        }));
-
-        return NextResponse.json({ activeGroups, wishItems: formattedWishes });
+        return NextResponse.json({ activeGroups, wishItems });
     } catch (error) {
         console.error("Failed to fetch likes:", error);
         return NextResponse.json({ activeGroups: [], wishItems: [] }, { status: 500 });
