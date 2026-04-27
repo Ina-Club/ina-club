@@ -58,9 +58,6 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
         <Typography variant="subtitle1" fontWeight={600}>
           {company.title}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {company.subTitle}
-        </Typography>
         <Box sx={{ display: "flex", flexDirection: "row", mt: 0.5, gap: 1 }}>
           <Typography variant="subtitle2" fontWeight={500}>
             {company.categories.join(", ")}
