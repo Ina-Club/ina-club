@@ -100,6 +100,15 @@ export default function SignInPage() {
             spinner: {
               color: "#1a2a5a",
             },
+            /* OTP / 2FA code input — force LTR so digits read left-to-right
+             even though the rest of the card is RTL */
+            otpCodeField: {
+              direction: "ltr",
+            },
+            otpCodeFieldInput: {
+              direction: "ltr",
+              textAlign: "left",
+            },
           },
         }}
         path="/sign-in"
