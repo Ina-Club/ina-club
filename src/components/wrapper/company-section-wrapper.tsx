@@ -92,7 +92,6 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
                 display: "flex",
                 width: "100%",
                 height: "100%",
-                flex: "auto !important",
               }}
             >
               <CompanyCard company={company} />
