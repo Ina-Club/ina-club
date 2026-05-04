@@ -71,7 +71,8 @@ export async function fetchWishItemCards({
     targetPrice: item.targetPrice,
     categoryName: item.category?.name,
     createdAt: item.createdAt.toISOString(),
-    authorName: authorsMap.get(item.createdById)?.name ?? "משתמש",
+    // Get only first name to hide personal data and keep business model!!!
+    authorName: authorsMap.get(item.createdById)?.name.split(" ")[0] ?? "משתמש",
     authorAvatar: authorsMap.get(item.createdById)?.imageUrl ?? null,
     likeCount: likeCountMap.get(item.id) ?? 0,
     isLikedByMe: userLikedSet.has(item.id),
