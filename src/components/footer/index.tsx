@@ -134,13 +134,7 @@ export default function Footer() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <EmailIcon sx={{ fontSize: 20 }} />
                 <Typography variant="body2">
-                  info@inaclub.co.il
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <PhoneIcon sx={{ fontSize: 20 }} />
-                <Typography variant="body2">
-                  03-1234567
+                  support@inaclub.co.il
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
