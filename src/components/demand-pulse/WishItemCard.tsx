@@ -89,6 +89,9 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
     <Card
       sx={{
         borderRadius: "16px",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
         boxShadow: isTrending
           ? "0 4px 20px rgba(255, 100, 50, 0.15)"
           : "0 2px 12px rgba(0,0,0,0.07)",
@@ -118,7 +121,7 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
         />
       )}
 
-      <CardContent sx={{ p: "14px 16px 12px", "&:last-child": { pb: "12px" } }}>
+      <CardContent sx={{ p: "14px 16px 12px", "&:last-child": { pb: "12px" }, display: "flex", flexDirection: "column", flex: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Avatar
             src={item.authorAvatar ?? undefined}
@@ -164,7 +167,7 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
           {item.text}
         </Typography>
 
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: "auto" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}>
             {item.categoryName && (
               <Chip
