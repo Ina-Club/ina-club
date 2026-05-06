@@ -7,15 +7,32 @@ import WishItemComposer from "./WishItemComposer";
 
 interface WishItemFeedProps {
   showComposer?: boolean;
+  limit?: number;
+  sinceDays?: number;
+  orderBy?: "likes";
 }
 
-export default function WishItemFeed({ showComposer = true }: WishItemFeedProps) {
+export default function WishItemFeed({
+  showComposer = true,
+  limit,
+  sinceDays,
+  orderBy,
+}: WishItemFeedProps) {
   const [items, setItems] = useState<WishItemData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchItems = useCallback(async () => {
     try {
-      const res = await fetch("/api/wish-items", { cache: "no-store" });
+      const params = new URLSearchParams();
+      if (limit) params.set("limit", String(limit));
+      if (sinceDays) {
+        const since = new Date();
+        since.setDate(since.getDate() - sinceDays);
+        params.set("since", since.toISOString());
+      }
+      if (orderBy) params.set("orderBy", orderBy);
+
+      const res = await fetch("/api/wish-items/?" + params.toString(), { cache: "no-store" });
       if (res.ok) {
         const data: WishItemData[] = await res.json();
         setItems(data);

@@ -7,54 +7,33 @@ import CompanyCard from "../card/company-card";
 import { Company } from "lib/dal";
 import { useState, useEffect } from "react";
 import CompanyCardSkeleton from "../skeleton/company-card-skeleton";
-import { DEFAULT_PAGINATION } from "@/app/config/pagination";
 
 interface CompanySectionWrapperProps { }
 
 const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
-  const [allCompanies, setAllCompanies] = useState<Company[]>([]);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fetchPage = async (opts?: { cursor?: string | null; append?: boolean }) => {
-    const append = opts?.append ?? false;
-    const nextCursor = opts?.cursor ?? null;
-    if (append) {
-      if (!nextCursor || loadingMore || initialLoading) return;
-      setLoadingMore(true);
-    } else {
-      setInitialLoading(true);
-    }
+  const fetchCompanies = async () => {
+    setLoading(true);
 
     const params = new URLSearchParams({
-      limit: DEFAULT_PAGINATION.toString(),
+      limit: "5",
     });
-    if (nextCursor) params.set("cursor", nextCursor);
 
     try {
       const res = await fetch("/api/companies/?" + params.toString());
       const data = await res.json();
-      const incoming: Company[] = data.companies ?? [];
-      setCursor(data.nextCursor ?? null);
-      setHasMore(!!data.nextCursor);
-      setAllCompanies((prev) => {
-        if (!append) return incoming;
-        const seen = new Set(prev.map((c) => c.id));
-        const filtered = incoming.filter((c) => !seen.has(c.id));
-        return [...prev, ...filtered];
-      });
+      setCompanies(data.companies ?? []);
     } catch {
-      if (!append) setAllCompanies([]);
+      setCompanies([]);
     } finally {
-      if (append) setLoadingMore(false);
-      else setInitialLoading(false);
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchPage();
+    fetchCompanies();
   }, []);
 
   return (
@@ -64,13 +43,8 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
       linkLabel={`צפה בכל החברות`}
       linkUrl={`/companies`}
     >
-      <ResponsiveHorizontalCardWrapper
-        gap="16px"
-        hasMore={hasMore}
-        loadingMore={loadingMore}
-        onLoadMore={() => fetchPage({ cursor, append: true })}
-      >
-        {initialLoading ? (
+      <ResponsiveHorizontalCardWrapper gap="16px">
+        {loading ? (
           Array.from({ length: 6 }).map((_, i) => (
             <Box
               key={i}
@@ -84,8 +58,8 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
               <CompanyCardSkeleton key={i} />
             </Box>
           ))
-        ) : allCompanies.length > 0 ? (
-          allCompanies.map((company, index) => (
+        ) : companies.length > 0 ? (
+          companies.map((company, index) => (
             <Box
               key={index}
               sx={{

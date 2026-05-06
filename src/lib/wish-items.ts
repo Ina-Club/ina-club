@@ -12,6 +12,8 @@ type FetchWishItemCardsOptions = {
   currentUserId?: string | null;
 };
 
+export const WISH_ITEM_DEFAULT_TAKE = 20;
+
 export async function fetchWishItemCards({
   where,
   orderBy = { createdAt: "desc" },

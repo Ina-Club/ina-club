@@ -7,58 +7,37 @@ import ActiveGroupCard from "../card/active-group-card";
 import { useState, useEffect } from "react";
 import { ActiveGroup } from "lib/dal";
 import ActiveGroupCardSkeleton from "../skeleton/active-group-card-skeleton";
-import { DEFAULT_PAGINATION } from "@/app/config/pagination";
 import { GroupStatus } from "lib/types/status";
 
 interface GroupSectionWrapperProps { }
 
 const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
-  const [allOpenActiveGroupsWithParent, setAllOpenActiveGroupsWithParent] =
-    useState<ActiveGroup[]>([]);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
+  const [groups, setGroups] = useState<ActiveGroup[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fetchPage = async (opts?: { cursor?: string | null; append?: boolean }) => {
-    const append = opts?.append ?? false;
-    const nextCursor = opts?.cursor ?? null;
-    if (append) {
-      if (!nextCursor || loadingMore || initialLoading) return;
-      setLoadingMore(true);
-    } else {
-      setInitialLoading(true);
-    }
+  const fetchGroups = async () => {
+    setLoading(true);
 
     const params = new URLSearchParams({
       lastWeek: "true",
-      limit: DEFAULT_PAGINATION.toString()
+      limit: "10",
+      orderBy: "participants",
     });
     params.append("status", GroupStatus.OPEN);
-    if (nextCursor) params.set("cursor", nextCursor);
 
     try {
       const res = await fetch("/api/active-groups/?" + params.toString());
       const data = await res.json();
-      const incoming: ActiveGroup[] = data.activeGroups ?? [];
-      setCursor(data.nextCursor ?? null);
-      setHasMore(!!data.nextCursor);
-      setAllOpenActiveGroupsWithParent((prev) => {
-        if (!append) return incoming;
-        const seen = new Set(prev.map((r) => r.id));
-        const filtered = incoming.filter((r) => !seen.has(r.id));
-        return [...prev, ...filtered];
-      });
+      setGroups(data.activeGroups ?? []);
     } catch {
-      if (!append) setAllOpenActiveGroupsWithParent([]);
+      setGroups([]);
     } finally {
-      if (append) setLoadingMore(false);
-      else setInitialLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPage();
+    fetchGroups();
   }, []);
 
   return (
@@ -69,13 +48,8 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
         linkLabel={`צפה בכל הקבוצות`}
         linkUrl={`/active-groups`}
       >
-        <ResponsiveHorizontalCardWrapper
-          gap="16px"
-          hasMore={hasMore}
-          loadingMore={loadingMore}
-          onLoadMore={() => fetchPage({ cursor, append: true })}
-        >
-          {initialLoading ? (
+        <ResponsiveHorizontalCardWrapper gap="16px">
+          {loading ? (
             Array.from({ length: 6 }).map((_, index) => (
               <Box
                 key={index}
@@ -88,8 +62,8 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
                 <ActiveGroupCardSkeleton />
               </Box>
             ))
-          ) : allOpenActiveGroupsWithParent.length > 0 ? (
-            allOpenActiveGroupsWithParent.map((activeGroup, index) => (
+          ) : groups.length > 0 ? (
+            groups.map((activeGroup, index) => (
               <Box
                 key={index}
                 sx={{

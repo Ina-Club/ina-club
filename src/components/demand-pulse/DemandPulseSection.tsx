@@ -27,7 +27,7 @@ export default function DemandPulseSection({ embeddedInTint = false }: DemandPul
           linkLabel="צפה בכל הבקשות"
           linkUrl="/requests"
         >
-          <WishItemFeed showComposer={false} />
+          <WishItemFeed showComposer={false} limit={20} sinceDays={30} orderBy="likes" />
         </SectionWrapper>
       </Container>
     </Box>
