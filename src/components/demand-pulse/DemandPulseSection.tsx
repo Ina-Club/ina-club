@@ -12,6 +12,10 @@ type DemandPulseSectionProps = {
   embeddedInTint?: boolean;
 };
 
+const WISH_ITEMS_PER_PAGE = 6;
+const WISH_ITEMS_PAGES = 2;
+const WISH_ITEMS_SINCE_DAYS = 30;
+
 export default function DemandPulseSection({ embeddedInTint = false }: DemandPulseSectionProps) {
   return (
     <Box
@@ -27,7 +31,13 @@ export default function DemandPulseSection({ embeddedInTint = false }: DemandPul
           linkLabel="צפה בכל הבקשות"
           linkUrl="/requests"
         >
-          <WishItemFeed showComposer={false} limit={12} sinceDays={30} orderBy="likes" layout="horizontal" />
+          <WishItemFeed
+            showComposer={false}
+            limit={WISH_ITEMS_PER_PAGE * WISH_ITEMS_PAGES}
+            sinceDays={WISH_ITEMS_SINCE_DAYS}
+            orderBy="likes"
+            layout="horizontal"
+          />
         </SectionWrapper>
       </Container>
     </Box>
