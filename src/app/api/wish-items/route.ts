@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/auth";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { fetchWishItemCards, WISH_ITEM_DEFAULT_TAKE } from "@/lib/wish-items";
+import { fetchWishItemCards } from "@/lib/wish-items";
 import { MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+
+const WISH_ITEM_DEFAULT_TAKE = 20;
 
 export async function GET(req: NextRequest) {
   try {
