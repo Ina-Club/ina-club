@@ -10,6 +10,8 @@ import CompanyCardSkeleton from "../skeleton/company-card-skeleton";
 
 interface CompanySectionWrapperProps { }
 
+const POPULAR_COMPANIES_AMOUNT = 5;
+
 const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +20,7 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
     setLoading(true);
 
     const params = new URLSearchParams({
-      limit: "5",
+      limit: POPULAR_COMPANIES_AMOUNT.toString(),
     });
 
     try {
