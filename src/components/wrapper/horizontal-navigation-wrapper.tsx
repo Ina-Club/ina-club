@@ -50,15 +50,16 @@ const HorizontalNavigationWrapper: React.FC<{
             />
             {children}
 
-            {displayScroll.end && <StyledTabScrollButton
+            <StyledTabScrollButton
                 orientation="horizontal"
                 direction="left"
                 onClick={handleEndScrollClick}
+                disabled={!displayScroll.end}
                 sx={{
                     right: "-20px",
                     zIndex: 2,
                 }}
-            />}
+            />
         </Box>
     );
 
