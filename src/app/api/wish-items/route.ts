@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       where,
     });
 
-    // Post-query sort by like count when requested
+    // TODO: Implement DB level sort for likes when reaching scale issues.
     // (likes live in a separate polymorphic table, so Prisma can't sort by them)
     if (orderByParam === "likes") {
       result.sort((a, b) => b.likeCount - a.likeCount);
