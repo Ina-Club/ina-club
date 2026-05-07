@@ -1,6 +1,5 @@
 import {
   Box,
-  CircularProgress,
   TabScrollButton,
   styled,
 } from "@mui/material";
@@ -22,15 +21,11 @@ const HorizontalNavigationWrapper: React.FC<{
     handleStartScrollClick: () => void;
     handleEndScrollClick: () => void;
     displayScroll: any;
-    loadingMore?: boolean;
-    hasMore?: boolean;
 }> = ({
     children,
     handleStartScrollClick,
     handleEndScrollClick,
     displayScroll,
-    loadingMore = false,
-    hasMore = false,
 }) => (
         <Box
             sx={{
@@ -55,21 +50,16 @@ const HorizontalNavigationWrapper: React.FC<{
             />
             {children}
 
-            {loadingMore && hasMore ? (
-                <CircularProgress size={30} sx={{
-                    left: "-20px",
-                    zIndex: 2,
-                }} />
-            ) : <StyledTabScrollButton
+            <StyledTabScrollButton
                 orientation="horizontal"
                 direction="left"
                 onClick={handleEndScrollClick}
-                disabled={!displayScroll.end && !loadingMore}
+                disabled={!displayScroll.end}
                 sx={{
                     right: "-20px",
                     zIndex: 2,
                 }}
-            />}
+            />
         </Box>
     );
 

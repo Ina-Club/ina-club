@@ -102,8 +102,7 @@ const useHorizontalNavigationWrapper = () => {
 
   const getNormalizedScrollLeft = (element: any) => {
     const { scrollLeft } = element;
-
-    return element.scrollWidth - element.clientWidth + scrollLeft;
+    return Math.round(element.scrollWidth - element.clientWidth + scrollLeft);
   };
 
   const updateScrollButtonState = useEventCallback(() => {

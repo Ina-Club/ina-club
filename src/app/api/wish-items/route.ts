@@ -3,16 +3,45 @@ import { validateSession } from "@/lib/auth";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { fetchWishItemCards } from "@/lib/wish-items";
+import { MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+
+const WISH_ITEM_DEFAULT_TAKE = 20;
 
 export async function GET(req: NextRequest) {
   try {
     // Feed is public, personalization is optional.
     const { userId } = await auth();
+    const { searchParams } = new URL(req.url);
+
+    // Server-side cap prevents abuse regardless of client input
+    const take = Math.min(
+      Number(searchParams.get("limit")) || WISH_ITEM_DEFAULT_TAKE,
+      MAX_PAGINATION_LIMIT
+    );
+
+    // Optional: only items created after this ISO date
+    const sinceParam = searchParams.get("since");
+    const where: Record<string, unknown> = {};
+    if (sinceParam) {
+      const sinceDate = new Date(sinceParam);
+      if (!isNaN(sinceDate.getTime())) {
+        where.createdAt = { gte: sinceDate };
+      }
+    }
+
+    const orderByParam = searchParams.get("orderBy");
 
     const result = await fetchWishItemCards({
       currentUserId: userId,
-      take: 30,
+      take,
+      where,
     });
+
+    // Post-query sort by like count when requested
+    // (likes live in a separate polymorphic table, so Prisma can't sort by them)
+    if (orderByParam === "likes") {
+      result.sort((a, b) => b.likeCount - a.likeCount);
+    }
 
     return NextResponse.json(result);
   } catch (error) {
