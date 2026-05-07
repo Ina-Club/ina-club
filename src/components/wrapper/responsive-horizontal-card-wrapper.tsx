@@ -19,10 +19,7 @@ type StylableProps = {
 const ResponsiveHorizontalCardWrapper: React.FC<{
   children: React.ReactNode;
   gap?: string;
-  onLoadMore: () => void;
-  hasMore?: boolean;
-  loadingMore?: boolean;
-}> = ({ children, gap, onLoadMore, hasMore = false, loadingMore = false }) => {
+}> = ({ children, gap }) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const {
@@ -62,21 +59,16 @@ const ResponsiveHorizontalCardWrapper: React.FC<{
   return (
     <ScrollPaginationWrapper
       orientation="horizontal"
-      onLoadMore={onLoadMore}
-      hasMore={hasMore}
-      loadingMore={loadingMore}
+      onLoadMore={() => {}}
       scrollRef={wrapperRef}
     >
-      {({ onScroll, triggerLoadMore }) => {
+      {({ onScroll }) => {
         const onScrollDesktop = () => {
           handleTabsScroll();
           onScroll();
         };
         const onEndClick = () => {
           handleEndScrollClick();
-          setTimeout(() => {
-            triggerLoadMore({ force: true });
-          }, 0);
         };
 
         return !isDesktop ? (
@@ -95,20 +87,12 @@ const ResponsiveHorizontalCardWrapper: React.FC<{
             >
               {styledChildren}
             </Box>
-            {loadingMore && hasMore && (
-              <CircularProgress size={30} sx={{
-                left: "-30px",
-                zIndex: 2,
-              }} />
-            )}
           </Box>
         ) : (
           <HorizontalNavigationWrapper
             handleStartScrollClick={handleStartScrollClick}
             handleEndScrollClick={onEndClick}
             displayScroll={displayScroll}
-            loadingMore={loadingMore}
-            hasMore={hasMore}
           >
             <Box
               onScroll={onScrollDesktop}

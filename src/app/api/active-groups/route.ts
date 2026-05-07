@@ -16,10 +16,17 @@ export async function GET(req: Request) {
     const categoryParams = searchParams.getAll("category").filter(Boolean);
     const minPriceParam = searchParams.get("minPrice");
     const maxPriceParam = searchParams.get("maxPrice");
+    const orderByParam = searchParams.get("orderBy");
 
     const cursor = searchParams.get("cursor") || undefined;
     const rawLimit: number = Number(searchParams.get('limit')) || DEFAULT_PAGINATION;
     const limit: number = Math.min(rawLimit, MAX_PAGINATION_LIMIT);
+
+    // Determine sort order — default createdAt desc, or by participant count
+    let orderBy: any = { createdAt: "desc" };
+    if (orderByParam === "participants") {
+      orderBy = { participants: { _count: "desc" } };
+    }
 
     const filters: any[] = [];
     if (titleParam) {
@@ -101,7 +108,7 @@ export async function GET(req: Request) {
         },
       },
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       ...(cursor && { cursor: { id: cursor } }),
     });
 
