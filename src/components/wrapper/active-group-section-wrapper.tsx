@@ -11,6 +11,8 @@ import { GroupStatus } from "lib/types/status";
 
 interface GroupSectionWrapperProps { }
 
+const HOT_GROUPS_AMOUNT = 10;
+
 const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
   const [groups, setGroups] = useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ const ActiveGroupSectionWrapper: React.FC<GroupSectionWrapperProps> = ({ }) => {
 
     const params = new URLSearchParams({
       lastWeek: "true",
-      limit: "10",
+      limit: HOT_GROUPS_AMOUNT.toString(),
       orderBy: "participants",
     });
     params.append("status", GroupStatus.OPEN);
