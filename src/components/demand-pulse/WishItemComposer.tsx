@@ -210,6 +210,7 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
 
       <Collapse in={showPrice}>
         <Box sx={{ display: "flex", gap: 2, mt: 1, pt: 1, borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+          {/* TODO: Use the SeachBar component!!!!!!!!! */}
           <TextField
             fullWidth
             type="number"
