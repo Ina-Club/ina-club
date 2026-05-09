@@ -231,6 +231,8 @@ export default function PriceAnalyzerComponent() {
         } else {
           setSuccessMsg("המוצר נוסף בהצלחה ל-Wish Items של הקהילה!");
         }
+      } else if (res.status === 409) {
+        showSnackbar("בקשה זהה כבר קיימת במערכת. עדיף לתת לה לייק!", "warning");
       } else if (res.status === 429) {
         showSnackbar("הגעת למגבלת הבקשות היומית.", "warning");
       } else {
