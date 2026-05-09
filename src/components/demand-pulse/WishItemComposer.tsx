@@ -19,6 +19,7 @@ import SendIcon from "@mui/icons-material/Send";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import ShekelIcon from "../shekel-icon";
+import { useSnackbar } from "@/contexts/snackbar-context";
 
 interface WishItemComposerProps {
   onPosted: () => void;
@@ -35,6 +36,7 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoryId, setCategoryId] = useState("");
   const textRef = useRef<HTMLInputElement>(null);
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     fetch("/api/categories")
@@ -99,15 +101,27 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
           categoryId: categoryId || undefined,
         }),
       });
+      
+      const data = await res.json();
+      
       if (res.ok) {
         setText("");
         setPrice("");
         setCategoryId("");
         setShowPrice(false);
         onPosted();
+        if (data.remaining !== undefined) {
+          showSnackbar(`פורסם בהצלחה! נותרו לך ${data.remaining} בקשות להיום.`, "success");
+        } else {
+          showSnackbar("פורסם בהצלחה!", "success");
+        }
+      } else if (res.status === 429) {
+        showSnackbar("הגעת למגבלת הבקשות היומית.", "warning");
+      } else {
+        showSnackbar("אירעה שגיאה בפרסום הבקשה.", "error");
       }
     } catch {
-      // fail silently
+      showSnackbar("אירעה שגיאה בפרסום הבקשה.", "error");
     } finally {
       setLoading(false);
     }

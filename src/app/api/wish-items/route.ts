@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/auth";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
 import { fetchWishItemCards } from "@/lib/wish-items";
 import { MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+import { clerkClient } from "@clerk/nextjs/server";
+import { checkWishItemQuota } from "@/lib/services/quota";
+import { DAILY_WISH_ITEM_LIMIT } from "@/app/config/quota";
+import { RoleLevel } from "@/lib/types/role";
+import { prisma } from "@/lib/prisma";
 
 const WISH_ITEM_DEFAULT_TAKE = 20;
 
@@ -73,10 +77,31 @@ export async function POST(req: NextRequest) {
     body.targetPrice && body.targetPrice > 0 ? body.targetPrice : null;
 
   try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const role = user.publicMetadata?.role;
+    const isAdmin = role === "ADMIN";
+
+    let remaining = 999;
+
+    if (!isAdmin) {
+      const quota = await checkWishItemQuota(userId, DAILY_WISH_ITEM_LIMIT);
+
+      if (!quota.allowed) {
+        return NextResponse.json(
+          { error: "You have reached the daily limit of wish items", remaining: 0 },
+          { status: 429 }
+        );
+      }
+      
+      remaining = quota.remaining - 1; // Since we are creating one now
+    }
+
     const item = await prisma.wishItem.create({
       data: { text, targetPrice, categoryId: body.categoryId || null, createdById: userId },
     });
-    return NextResponse.json(item, { status: 201 });
+
+    return NextResponse.json({ ...item, remaining }, { status: 201 });
   } catch (error) {
     console.error("Failed to create wish item:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
