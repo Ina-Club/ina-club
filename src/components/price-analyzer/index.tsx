@@ -26,6 +26,7 @@ import { SearchBar } from "@/components/search-bar";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useSnackbar } from "@/contexts/snackbar-context";
 import { formatShekelAmount } from "@/lib/utils/currency";
 import type {
   NeedMoreInfoResponse,
@@ -48,6 +49,7 @@ export default function PriceAnalyzerComponent() {
   const [priceResult, setPriceResult] = useState<PriceResponse | null>(null);
   const { isSignedIn } = useAuth();
   const router = useRouter();
+  const { showSnackbar } = useSnackbar();
 
   // Computed group price range values for the chart
   const minGroupPrice = priceResult ? Math.round(priceResult.minGroupPrice) : 0;
@@ -220,13 +222,24 @@ export default function PriceAnalyzerComponent() {
           targetPrice: averageGroupPrice, // use the suggested group price
         }),
       });
+      
+      const data = await res.json();
+      
       if (res.ok) {
-        setSuccessMsg("המוצר נוסף בהצלחה ל-Wish Items של הקהילה!");
+        if (data.remaining !== undefined) {
+          setSuccessMsg(`המוצר נוסף בהצלחה ל-Wish Items של הקהילה! נותרו לך ${data.remaining} בקשות להיום.`);
+        } else {
+          setSuccessMsg("המוצר נוסף בהצלחה ל-Wish Items של הקהילה!");
+        }
+      } else if (res.status === 409) {
+        showSnackbar("בקשה זהה כבר קיימת במערכת. עדיף לתת לה לייק!", "warning");
+      } else if (res.status === 429) {
+        showSnackbar("הגעת למגבלת הבקשות היומית.", "warning");
       } else {
-        throw new Error("Failed to create wish item");
+        throw new Error("אירעה שגיאה ביצירת הבקשה.");
       }
-    } catch (err) {
-      setError("אירעה שגיאה ביצירת ה-Wish Item.");
+    } catch (err: any) {
+      setError("אירעה שגיאה ביצירת הבקשה.");
     } finally {
       setLoading(false);
     }
