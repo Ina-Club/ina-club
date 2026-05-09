@@ -140,7 +140,7 @@ model Testimonial {
 
 model WishItem {
   id          String    @id @default(uuid())
-  text        String
+  text        String    @unique
   targetPrice Float?
   createdAt   DateTime  @default(now())
   createdById String    // Clerk User ID
