@@ -115,6 +115,8 @@ export default function WishItemComposer({ onPosted }: WishItemComposerProps) {
         } else {
           showSnackbar("פורסם בהצלחה!", "success");
         }
+      } else if (res.status === 409) {
+        showSnackbar("בקשה זהה כבר קיימת במערכת. עדיף לתת לה לייק!", "warning");
       } else if (res.status === 429) {
         showSnackbar("הגעת למגבלת הבקשות היומית.", "warning");
       } else {

@@ -12,46 +12,41 @@ import { prisma } from "@/lib/prisma";
 const WISH_ITEM_DEFAULT_TAKE = 20;
 
 export async function GET(req: NextRequest) {
-  try {
-    // Feed is public, personalization is optional.
-    const { userId } = await auth();
-    const { searchParams } = new URL(req.url);
+  // Feed is public, personalization is optional.
+  const { userId } = await auth();
+  const { searchParams } = new URL(req.url);
 
-    // Server-side cap prevents abuse regardless of client input
-    const take = Math.min(
-      Number(searchParams.get("limit")) || WISH_ITEM_DEFAULT_TAKE,
-      MAX_PAGINATION_LIMIT
-    );
+  // Server-side cap prevents abuse regardless of client input
+  const take = Math.min(
+    Number(searchParams.get("limit")) || WISH_ITEM_DEFAULT_TAKE,
+    MAX_PAGINATION_LIMIT
+  );
 
-    // Optional: only items created after this ISO date
-    const sinceParam = searchParams.get("since");
-    const where: Record<string, unknown> = {};
-    if (sinceParam) {
-      const sinceDate = new Date(sinceParam);
-      if (!isNaN(sinceDate.getTime())) {
-        where.createdAt = { gte: sinceDate };
-      }
+  // Optional: only items created after this ISO date
+  const sinceParam = searchParams.get("since");
+  const where: Record<string, unknown> = {};
+  if (sinceParam) {
+    const sinceDate = new Date(sinceParam);
+    if (!isNaN(sinceDate.getTime())) {
+      where.createdAt = { gte: sinceDate };
     }
-
-    const orderByParam = searchParams.get("orderBy");
-
-    const result = await fetchWishItemCards({
-      currentUserId: userId,
-      take,
-      where,
-    });
-
-    // TODO: Implement DB level sort for likes when reaching scale issues.
-    // (likes live in a separate polymorphic table, so Prisma can't sort by them)
-    if (orderByParam === "likes") {
-      result.sort((a, b) => b.likeCount - a.likeCount);
-    }
-
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("Failed to fetch wish items:", error);
-    return NextResponse.json([], { status: 500 });
   }
+
+  const orderByParam = searchParams.get("orderBy");
+
+  const result = await fetchWishItemCards({
+    currentUserId: userId,
+    take,
+    where,
+  });
+
+  // TODO: Implement DB level sort for likes when reaching scale issues.
+  // (likes live in a separate polymorphic table, so Prisma can't sort by them)
+  if (orderByParam === "likes") {
+    result.sort((a, b) => b.likeCount - a.likeCount);
+  }
+
+  return NextResponse.json(result);
 }
 
 export async function POST(req: NextRequest) {
@@ -73,37 +68,48 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const existingItem = await prisma.wishItem.findFirst({
+    where: {
+      text: {
+        equals: text,
+        mode: "insensitive",
+      },
+    },
+  });
+
+  if (existingItem) {
+    return NextResponse.json(
+      { error: "A wish item with this description already exists." },
+      { status: 409 }
+    );
+  }
+
   const targetPrice =
     body.targetPrice && body.targetPrice > 0 ? body.targetPrice : null;
 
-  try {
-    const client = await clerkClient();
-    const user = await client.users.getUser(userId);
-    const role = user.publicMetadata?.role;
-    const isAdmin = role === "ADMIN";
+  const client = await clerkClient();
+  const user = await client.users.getUser(userId);
+  const role = user.publicMetadata?.role;
+  const isAdmin = role === "ADMIN";
 
-    let remaining = 999;
+  let remaining = 999;
 
-    if (!isAdmin) {
-      const quota = await checkWishItemQuota(userId, DAILY_WISH_ITEM_LIMIT);
+  if (!isAdmin) {
+    const quota = await checkWishItemQuota(userId, DAILY_WISH_ITEM_LIMIT);
 
-      if (!quota.allowed) {
-        return NextResponse.json(
-          { error: "You have reached the daily limit of wish items", remaining: 0 },
-          { status: 429 }
-        );
-      }
-      
-      remaining = quota.remaining - 1; // Since we are creating one now
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: "You have reached the daily limit of wish items", remaining: 0 },
+        { status: 429 }
+      );
     }
-
-    const item = await prisma.wishItem.create({
-      data: { text, targetPrice, categoryId: body.categoryId || null, createdById: userId },
-    });
-
-    return NextResponse.json({ ...item, remaining }, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create wish item:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    
+    remaining = quota.remaining - 1; // Since we are creating one now
   }
+
+  const item = await prisma.wishItem.create({
+    data: { text, targetPrice, categoryId: body.categoryId || null, createdById: userId },
+  });
+
+  return NextResponse.json({ ...item, remaining }, { status: 201 });
 }
