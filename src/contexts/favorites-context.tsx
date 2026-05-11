@@ -20,6 +20,7 @@ type FavoritesState = {
 };
 
 type FavoritesContextValue = {
+  isSignedIn: boolean;
   likedWishes: WishItemData[];
   likedActiveGroups: ActiveGroup[];
   isActiveGroupLiked: (id: string) => boolean;
@@ -143,6 +144,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
+      isSignedIn: isSignedIn || false,
       likedWishes: favorites.wishes,
       likedActiveGroups: favorites.activeGroups,
       isWishLiked,
@@ -151,6 +153,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       toggleActiveGroupLike,
     }),
     [
+      isSignedIn,
       favorites.activeGroups,
       favorites.wishes,
       isActiveGroupLiked,
