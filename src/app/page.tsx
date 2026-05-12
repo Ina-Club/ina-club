@@ -5,7 +5,7 @@ import ActiveGroupSectionWrapper from "@/components/wrapper/active-group-section
 import CompanySectionWrapper from "@/components/wrapper/company-section-wrapper";
 
 import DemandPulseSection from "@/components/demand-pulse/DemandPulseSection";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { Suspense } from "react";
 
 const SECTION_TINT = "#e6edf6";
