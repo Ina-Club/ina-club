@@ -39,7 +39,7 @@ const initialState: FavoritesState = {
 };
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const { userId, isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
   const [favorites, setFavorites] = useState<FavoritesState>(initialState);
   const { showSnackbar } = useSnackbar();
