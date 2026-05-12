@@ -57,7 +57,7 @@ export function RequestsPageView() {
               border: "1px solid rgba(26, 42, 90, 0.08)",
             }}
           >
-            <WishItemFeed key={feedKey} showComposer={false} />
+            <WishItemFeed key={feedKey} />
           </Box>
         </Container>
       </Box>

@@ -3,14 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Box, Grid, Skeleton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import WishItemCard, { WishItemData } from "./WishItemCard";
-import WishItemComposer from "./WishItemComposer";
 import HorizontalNavigationWrapper from "@/components/wrapper/horizontal-navigation-wrapper";
 import useHorizontalNavigationWrapper from "@/hooks/useHorizontalNavigationWrapper";
 
 const ITEMS_PER_PAGE = 6; // 2 rows × 3 columns
 
 interface WishItemFeedProps {
-  showComposer?: boolean;
   limit?: number;
   sinceDays?: number;
   orderBy?: "likes";
@@ -19,7 +17,6 @@ interface WishItemFeedProps {
 }
 
 export default function WishItemFeed({
-  showComposer = true,
   limit,
   sinceDays,
   orderBy,
@@ -195,12 +192,6 @@ export default function WishItemFeed({
 
   return (
     <Box>
-      {showComposer && (
-        <Box sx={{ mb: 2 }}>
-          <WishItemComposer onPosted={fetchItems} />
-        </Box>
-      )}
-
       {loading ? skeletonGrid : items.length === 0 ? emptyState : (
         <Grid container spacing={1.5}>
           {items.map((item) => (
