@@ -20,6 +20,7 @@ type FavoritesState = {
 };
 
 type FavoritesContextValue = {
+  isSignedIn: boolean;
   likedWishes: WishItemData[];
   likedActiveGroups: ActiveGroup[];
   isActiveGroupLiked: (id: string) => boolean;
@@ -38,7 +39,7 @@ const initialState: FavoritesState = {
 };
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const { userId, isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
   const [favorites, setFavorites] = useState<FavoritesState>(initialState);
   const { showSnackbar } = useSnackbar();
@@ -143,6 +144,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
+      isSignedIn: isSignedIn || false,
       likedWishes: favorites.wishes,
       likedActiveGroups: favorites.activeGroups,
       isWishLiked,
@@ -151,6 +153,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       toggleActiveGroupLike,
     }),
     [
+      isSignedIn,
       favorites.activeGroups,
       favorites.wishes,
       isActiveGroupLiked,

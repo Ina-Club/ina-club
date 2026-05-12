@@ -32,7 +32,6 @@ export default function DemandPulseSection({ embeddedInTint = false }: DemandPul
           linkUrl="/requests"
         >
           <WishItemFeed
-            showComposer={false}
             limit={WISH_ITEMS_PER_PAGE * WISH_ITEMS_PAGES}
             sinceDays={WISH_ITEMS_SINCE_DAYS}
             orderBy="likes"

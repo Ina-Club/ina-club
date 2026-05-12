@@ -22,12 +22,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
         px: { xs: 2, md: 4 },
       }}
     >
-      {/* Background Circles */}
+      {/* Background Circles — hidden on mobile (filter:blur is GPU-expensive) */}
       <Box
         sx={{
           position: "absolute",
           inset: 0,
           opacity: 0.1,
+          display: { xs: "none", md: "block" },
         }}
       >
         <Box
