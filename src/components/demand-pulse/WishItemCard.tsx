@@ -15,7 +15,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import { useRouter } from "next/navigation";
 import { formatShekelAmount } from "@/lib/utils/currency";
-import { useFavorites } from "@/contexts/favorites-context";
+import { useAuth } from "@clerk/nextjs";
 
 export interface WishItemData {
   id: string;
@@ -37,7 +37,7 @@ interface WishItemCardProps {
 const TRENDING_THRESHOLD = 3;
 
 export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) {
-  const { isSignedIn } = useFavorites();
+  const { isSignedIn } = useAuth();
   const router = useRouter();
   const [liked, setLiked] = useState(item.isLikedByMe);
   const [likeCount, setLikeCount] = useState(item.likeCount);
