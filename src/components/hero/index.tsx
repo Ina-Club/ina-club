@@ -166,7 +166,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
           </Button>
         </Box>
 
-        <Box
+        {/* TODO: Add statistics when we have real data */}
+        {/* <Box
           sx={{
             display: "flex",
             flexDirection: { xs: "column", md: "row" },
@@ -220,7 +221,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenQuickRequest }) => {
               משתתפים פעילים
             </Typography>
           </Box>
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   );
