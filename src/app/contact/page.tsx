@@ -20,14 +20,14 @@ const sections: StaticPageSection[] = [
       <ul style={{ margin: 0, paddingInlineStart: "20px", lineHeight: 1.7 }}>
         <li>
           מייל כללי ותמיכה:{" "}
-          <a href="mailto:support@ina-club.com" style={{ color: "#1a2a5a", fontWeight: 600 }}>
-            support@ina-club.com
+          <a href="mailto:support@inaclub.co.il" style={{ color: "#1a2a5a", fontWeight: 600 }}>
+            support@inaclub.co.il
           </a>
         </li>
         <li>
           שיתופי פעולה עסקיים:{" "}
-          <a href="mailto:partnerships@ina-club.com" style={{ color: "#1a2a5a", fontWeight: 600 }}>
-            partnerships@ina-club.com
+          <a href="mailto:partnerships@inaclub.co.il" style={{ color: "#1a2a5a", fontWeight: 600 }}>
+            partnerships@inaclub.co.il
           </a>
         </li>
         <li>דיווח על תקלה: ניתן לצרף צילום מסך או תיאור של הצעדים שהובילו לבעיה.</li>

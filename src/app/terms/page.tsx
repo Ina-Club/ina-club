@@ -75,7 +75,7 @@ const sections: StaticPageSection[] = [
   {
     title: "יצירת קשר",
     paragraphs: [
-      "לשאלות לגבי תנאי השימוש ניתן לפנות אלינו בכתובת: support@ina-club.com.",
+      "לשאלות לגבי תנאי השימוש ניתן לפנות אלינו בכתובת: support@inaclub.co.il",
     ],
   },
 ];
