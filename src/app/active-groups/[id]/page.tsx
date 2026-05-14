@@ -22,21 +22,25 @@ import ParticipantsProgress from "@/components/card/active-group-card/participat
 import GroupMembershipPanel from "@/components/group-membership-button/group-membership-panel";
 import { formatShekelAmount } from "@/lib/utils/currency";
 
+const SIMILAR_GROUPS_COUNT = 3;
+
 export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
   const { id } = await params;
   const { userId } = await auth();
   const user = userId ? await currentUser() : null;
 
-  const ag = (await fetchActiveGroups({ id }))?.[0] ?? null;
+  const ag = (await fetchActiveGroups({ whereData: { id }, includeParticipants: true }))?.[0] ?? null;
   if (!ag) {
     return (
       <NotFound />
     );
   }
 
-  const alreadyJoined = !!userId ? await checkUserIsActiveGroupParticipant(userId, ag.id) : false;
-  const similarGroups = await fetchActiveGroups({ category: { name: ag.category ?? "" }, NOT: { id } }, 3);
-  const likeCount = await fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP);
+  const [alreadyJoined, similarGroups, likeCount] = await Promise.all([
+    userId ? checkUserIsActiveGroupParticipant(userId, ag.id) : false,
+    fetchActiveGroups({ whereData: { category: { name: ag.category ?? "" }, NOT: { id } }, take: SIMILAR_GROUPS_COUNT }),
+    fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP),
+  ]);
   const currentUserForPanel = userId && user
     ? {
         firstName: user.firstName ?? "משתמש",
@@ -130,7 +134,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               סטטוס רשומים
             </Typography>
             <ParticipantsProgress
-              current={ag.participants.length}
+              current={ag.participants?.length ?? 0}
               min={ag.minParticipants}
               max={ag.maxParticipants}
             />
@@ -163,7 +167,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
             </Typography>
             <GroupMembershipPanel
               groupId={id}
-              initialParticipants={ag.participants}
+              initialParticipants={ag.participants ?? []}
               currentUser={currentUserForPanel}
               isJoined={alreadyJoined}
               status={ag.status}
@@ -193,7 +197,6 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
                   description: undefined,
                   category: s.category,
                   images: s.images ?? ["/InaClubLogo.png"],
-                  participants: [],
                   status: GroupStatus.OPEN,
                   basePrice: s.basePrice,
                   groupPrice: s.groupPrice,

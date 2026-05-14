@@ -21,7 +21,7 @@ export interface ActiveGroup {
   createdAt?: Date;
   registrationTerms?: string;
   company?: Company;
-  participants: User[];
+  participants?: User[];
   images: string[];
 }
 

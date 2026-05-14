@@ -3,7 +3,7 @@ import { prisma } from "lib/prisma";
 import { GroupStatus } from "@prisma/client";
 import { validateSession } from "@/lib/auth";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
-import { getClerkPublicUsersMap } from "@/lib/clerk-users";
+
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -112,8 +112,7 @@ export async function GET(req: Request) {
       ...(cursor && { cursor: { id: cursor } }),
     });
 
-    const participantIds = rows.flatMap((r) => r.participants.map((p) => p.userId));
-    const usersMap = await getClerkPublicUsersMap(participantIds);
+
 
     let nextCursor: string | null = null;
 
@@ -131,10 +130,6 @@ export async function GET(req: Request) {
       groupPrice: r.groupPrice,
       deadline: r.deadline,
       images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
-      participants: r.participants.map((p) => ({
-        firstName: usersMap.get(p.userId)?.name.split(" ")[0] ?? "משתמש",
-        image: usersMap.get(p.userId)?.imageUrl ?? "",
-      })),
       minParticipants: r.minParticipants,
       maxParticipants: r.maxParticipants
     }));
