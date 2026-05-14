@@ -1,4 +1,5 @@
 
+import { Suspense } from "react";
 import {
   Box,
   Typography,
@@ -14,33 +15,64 @@ import GroupImages from "@/components/group-images/group-images";
 import NotFound from "app/not-found";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
-import { fetchActiveGroups } from "@/lib/groups";
+import { fetchActiveGroups, fetchGroupParticipants } from "@/lib/groups";
 import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
 import { LikeTargetType } from "@/lib/types/like";
 import { fetchGroupLikeCount } from "@/lib/groups";
 import ParticipantsProgress from "@/components/card/active-group-card/participations-progress-bar";
 import GroupMembershipPanel from "@/components/group-membership-button/group-membership-panel";
+import GroupMembershipPanelSkeleton from "@/components/group-membership-button/group-membership-panel-skeleton";
 import { formatShekelAmount } from "@/lib/utils/currency";
 
+import type { User } from "@/lib/dal";
+
 const SIMILAR_GROUPS_COUNT = 3;
+
+/** Async server component — streamed via Suspense */
+async function GroupMembershipPanelLoader({
+  groupId,
+  userId,
+  currentUser,
+  status,
+}: {
+  groupId: string;
+  userId: string | null;
+  currentUser: User | null;
+  status: string;
+}) {
+  const [participants, alreadyJoined] = await Promise.all([
+    fetchGroupParticipants(groupId),
+    userId ? checkUserIsActiveGroupParticipant(userId, groupId) : false,
+  ]);
+
+  return (
+    <GroupMembershipPanel
+      groupId={groupId}
+      initialParticipants={participants}
+      currentUser={currentUser}
+      isJoined={alreadyJoined}
+      status={status}
+    />
+  );
+}
 
 export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
   const { id } = await params;
   const { userId } = await auth();
   const user = userId ? await currentUser() : null;
 
-  const ag = (await fetchActiveGroups({ whereData: { id }, includeParticipants: true }))?.[0] ?? null;
+  const ag = (await fetchActiveGroups({ whereData: { id } }))?.[0] ?? null;
   if (!ag) {
     return (
       <NotFound />
     );
   }
 
-  const [alreadyJoined, similarGroups, likeCount] = await Promise.all([
-    userId ? checkUserIsActiveGroupParticipant(userId, ag.id) : false,
+  const [similarGroups, likeCount] = await Promise.all([
     fetchActiveGroups({ whereData: { category: { name: ag.category ?? "" }, NOT: { id } }, take: SIMILAR_GROUPS_COUNT }),
     fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP),
   ]);
+
   const currentUserForPanel = userId && user
     ? {
         firstName: user.firstName ?? "משתמש",
@@ -134,7 +166,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               סטטוס רשומים
             </Typography>
             <ParticipantsProgress
-              current={ag.participants?.length ?? 0}
+              current={ag.participantCount}
               min={ag.minParticipants}
               max={ag.maxParticipants}
             />
@@ -165,13 +197,14 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
             <Typography variant="subtitle2">
               {likeCount} אנשים כבר סימנו בלייק את הקבוצה!
             </Typography>
-            <GroupMembershipPanel
-              groupId={id}
-              initialParticipants={ag.participants ?? []}
-              currentUser={currentUserForPanel}
-              isJoined={alreadyJoined}
-              status={ag.status}
-            />
+            <Suspense fallback={<GroupMembershipPanelSkeleton />}>
+              <GroupMembershipPanelLoader
+                groupId={id}
+                userId={userId}
+                currentUser={currentUserForPanel}
+                status={ag.status}
+              />
+            </Suspense>
           </Paper>
         </Box>
       </Box>
@@ -197,6 +230,9 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
                   description: undefined,
                   category: s.category,
                   images: s.images ?? ["/InaClubLogo.png"],
+                  participantCount: s.participantCount,
+                  minParticipants: s.minParticipants,
+                  maxParticipants: s.maxParticipants,
                   status: GroupStatus.OPEN,
                   basePrice: s.basePrice,
                   groupPrice: s.groupPrice,

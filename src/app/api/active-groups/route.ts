@@ -95,11 +95,7 @@ export async function GET(req: Request) {
         basePrice: true,
         groupPrice: true,
         deadline: true,
-        participants: {
-          select: {
-            userId: true,
-          },
-        },
+        _count: { select: { participants: true } },
         minParticipants: true,
         maxParticipants: true,
         images: {
@@ -130,6 +126,7 @@ export async function GET(req: Request) {
       groupPrice: r.groupPrice,
       deadline: r.deadline,
       images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
+      participantCount: r._count.participants,
       minParticipants: r.minParticipants,
       maxParticipants: r.maxParticipants
     }));
