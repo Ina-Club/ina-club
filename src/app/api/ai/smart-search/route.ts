@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         const { searchText } = body as { searchText: string };
         if (!searchText) return NextResponse.json({ error: "טקסט לחיפוש חובה" }, { status: 400 });
 
-        const activeGroups: ActiveGroup[] = await fetchActiveGroups({ status: GroupStatus.OPEN });
+        const activeGroups: ActiveGroup[] = await fetchActiveGroups({ whereData: { status: GroupStatus.OPEN } });
         const rawWishItems = await prisma.wishItem.findMany({
             orderBy: { createdAt: "desc" },
             take: 100, // Reasonable limit

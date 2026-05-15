@@ -3,8 +3,13 @@ import { prisma } from "./prisma";
 import { LikeTargetType } from "./types/like";
 import { getClerkPublicUsersMap } from "./clerk-users";
 
-export const fetchActiveGroups = async (whereData: object, take?: number) => {
-    const where: any = { ...whereData };
+interface FetchActiveGroupsOptions {
+    whereData: object;
+    take?: number;
+}
+
+export const fetchActiveGroups = async ({ whereData, take }: FetchActiveGroupsOptions) => {
+    const where = { ...whereData };
     const rows = await prisma.activeGroup.findMany({
         select: {
             id: true,
@@ -15,11 +20,7 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
             basePrice: true,
             groupPrice: true,
             deadline: true,
-            participants: {
-                select: {
-                    userId: true,
-                },
-            },
+            _count: { select: { participants: true } },
             minParticipants: true,
             maxParticipants: true,
             registrationTerms: true,
@@ -33,9 +34,6 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
         take
     });
 
-    const allParticipantIds = rows.flatMap((row) => row.participants.map((p) => p.userId));
-    const usersMap = await getClerkPublicUsersMap(allParticipantIds);
-
     const data = rows.map((r) => ({
         id: r.id,
         title: r.title,
@@ -46,16 +44,28 @@ export const fetchActiveGroups = async (whereData: object, take?: number) => {
         groupPrice: r.groupPrice,
         deadline: r.deadline,
         images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
-        participants: r.participants.map((p) => ({
-            firstName: usersMap.get(p.userId)?.name.split(" ")[0] ?? "משתמש",
-            image: usersMap.get(p.userId)?.imageUrl ?? "",
-        })),
+        participantCount: r._count.participants,
         minParticipants: r.minParticipants,
         maxParticipants: r.maxParticipants,
         registrationTerms: r.registrationTerms,
     }));
 
     return data as ActiveGroup[];
+}
+
+export const fetchGroupParticipants = async (groupId: string) => {
+    const rows = await prisma.activeGroupParticipant.findMany({
+        where: { activeGroupId: groupId },
+        select: { userId: true },
+    });
+
+    const userIds = rows.map((r) => r.userId);
+    const usersMap = await getClerkPublicUsersMap(userIds);
+
+    return userIds.map((id) => ({
+        firstName: usersMap.get(id)?.name.split(" ")[0] ?? "משתמש",
+        image: usersMap.get(id)?.imageUrl ?? "",
+    }));
 }
 
 export const filterGroupsByIds = (groups: ActiveGroup[], groupIds: string[]) => {
