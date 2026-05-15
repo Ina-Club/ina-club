@@ -39,6 +39,7 @@ export async function fetchWishItemCards({
   const itemIds = items.map((item) => item.id);
 
   const [likeCounts, userLikes, authorsMap] = await Promise.all([
+    // Get number of likes for each item.
     prisma.like.groupBy({
       by: ["targetId"],
       where: {
@@ -47,6 +48,8 @@ export async function fetchWishItemCards({
       },
       _count: { id: true },
     }),
+
+    // Get the items liked by the current user.
     currentUserId
       ? prisma.like.findMany({
           where: {
@@ -57,6 +60,8 @@ export async function fetchWishItemCards({
           select: { targetId: true },
         })
       : Promise.resolve<Array<{ targetId: string }>>([]),
+
+    // Get the authors of the items.
     getClerkPublicUsersMap(items.map((item) => item.createdById)),
   ]);
 

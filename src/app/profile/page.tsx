@@ -551,22 +551,11 @@ function ProfileContent() {
                 iconPosition={isMdUp ? "start" : undefined}
               />
               <Tab
-                icon={<ShoppingBagIcon />}
-                label={
-                  isMdUp
-                    ? "חיסכון קבוצתי"
-                    : tabValue === 1
-                      ? "חיסכון קבוצתי"
-                      : undefined
-                }
-                iconPosition={isMdUp ? "start" : undefined}
-              />
-              <Tab
                 icon={<GroupIcon />}
                 label={
                   isMdUp
                     ? "קבוצות רכישה"
-                    : tabValue === 2
+                    : tabValue === 1
                       ? "קבוצות רכישה"
                       : undefined
                 }
@@ -575,7 +564,7 @@ function ProfileContent() {
               <Tab
                 icon={<FavoriteIcon />}
                 label={
-                  isMdUp ? "מועדפים" : tabValue === 3 ? "מועדפים" : undefined
+                  isMdUp ? "מועדפים" : tabValue === 2 ? "מועדפים" : undefined
                 }
                 iconPosition={isMdUp ? "start" : undefined}
               />
@@ -584,7 +573,7 @@ function ProfileContent() {
                 label={
                   isMdUp
                     ? "הקופונים שלי"
-                    : tabValue === 4
+                    : tabValue === 3
                       ? "הקופונים שלי"
                       : undefined
                 }
@@ -654,16 +643,7 @@ function ProfileContent() {
                   </Box>
                 )}
               </TabPanel>
-
-              {/* Active Groups Tab */}
-              {/* Pending Request Groups Tab */}
               <TabPanel value={tabValue} index={2}>
-                <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
-                  מידע נוסף יופיע כאן בקרוב
-                </Typography>
-              </TabPanel>
-
-              <TabPanel value={tabValue} index={3}>
                 <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
                   בקשות שסימנת ({likedWishes.length})
                 </Typography>
@@ -719,7 +699,7 @@ function ProfileContent() {
               </TabPanel>
 
               {/* Coupons Tab */}
-              <TabPanel value={tabValue} index={4}>
+              <TabPanel value={tabValue} index={3}>
                 <Typography variant={isMdUp ? "h6" : "subtitle2"} gutterBottom>
                   הקופונים שלי ({detailProfile?.coupons?.length ?? 0})
                 </Typography>

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession, getClerkUser } from "@/lib/auth";
-import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 import { clerkClient } from "@clerk/nextjs/server";
 import { fetchWishItemCards } from "@/lib/wish-items";
 
@@ -49,7 +48,7 @@ export async function GET(request: Request) {
               include: { image: true },
               orderBy: { order: "asc" },
             },
-            participants: true, // Only IDs now
+            _count: { select: { participants: true } },
           },
         },
       },
@@ -66,11 +65,6 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    const participantUserIds = memberships.flatMap((m) =>
-      m.activeGroup.participants.map((p) => p.userId),
-    );
-    const participantsMap = await getClerkPublicUsersMap(participantUserIds);
-
     const transformedUser = {
       ...userData,
       enrolledActiveGroups: memberships.map((m) => ({
@@ -81,10 +75,7 @@ export async function GET(request: Request) {
         company: m.activeGroup.company?.title,
         basePrice: m.activeGroup.basePrice,
         groupPrice: m.activeGroup.groupPrice,
-        participants: m.activeGroup.participants.map((p) => ({
-          name: participantsMap.get(p.userId)?.name ?? "משתמש",
-          image: participantsMap.get(p.userId)?.imageUrl ?? "",
-        })),
+        participantCount: m.activeGroup._count.participants,
         minParticipants: m.activeGroup.minParticipants,
         maxParticipants: m.activeGroup.maxParticipants,
         deadline: m.activeGroup.deadline,
