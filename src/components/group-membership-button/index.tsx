@@ -16,6 +16,7 @@ interface GroupMembershipButtonProps {
   children?: React.ReactNode;
   isJoined?: boolean;
   isActivated?: boolean;
+  businessRegistrationTerms?: string;
 }
 
 export default function GroupMembershipButton({
@@ -27,6 +28,7 @@ export default function GroupMembershipButton({
   children,
   isJoined = false,
   isActivated = false,
+  businessRegistrationTerms,
 }: GroupMembershipButtonProps) {
   const { isSignedIn, isLoaded } = useAuth();
   const status = isLoaded ? (isSignedIn ? "authenticated" : "unauthenticated") : "loading";
@@ -112,6 +114,7 @@ export default function GroupMembershipButton({
         onSubmitPaymentDetails={async (cardNumber, expiry, cvv) => {
           return await changeMembershipState(cardNumber, expiry, cvv);
         }}
+        businessRegistrationTerms={businessRegistrationTerms}
       />
 
       <Button

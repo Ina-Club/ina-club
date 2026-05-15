@@ -14,6 +14,7 @@ interface GroupMembershipPanelProps {
   currentUser: User | null; // null when not signed in
   isJoined: boolean;
   status?: GroupStatus | string;
+  businessRegistrationTerms?: string;
 }
 
 export default function GroupMembershipPanel({
@@ -22,6 +23,7 @@ export default function GroupMembershipPanel({
   currentUser,
   isJoined,
   status,
+  businessRegistrationTerms,
 }: GroupMembershipPanelProps) {
   const [participants, setParticipants] = useState<User[]>(initialParticipants);
 
@@ -94,6 +96,7 @@ export default function GroupMembershipPanel({
           isActivated={status === "ACTIVATED"}
           onJoin={handleJoin}
           onLeave={handleLeave}
+          businessRegistrationTerms={businessRegistrationTerms}
         />
       </Box>
     </>

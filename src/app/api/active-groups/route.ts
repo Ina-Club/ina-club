@@ -3,7 +3,7 @@ import { prisma } from "lib/prisma";
 import { GroupStatus } from "@prisma/client";
 import { validateSession } from "@/lib/auth";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
-
+import { fetchActiveGroups } from "@/lib/groups";
 
 // GET /api/active-groups
 export async function GET(req: Request) {
@@ -85,53 +85,21 @@ export async function GET(req: Request) {
 
     const where = filters.length ? { AND: filters } : {};
 
-    const rows = await prisma.activeGroup.findMany({
+    const activeGroups = await fetchActiveGroups({
+      whereData: where,
       take: limit + 1,
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        category: { select: { name: true } },
-        basePrice: true,
-        groupPrice: true,
-        deadline: true,
-        _count: { select: { participants: true } },
-        minParticipants: true,
-        maxParticipants: true,
-        images: {
-          select: { image: { select: { url: true } }, order: true },
-          orderBy: { order: "asc" },
-        },
-      },
-      where,
       orderBy,
-      ...(cursor && { cursor: { id: cursor } }),
+      cursor: cursor ? { id: cursor } : undefined,
     });
-
-
 
     let nextCursor: string | null = null;
 
-    if (rows.length > limit) {
-      const nextItem = rows.pop()!; // remove the extra one
+    if (activeGroups.length > limit) {
+      const nextItem = activeGroups.pop()!; // remove the extra one
       nextCursor = nextItem.id;
     }
 
-    const data = rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      status: r.status,
-      category: r.category?.name ?? "",
-      basePrice: r.basePrice,
-      groupPrice: r.groupPrice,
-      deadline: r.deadline,
-      images: r.images.length ? r.images.map((ri) => ri.image.url) : ["/InaClubLogo.png"],
-      participantCount: r._count.participants,
-      minParticipants: r.minParticipants,
-      maxParticipants: r.maxParticipants
-    }));
-
-    return NextResponse.json({ activeGroups: data, nextCursor });
+    return NextResponse.json({ activeGroups, nextCursor });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "שגיאה בשליפת קבוצות פעילות" }, { status: 500 });

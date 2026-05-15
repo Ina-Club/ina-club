@@ -26,7 +26,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
   const { userId } = await auth();
   const user = userId ? await currentUser() : null;
 
-  const ag = (await fetchActiveGroups({ whereData: { id } }))?.[0] ?? null;
+  const ag = (await fetchActiveGroups({ whereData: { id }, includeDetails: true }))?.[0] ?? null;
   if (!ag) {
     return (
       <NotFound />
@@ -159,6 +159,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
                 userId={userId}
                 currentUser={currentUserForPanel}
                 status={ag.status}
+                businessRegistrationTerms={ag.registrationTerms}
               />
             </Suspense>
           </Paper>

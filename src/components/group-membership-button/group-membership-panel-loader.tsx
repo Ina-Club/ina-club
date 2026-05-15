@@ -12,6 +12,7 @@ interface GroupMembershipPanelLoaderProps {
   userId: string | null;
   currentUser: User | null;
   status: string;
+  businessRegistrationTerms?: string;
 }
 
 /** Async server component — streamed via Suspense */
@@ -20,6 +21,7 @@ export default async function GroupMembershipPanelLoader({
   userId,
   currentUser,
   status,
+  businessRegistrationTerms,
 }: GroupMembershipPanelLoaderProps) {
   const [participants, alreadyJoined, likeCount] = await Promise.all([
     fetchGroupParticipants(groupId),
@@ -39,6 +41,7 @@ export default async function GroupMembershipPanelLoader({
         currentUser={currentUser}
         isJoined={alreadyJoined}
         status={status}
+        businessRegistrationTerms={businessRegistrationTerms}
       />
     </>
   );
