@@ -1,14 +1,22 @@
 import { ActiveGroup } from "./dal";
 import { prisma } from "./prisma";
+import { Prisma } from "@prisma/client";
 import { LikeTargetType } from "./types/like";
 import { getClerkPublicUsersMap } from "./clerk-users";
 
 interface FetchActiveGroupsOptions {
-    whereData: object;
+    whereData?: Prisma.ActiveGroupWhereInput;
     take?: number;
+    cursor?: Prisma.ActiveGroupWhereUniqueInput;
+    orderBy?: Prisma.ActiveGroupOrderByWithRelationInput;
 }
 
-export const fetchActiveGroups = async ({ whereData, take }: FetchActiveGroupsOptions) => {
+export const fetchActiveGroups = async ({
+    whereData = {},
+    take,
+    cursor,
+    orderBy = { createdAt: "desc" }
+}: FetchActiveGroupsOptions = {}) => {
     const where = { ...whereData };
     const rows = await prisma.activeGroup.findMany({
         select: {
@@ -29,9 +37,10 @@ export const fetchActiveGroups = async ({ whereData, take }: FetchActiveGroupsOp
                 orderBy: { order: "asc" },
             },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         where,
-        take
+        take,
+        ...(cursor && { cursor }),
     });
 
     const data = rows.map((r) => ({
