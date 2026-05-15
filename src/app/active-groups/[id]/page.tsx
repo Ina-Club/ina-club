@@ -4,57 +4,22 @@ import {
   Box,
   Typography,
   Chip,
-  Divider,
   Paper,
   Stack,
 } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupStatus } from "lib/types/status";
-import ActiveGroupCard from "@/components/card/active-group-card";
 import GroupImages from "@/components/group-images/group-images";
 import NotFound from "app/not-found";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
-import { fetchActiveGroups, fetchGroupParticipants } from "@/lib/groups";
+import { fetchActiveGroups } from "@/lib/groups";
 import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
-import { LikeTargetType } from "@/lib/types/like";
-import { fetchGroupLikeCount } from "@/lib/groups";
 import ParticipantsProgress from "@/components/card/active-group-card/participations-progress-bar";
-import GroupMembershipPanel from "@/components/group-membership-button/group-membership-panel";
+import GroupMembershipPanelLoader from "@/components/group-membership-button/group-membership-panel-loader";
 import GroupMembershipPanelSkeleton from "@/components/group-membership-button/group-membership-panel-skeleton";
+import SimilarGroupsLoader from "@/components/similar-groups/similar-groups-loader";
+import SimilarGroupsSkeleton from "@/components/skeleton/similar-groups-skeleton";
 import { formatShekelAmount } from "@/lib/utils/currency";
-
-import type { User } from "@/lib/dal";
-
-const SIMILAR_GROUPS_COUNT = 3;
-
-/** Async server component — streamed via Suspense */
-async function GroupMembershipPanelLoader({
-  groupId,
-  userId,
-  currentUser,
-  status,
-}: {
-  groupId: string;
-  userId: string | null;
-  currentUser: User | null;
-  status: string;
-}) {
-  const [participants, alreadyJoined] = await Promise.all([
-    fetchGroupParticipants(groupId),
-    userId ? checkUserIsActiveGroupParticipant(userId, groupId) : false,
-  ]);
-
-  return (
-    <GroupMembershipPanel
-      groupId={groupId}
-      initialParticipants={participants}
-      currentUser={currentUser}
-      isJoined={alreadyJoined}
-      status={status}
-    />
-  );
-}
 
 export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
   const { id } = await params;
@@ -67,11 +32,6 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
       <NotFound />
     );
   }
-
-  const [similarGroups, likeCount] = await Promise.all([
-    fetchActiveGroups({ whereData: { category: { name: ag.category ?? "" }, NOT: { id } }, take: SIMILAR_GROUPS_COUNT }),
-    fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP),
-  ]);
 
   const currentUserForPanel = userId && user
     ? {
@@ -193,10 +153,6 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               מחיר יחידה: {formatShekelAmount(ag.basePrice)} <br />
               מחיר קבוצתי: {formatShekelAmount(ag.groupPrice)} <br />
             </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2">
-              {likeCount} אנשים כבר סימנו בלייק את הקבוצה!
-            </Typography>
             <Suspense fallback={<GroupMembershipPanelSkeleton />}>
               <GroupMembershipPanelLoader
                 groupId={id}
@@ -209,41 +165,12 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
         </Box>
       </Box>
 
-      {similarGroups.length > 0 && (
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h6" fontWeight={700} mb={2}>
-            מומלץ עבורך • קבוצות דומות
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-              gap: 2,
-            }}
-          >
-            {similarGroups.map((s) => (
-              <ActiveGroupCard
-                key={s.id}
-                activeGroup={{
-                  id: s.id,
-                  title: s.title,
-                  description: undefined,
-                  category: s.category,
-                  images: s.images ?? ["/InaClubLogo.png"],
-                  participantCount: s.participantCount,
-                  minParticipants: s.minParticipants,
-                  maxParticipants: s.maxParticipants,
-                  status: GroupStatus.OPEN,
-                  basePrice: s.basePrice,
-                  groupPrice: s.groupPrice,
-                  deadline: new Date(),
-                  createdAt: new Date(),
-                }}
-              />
-            ))}
-          </Box>
-        </Box>
-      )}
+      <Suspense fallback={<SimilarGroupsSkeleton />}>
+        <SimilarGroupsLoader
+          category={ag.category ?? ""}
+          excludeId={id}
+        />
+      </Suspense>
       </Box>
     </>
   );
