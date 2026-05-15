@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
 import { validateSession, getClerkUser } from "@/lib/auth";
-import { getClerkPublicUsersMap } from "@/lib/clerk-users";
 import { clerkClient } from "@clerk/nextjs/server";
 import { fetchWishItemCards } from "@/lib/wish-items";
 
