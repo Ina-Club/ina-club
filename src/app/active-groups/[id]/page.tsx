@@ -159,6 +159,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
                 userId={userId}
                 currentUser={currentUserForPanel}
                 status={ag.status}
+                businessRegistrationTerms={ag.registrationTerms}
               />
             </Suspense>
           </Paper>

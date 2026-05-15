@@ -18,7 +18,7 @@ import {
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { LoadingCircle } from "../loading-circle";
 
-const REGISTRATION_TERMS = `בשמירת פרטי אשראי אלה, אנו מבטיחים כי המשתתפים מחויבים לתהליך במעמד השלמת הרכישה על ידי העסק.
+const GLOBAL_REGISTRATION_TERMS = `בשמירת פרטי אשראי אלה, אנו מבטיחים כי המשתתפים מחויבים לתהליך במעמד השלמת הרכישה על ידי העסק.
 כרטיסך יחויב בדמי ביטול על סך {penaltyAmount} ש"ח בלבד באחד משני המקרים הבאים:
 • במידה ותבטל את הרשמתך לאחר אישור הקבוצה.
 • במידה ולא תממש את הקנייה במועד שנקבע.`;
@@ -31,12 +31,14 @@ interface CommitmentDialogProps {
     expiry: string,
     cvv: string
   ) => Promise<void>;
+  businessRegistrationTerms?: string;
 }
 
 export default function CommitmentDialog({
   open,
   onClose,
   onSubmitPaymentDetails,
+  businessRegistrationTerms,
 }: CommitmentDialogProps) {
   const [step, setStep] = useState(1);
   const [agreed, setAgreed] = useState(false);
@@ -113,7 +115,7 @@ export default function CommitmentDialog({
       <DialogContent dividers sx={{ minHeight: 200 }}>
         {penaltyAmount === null && step !== 3 ? (
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-            <LoadingCircle loadingText="טוען..."/>
+            <LoadingCircle loadingText="טוען..." />
           </Box>
         ) : step === 1 ? (
           <Box>
@@ -121,12 +123,22 @@ export default function CommitmentDialog({
               על מנת להשתתף בקבוצה זו, עליך להסכים לתנאים הבאים:
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-line", maxHeight: 300, overflowY: "auto", p: 1, bgcolor: "grey.50", borderRadius: 1 }}>
-              {REGISTRATION_TERMS.split('{penaltyAmount} ש"ח')[0]}
+              {GLOBAL_REGISTRATION_TERMS.split('{penaltyAmount} ש"ח')[0]}
               <strong style={{ textDecoration: "underline" }}>
                 {penaltyAmount} ש"ח
               </strong>
-              {REGISTRATION_TERMS.split('{penaltyAmount} ש"ח')[1]}
+              {GLOBAL_REGISTRATION_TERMS.split('{penaltyAmount} ש"ח')[1]}
             </Typography>
+            {businessRegistrationTerms && (
+              <Box>
+                <Typography variant="body1">
+                  תנאי הרשמה ספציפיים לעסק זה:
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-line", maxHeight: 300, overflowY: "auto", p: 1, bgcolor: "grey.50", borderRadius: 1 }}>
+                  {businessRegistrationTerms}
+                </Typography>
+              </Box>
+            )}
 
             <Box mt={3}>
               <FormControlLabel
