@@ -9,13 +9,15 @@ interface FetchActiveGroupsOptions {
     take?: number;
     cursor?: Prisma.ActiveGroupWhereUniqueInput;
     orderBy?: Prisma.ActiveGroupOrderByWithRelationInput;
+    includeDetails?: boolean;
 }
 
 export const fetchActiveGroups = async ({
     whereData = {},
     take,
     cursor,
-    orderBy = { createdAt: "desc" }
+    orderBy = { createdAt: "desc" },
+    includeDetails = false
 }: FetchActiveGroupsOptions = {}) => {
     const where = { ...whereData };
     const rows = await prisma.activeGroup.findMany({
@@ -23,7 +25,7 @@ export const fetchActiveGroups = async ({
             id: true,
             title: true,
             status: true,
-            description: true,
+            ...(includeDetails && { description: true }),
             category: { select: { name: true } },
             basePrice: true,
             groupPrice: true,
@@ -31,7 +33,7 @@ export const fetchActiveGroups = async ({
             _count: { select: { participants: true } },
             minParticipants: true,
             maxParticipants: true,
-            registrationTerms: true,
+            ...(includeDetails && { registrationTerms: true }),
             images: {
                 select: { image: { select: { url: true } }, order: true },
                 orderBy: { order: "asc" },
@@ -47,7 +49,7 @@ export const fetchActiveGroups = async ({
         id: r.id,
         title: r.title,
         status: r.status,
-        description: r.description,
+        ...(includeDetails && { description: r.description }),
         category: r.category?.name ?? "",
         basePrice: r.basePrice,
         groupPrice: r.groupPrice,
@@ -56,7 +58,7 @@ export const fetchActiveGroups = async ({
         participantCount: r._count.participants,
         minParticipants: r.minParticipants,
         maxParticipants: r.maxParticipants,
-        registrationTerms: r.registrationTerms,
+        ...(includeDetails && { registrationTerms: r.registrationTerms }),
     }));
 
     return data as ActiveGroup[];
