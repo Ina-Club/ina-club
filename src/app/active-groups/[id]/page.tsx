@@ -1,25 +1,24 @@
 
+import { Suspense } from "react";
 import {
   Box,
   Typography,
   Chip,
-  Divider,
   Paper,
   Stack,
 } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import { GroupStatus } from "lib/types/status";
-import ActiveGroupCard from "@/components/card/active-group-card";
 import GroupImages from "@/components/group-images/group-images";
 import NotFound from "app/not-found";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { checkUserIsActiveGroupParticipant } from "@/lib/utils/praticipant";
 import { fetchActiveGroups } from "@/lib/groups";
 import GenericEntityLikeButton from "@/components/floating-like-button/generic-entity-like-button";
-import { LikeTargetType } from "@/lib/types/like";
-import { fetchGroupLikeCount } from "@/lib/groups";
 import ParticipantsProgress from "@/components/card/active-group-card/participations-progress-bar";
-import GroupMembershipPanel from "@/components/group-membership-button/group-membership-panel";
+import GroupMembershipPanelLoader from "@/components/group-membership-button/group-membership-panel-loader";
+import GroupMembershipPanelSkeleton from "@/components/group-membership-button/group-membership-panel-skeleton";
+import SimilarGroupsLoader from "@/components/similar-groups/similar-groups-loader";
+import SimilarGroupsSkeleton from "@/components/skeleton/similar-groups-skeleton";
 import { formatShekelAmount } from "@/lib/utils/currency";
 
 export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
@@ -27,16 +26,13 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
   const { userId } = await auth();
   const user = userId ? await currentUser() : null;
 
-  const ag = (await fetchActiveGroups({ id }))?.[0] ?? null;
+  const ag = (await fetchActiveGroups({ whereData: { id } }))?.[0] ?? null;
   if (!ag) {
     return (
       <NotFound />
     );
   }
 
-  const alreadyJoined = !!userId ? await checkUserIsActiveGroupParticipant(userId, ag.id) : false;
-  const similarGroups = await fetchActiveGroups({ category: { name: ag.category ?? "" }, NOT: { id } }, 3);
-  const likeCount = await fetchGroupLikeCount(ag.id, LikeTargetType.ACTIVE_GROUP);
   const currentUserForPanel = userId && user
     ? {
         firstName: user.firstName ?? "משתמש",
@@ -130,7 +126,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               סטטוס רשומים
             </Typography>
             <ParticipantsProgress
-              current={ag.participants.length}
+              current={ag.participantCount}
               min={ag.minParticipants}
               max={ag.maxParticipants}
             />
@@ -157,54 +153,24 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               מחיר יחידה: {formatShekelAmount(ag.basePrice)} <br />
               מחיר קבוצתי: {formatShekelAmount(ag.groupPrice)} <br />
             </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2">
-              {likeCount} אנשים כבר סימנו בלייק את הקבוצה!
-            </Typography>
-            <GroupMembershipPanel
-              groupId={id}
-              initialParticipants={ag.participants}
-              currentUser={currentUserForPanel}
-              isJoined={alreadyJoined}
-              status={ag.status}
-            />
+            <Suspense fallback={<GroupMembershipPanelSkeleton />}>
+              <GroupMembershipPanelLoader
+                groupId={id}
+                userId={userId}
+                currentUser={currentUserForPanel}
+                status={ag.status}
+              />
+            </Suspense>
           </Paper>
         </Box>
       </Box>
 
-      {similarGroups.length > 0 && (
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h6" fontWeight={700} mb={2}>
-            מומלץ עבורך • קבוצות דומות
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-              gap: 2,
-            }}
-          >
-            {similarGroups.map((s) => (
-              <ActiveGroupCard
-                key={s.id}
-                activeGroup={{
-                  id: s.id,
-                  title: s.title,
-                  description: undefined,
-                  category: s.category,
-                  images: s.images ?? ["/InaClubLogo.png"],
-                  participants: [],
-                  status: GroupStatus.OPEN,
-                  basePrice: s.basePrice,
-                  groupPrice: s.groupPrice,
-                  deadline: new Date(),
-                  createdAt: new Date(),
-                }}
-              />
-            ))}
-          </Box>
-        </Box>
-      )}
+      <Suspense fallback={<SimilarGroupsSkeleton />}>
+        <SimilarGroupsLoader
+          category={ag.category ?? ""}
+          excludeId={id}
+        />
+      </Suspense>
       </Box>
     </>
   );

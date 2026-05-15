@@ -23,7 +23,7 @@ export async function GET() {
             .map((l) => l.targetId);
 
         const [activeGroups, wishItems] = await Promise.all([
-            fetchActiveGroups({ id: { in: activeGroupIds } }),
+            fetchActiveGroups({ whereData: { id: { in: activeGroupIds } } }),
             fetchWishItemCards({
                 where: { id: { in: wishItemIds } },
                 currentUserId: userId,
