@@ -104,7 +104,7 @@ export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({
           variant="h5"
           sx={{
             color: "#1a2a5a",
-            mb: 6,
+            mb: 9,
             fontSize: { md: "1.25rem", xs: "1rem" },
             fontWeight: 400,
             lineHeight: 1.6,

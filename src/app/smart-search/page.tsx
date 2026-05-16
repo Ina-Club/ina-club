@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Box, Button, Card, Typography } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Box, Button, Card, Typography, TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { DefaultPageBanner } from "@/components/default-page-banner";
-import { SearchBar } from "@/components/search-bar";
 import { ActiveGroup } from "lib/dal";
 import { LoadingCircle } from "@/components/loading-circle";
 import { SmartSearchHelper } from "@/components/smart-search/helper";
@@ -12,59 +11,98 @@ import { SmartSearchComponent } from "@/components/smart-search";
 import { WishItemData } from "@/components/demand-pulse/WishItemCard";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { SearchBar } from "@/components/search-bar";
+
+interface UserStatus {
+  isSignedIn: boolean;
+  canUseSmartSearch: boolean;
+  smartSearchQuotaReached: boolean;
+  remainingSmartSearch: number;
+}
 
 export default function SmartSearchPage() {
-  const headerText: string = "חיפוש חכם";
-  const descriptionText: string =
+  const headerText = "חיפוש חכם";
+  const descriptionText =
     "חפשו טקסט חופשי ונציג קבוצות פעילות ובקשות רלוונטיות בהקשר המבוקש.";
+
   const [searchText, setSearchText] = useState("");
-  const [displayedActiveGroups, setDisplayedActiveGroups] = useState<
-    ActiveGroup[]
-  >([]);
-  const [displayedWishItems, setDisplayedWishItems] = useState<WishItemData[]>(
-    [],
-  );
+  const [displayedActiveGroups, setDisplayedActiveGroups] = useState<ActiveGroup[]>([]);
+  const [displayedWishItems, setDisplayedWishItems] = useState<WishItemData[]>([]);
   const [displayHelper, setDisplayHelper] = useState(true);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [errorAi, setErrorAi] = useState<string | null>(null);
   const [filterAi, setFilterAi] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+
   const { isSignedIn } = useAuth();
   const router = useRouter();
 
-  const readyForSearch: boolean = !!searchText.trim() && !loadingSearch;
-  // Currently we dont wait for this to end when we call this, we can change this is the future if required.
+  const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      fetch("/api/user-status")
+        .then((res) => res.json())
+        .then((data) => setUserStatus(data))
+        .catch(() => { })
+        .finally(() => setStatusLoading(false));
+    } else {
+      setStatusLoading(false);
+    }
+  }, [isSignedIn]);
+
+  const isBlocked =
+    statusLoading || !userStatus
+      ? true
+      : userStatus.smartSearchQuotaReached;
+
+  const readyForSearch =
+    !!searchText.trim() && !loadingSearch && !isBlocked;
+
+  const handleAISearch = async () => {
+    try {
+      const response = await fetch("/api/ai/smart-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ searchText }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.activeGroups == undefined || data.filtered == undefined) {
+        throw new Error(`${response.status}`);
+      }
+
+      if (data.filtered) setFilterAi(true);
+
+      setDisplayedWishItems(data.wishItems || []);
+      setDisplayedActiveGroups(data.activeGroups);
+
+      fetch("/api/user-status")
+        .then((res) => res.json())
+        .then((data) => setUserStatus(data))
+        .catch(() => { });
+    } catch (err: any) {
+      console.log("AI error", err);
+
+      setErrorAi(
+        err.message === "429"
+          ? "הגעת למכסה היומית של החיפוש החכם. נסה שוב מחר."
+          : "שגיאה בשליפת הנתונים מAI, אנא נסו שנית מאוחר יותר."
+      );
+    } finally {
+      setLoadingSearch(false);
+    }
+  };
+
   const handleSmartSearch = async () => {
     setErrorAi(null);
     setFilterAi(false);
     setLoadingSearch(true);
     setDisplayHelper(false);
     await handleAISearch();
-  };
-
-  const handleAISearch = async () => {
-    try {
-      const response: Response = await fetch("/api/ai/smart-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ searchText }),
-      });
-      const data = await response.json();
-      if (
-        !response.ok ||
-        data.activeGroups == undefined ||
-        data.filtered == undefined
-      ) {
-        throw new Error(`${response.status}`);
-      }
-      if (data.filtered) setFilterAi(true);
-      setDisplayedWishItems(data.wishItems || []);
-      setDisplayedActiveGroups(data.activeGroups);
-    } catch (err) {
-      console.log("Failed Sending the request to AI!", err);
-      setErrorAi("שגיאה בשליפת הנתונים מAI, אנא נסו שנית מאוחר יותר.");
-    } finally {
-      setLoadingSearch(false);
-    }
   };
 
   return (
@@ -78,6 +116,7 @@ export default function SmartSearchPage() {
           "ממשיכים מכאן בלחיצה על כרטיס לדף קבוצה או בקשה.",
         ]}
       />
+
       <Box
         sx={{
           width: "100%",
@@ -88,41 +127,60 @@ export default function SmartSearchPage() {
         }}
       >
         {isSignedIn ? (
-          <Card
-            sx={{
-              p: 1,
-              mt: -4,
-              mb: 3,
-              boxShadow: 3,
-              borderRadius: "12px",
-              position: "relative",
-              border: "2px solid transparent",
-              "&:hover": { borderColor: "#1a2a5a" },
-            }}
-            onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === "Enter" && readyForSearch) handleSmartSearch();
-            }}
-          >
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              <Box sx={{ flexGrow: 1 }}>
-                <SearchBar
-                  searchText={searchText}
-                  placeholderText="חפשו טקסט חופשי..."
-                  handleSearchTextChange={setSearchText}
-                />
-              </Box>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<SearchIcon />}
-                onClick={handleSmartSearch}
-                sx={{ minWidth: 120 }}
-                disabled={!readyForSearch}
+          <Box sx={{ position: "relative", width: "100%", mt: -4 }}>
+            {!statusLoading && userStatus && (
+              <Typography
+                variant="caption"
+                sx={{
+                  position: "absolute",
+                  top: -24,
+                  right: 8,
+                  color: "text.secondary",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                }}
               >
-                {loadingSearch ? "מחפש..." : "חיפוש"}
-              </Button>
-            </Box>
-          </Card>
+                ניתן לחפש עד 2 פעמים ביום {userStatus.remainingSmartSearch !== undefined ? `(נותרו ${userStatus.remainingSmartSearch})` : ""}
+              </Typography>
+            )}
+            <Card
+              sx={{
+                p: 1,
+                mb: 3,
+                boxShadow: 3,
+                borderRadius: "12px",
+                border: "2px solid transparent",
+                "&:hover": { borderColor: "#1a2a5a" },
+              }}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" && readyForSearch) handleSmartSearch();
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                <Box sx={{ flexGrow: 1 }}>
+                  <SearchBar
+                    searchText={searchText}
+                    placeholderText={
+                      statusLoading ? "חפשו טקסט חופשי..." :
+                        userStatus?.smartSearchQuotaReached ? "הגעת למכסה היומית - ניתן לחפש שוב מחר" : "חפשו טקסט חופשי..."
+                    }
+                    handleSearchTextChange={setSearchText}
+                    disabled={isBlocked}
+                  />
+                </Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<SearchIcon />}
+                  onClick={handleSmartSearch}
+                  sx={{ minWidth: 120 }}
+                  disabled={!readyForSearch}
+                >
+                  {loadingSearch ? "מחפש..." : "חיפוש"}
+                </Button>
+              </Box>
+            </Card>
+          </Box>
         ) : (
           <Box
             sx={{
@@ -165,7 +223,7 @@ export default function SmartSearchPage() {
               >
                 התחבר
               </Typography>{" "}
-              כדי להתחיל לחפש בקלות 
+              כדי להתחיל לחפש בקלות
             </Typography>
           </Box>
         )}
