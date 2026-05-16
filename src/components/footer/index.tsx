@@ -38,11 +38,14 @@ export default function Footer() {
               InaClub
             </Typography>
             <Typography variant="body2" sx={{ mb: 3, lineHeight: 1.6 }}>
-              הפלטפורמה המובילה בישראל לרכישות קבוצתיות חכמות.
+              הפלטפורמה היחידה בישראל לרכישות קבוצתיות חכמות.
               חסוך כסף על המוצרים שאתה אוהב עם אלפי קונים נוספים.
             </Typography>
 
             {/* רשתות חברתיות */}
+            <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.6 }}>
+              עקבו אחרינו והצטרפו לקהילה:
+            </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
               <IconButton
                 sx={{
@@ -59,7 +62,7 @@ export default function Footer() {
           </Box>
 
           {/* קישורים מהירים */}
-          <Box sx={{ flex: { xs: "none", md: 1 }, ml: {xs: "none", md: 5} }}>
+          <Box sx={{ flex: { xs: "none", md: 1 }, ml: { xs: "none", md: 5 } }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               קישורים מהירים
             </Typography>
@@ -91,7 +94,13 @@ export default function Footer() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <EmailIcon sx={{ fontSize: 20 }} />
                 <Typography variant="body2">
-                  support@inaclub.co.il
+                  <Link
+                    href="mailto:support@inaclub.co.il"
+                    underline="hover"
+                    color="inherit"
+                  >
+                    support@inaclub.co.il
+                  </Link>
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -106,7 +115,7 @@ export default function Footer() {
 
           {/* לינקים משפטיים */}
           <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
-          <Link href="/about" underline="hover" color="inherit" variant="body2">
+            <Link href="/about" underline="hover" color="inherit" variant="body2">
               מי אנחנו
             </Link>
 

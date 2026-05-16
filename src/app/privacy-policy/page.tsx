@@ -1,5 +1,6 @@
 import { StaticPageLayout, StaticPageSection } from "@/components/static-page/static-page-layout";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "מדיניות פרטיות | Ina Club",
@@ -88,6 +89,7 @@ const sections: StaticPageSection[] = [
 ];
 
 export default function PrivacyPolicyPage() {
+  notFound();
   return (
     <StaticPageLayout
       header="מדיניות פרטיות"

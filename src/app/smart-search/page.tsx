@@ -172,7 +172,7 @@ export default function SmartSearchPage() {
       </Box>
 
       {displayHelper ? (
-        <SmartSearchHelper />
+        <SmartSearchHelper onExampleClick={setSearchText} />
       ) : !loadingSearch ? (
         <SmartSearchComponent
           filterAi={filterAi}

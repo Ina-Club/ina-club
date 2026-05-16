@@ -20,6 +20,8 @@ import GroupMembershipPanelSkeleton from "@/components/group-membership-button/g
 import SimilarGroupsLoader from "@/components/similar-groups/similar-groups-loader";
 import SimilarGroupsSkeleton from "@/components/skeleton/similar-groups-skeleton";
 import { formatShekelAmount } from "@/lib/utils/currency";
+import CompanyCardLoader from "@/components/company-card-loader/company-card-loader";
+import CompanyCardSkeleton from "@/components/skeleton/company-card-skeleton";
 
 export default async function ActiveGroupDetail({ params }: { params: Promise<{ id: string }>; }) {
   const { id } = await params;
@@ -101,7 +103,7 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
             }}
           >
             <Typography variant="h6" fontWeight={700} mb={1}>
-              תיאור
+              על המוצר
             </Typography>
             <Typography
               variant="body1"
@@ -134,7 +136,13 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
         </Box>
 
         {/* Right side – Price analysis, participants, CTA */}
-        <Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
           <Paper
             elevation={0}
             sx={{
@@ -142,17 +150,16 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               border: "1px solid",
               borderColor: "divider",
               borderRadius: 3,
-              position: { md: "sticky" },
-              top: { md: 96 },
             }}
           >
-            <Typography variant="h6" fontWeight={700} mb={1}>
-              ניתוח מחיר
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              מחיר יחידה: {formatShekelAmount(ag.basePrice)} <br />
-              מחיר קבוצתי: {formatShekelAmount(ag.groupPrice)} <br />
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ textDecoration: "line-through" }}>
+                מחיר יחידה: {formatShekelAmount(ag.basePrice)}
+              </Typography>
+              <Typography variant="h6" fontWeight={700} color="primary.main">
+                מחיר קבוצתי: {formatShekelAmount(ag.groupPrice)}
+              </Typography>
+            </Box>
             <Suspense fallback={<GroupMembershipPanelSkeleton />}>
               <GroupMembershipPanelLoader
                 groupId={id}
@@ -163,6 +170,14 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               />
             </Suspense>
           </Paper>
+
+          {ag.companyId && (
+            <Box>
+              <Suspense fallback={<CompanyCardSkeleton />}>
+                <CompanyCardLoader companyId={ag.companyId} />
+              </Suspense>
+            </Box>
+          )}
         </Box>
       </Box>
 

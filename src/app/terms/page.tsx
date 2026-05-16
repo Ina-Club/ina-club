@@ -1,5 +1,6 @@
 import { StaticPageLayout, StaticPageSection } from "@/components/static-page/static-page-layout";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "תנאי שימוש | Ina Club",
@@ -81,6 +82,7 @@ const sections: StaticPageSection[] = [
 ];
 
 export default function TermsPage() {
+  notFound();
   return (
     <StaticPageLayout
       header="תנאי שימוש"

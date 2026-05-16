@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { Box, Typography, Stack } from "@mui/material";
 import { PageHintButton } from "@/components/page-shell/PageHintButton";
@@ -10,6 +8,7 @@ export interface DefaultPageBannerProps {
   mainSx?: object;
   /** אייקון עזרה עדין → חלון קטן (דפים קריטיים) */
   hintBullets?: string[];
+  headerExtra?: React.ReactNode;
 }
 
 export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({
@@ -17,6 +16,7 @@ export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({
   description,
   mainSx,
   hintBullets,
+  headerExtra,
 }) => {
   const showHint = hintBullets && hintBullets.length > 0;
 
@@ -83,7 +83,7 @@ export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({
           gap={1}
           sx={{ mb: 1 }}
         >
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 2 }}>
             <Typography
               component="h1"
               sx={{
@@ -95,6 +95,7 @@ export const DefaultPageBanner: React.FC<DefaultPageBannerProps> = ({
             >
               {header}
             </Typography>
+            {headerExtra}
           </Box>
           {showHint && <PageHintButton bullets={hintBullets!} />}
         </Stack>
