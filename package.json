@@ -18,6 +18,7 @@
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
     "@prisma/client": "^6.15.0",
+    "canvas-confetti": "^1.9.4",
     "formik": "^2.4.6",
     "next": "^15.5.0",
     "react": "19.1.1",
@@ -26,6 +27,7 @@
     "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

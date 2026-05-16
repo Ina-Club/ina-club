@@ -34,7 +34,6 @@ model Payment {
 
 model Company {
   id           String        @id @default(uuid())
-  ownerId      String        @unique // Clerk User ID
   title        String
   address      String?
   city         String?
@@ -46,6 +45,7 @@ model Company {
   websiteUrl   String?       @unique
   logoId       String?       @unique
   updatedAt    DateTime?     @updatedAt
+  ownerId      String        @unique
   activeGroups ActiveGroup[]
   logo         Image?        @relation("CompanyLogo", fields: [logoId], references: [id])
   testimonials Testimonial[]
@@ -61,10 +61,10 @@ model Category {
 }
 
 model Image {
-  id                 String             @id @default(uuid())
-  url                String
-  activeGroupImages  ActiveGroupImage[]
-  companyLogo        Company?           @relation("CompanyLogo")
+  id                String             @id @default(uuid())
+  url               String
+  activeGroupImages ActiveGroupImage[]
+  companyLogo       Company?           @relation("CompanyLogo")
 }
 
 model ActiveGroupImage {
@@ -86,7 +86,7 @@ model ActiveGroup {
   companyId         String
   basePrice         Float
   createdAt         DateTime                 @default(now())
-  createdById       String                   // Clerk User ID
+  createdById       String
   description       String
   groupPrice        Float
   maxParticipants   Int?
@@ -97,13 +97,13 @@ model ActiveGroup {
   company           Company                  @relation(fields: [companyId], references: [id])
   images            ActiveGroupImage[]
   participants      ActiveGroupParticipant[]
-  tokens            PaymentToken[]
   coupons           Coupon[]
+  tokens            PaymentToken[]
 }
 
 model ActiveGroupParticipant {
   id            String      @id @default(uuid())
-  userId        String      // Clerk User ID
+  userId        String
   activeGroupId String
   joinedAt      DateTime    @default(now())
   lastPing      DateTime
@@ -114,7 +114,7 @@ model ActiveGroupParticipant {
 
 model Like {
   id         String         @id @default(uuid())
-  userId     String         // Clerk User ID
+  userId     String
   targetType LikeTargetType
   targetId   String
   createdAt  DateTime       @default(now())
@@ -143,7 +143,7 @@ model WishItem {
   text        String    @unique
   targetPrice Float?
   createdAt   DateTime  @default(now())
-  createdById String    // Clerk User ID
+  createdById String
   categoryId  String?
   category    Category? @relation("WishItemCategory", fields: [categoryId], references: [id])
 
@@ -151,28 +151,25 @@ model WishItem {
 }
 
 model PaymentServiceProvider {
-  id                String                 @id @default(uuid())
-  name              String                 @unique // E.g., "STRIPE", "MOCK_PSP"
-  isActive          Boolean                @default(true)
-  
-  tokens            PaymentToken[]
+  id       String         @id @default(uuid())
+  name     String         @unique
+  isActive Boolean        @default(true)
+  tokens   PaymentToken[]
 }
 
 model PaymentToken {
-  id                String                 @id @default(uuid())
-  userId            String
-  activeGroupId     String
-  activeGroup       ActiveGroup            @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
-  pspId             String
-  psp               PaymentServiceProvider @relation(fields: [pspId], references: [id], onDelete: Restrict)
-  
-  pspToken          String                 
-  agreedFee         Float                  
-  currency          String                 @default("ILS")
-  status            TokenStatus            @default(ACTIVE)
-  
-  createdAt         DateTime               @default(now())
-  consumedAt        DateTime?
+  id            String                 @id @default(uuid())
+  userId        String
+  activeGroupId String
+  pspId         String
+  pspToken      String
+  agreedFee     Float
+  status        TokenStatus            @default(ACTIVE)
+  createdAt     DateTime               @default(now())
+  consumedAt    DateTime?
+  currency      String                 @default("ILS")
+  activeGroup   ActiveGroup            @relation(fields: [activeGroupId], references: [id], onDelete: Cascade)
+  psp           PaymentServiceProvider @relation(fields: [pspId], references: [id])
 }
 
 model Coupon {
@@ -187,6 +184,31 @@ model Coupon {
 
   @@unique([userId, groupId])
   @@index([userId])
+}
+
+model UserActivity {
+  userId                    String    @id
+  lastWishItemDate          DateTime?
+  lastPriceAnalysisDate     DateTime?
+  wishItemBlockedUntil      DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+  priceAnalysisCount        Int       @default(0)
+  lastSmartSearchDate       DateTime?
+  smartSearchCount          Int       @default(0)
+}
+
+model B2BInvitation {
+  id             String      @id @default(uuid())
+  email          String      @unique
+  packageType    PackageType
+  maxGroups      Int
+  price          Float
+  endDate        DateTime?
+  companyTitle   String
+  companyAddress String?
+  companyCity    String?
+  createdAt      DateTime    @default(now())
 }
 
 enum GroupStatus {
@@ -233,22 +255,4 @@ enum CouponStatus {
   ACTIVE
   EXPIRED
   USED
-}
-
-model B2BInvitation {
-  id              String      @id @default(uuid())
-  email           String      @unique
-
-  // Package Data
-  packageType     PackageType
-  maxGroups       Int
-  price           Float
-  endDate         DateTime?
-
-  // Company Data
-  companyTitle    String
-  companyAddress  String?
-  companyCity     String?
-
-  createdAt       DateTime    @default(now())
 }

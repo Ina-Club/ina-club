@@ -8,6 +8,7 @@ import { checkWishItemQuota } from "@/lib/services/quota";
 import { DAILY_WISH_ITEM_LIMIT } from "@/app/config/quota";
 import { RoleLevel } from "@/lib/types/role";
 import { prisma } from "@/lib/prisma";
+import { moderateContent } from "@/lib/services/ai-moderation";
 
 const WISH_ITEM_DEFAULT_TAKE = 20;
 
@@ -68,6 +69,57 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const client = await clerkClient();
+  const user = await client.users.getUser(userId);
+  const role = user.publicMetadata?.role;
+  const isAdmin = role === "ADMIN";
+
+  const now = new Date();
+  const oneWeekFromNow = new Date();
+  oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+  oneWeekFromNow.setHours(0, 0, 0, 0);
+
+  if (!isAdmin) {
+    // 1. Check violation block first
+    const activity = await prisma.userActivity.findUnique({ where: { userId } });
+    if (activity?.wishItemBlockedUntil && activity.wishItemBlockedUntil > now) {
+      return NextResponse.json(
+        { error: "אתה חסום מיצירת בקשות עקב הפרת תנאי השימוש. תוכל להגיש בקשה מחדש לאחר שתסתיים החסימה.", blocked: true },
+        { status: 403 }
+      );
+    }
+
+    // 2. Check daily quota
+    const quota = await checkWishItemQuota(userId, DAILY_WISH_ITEM_LIMIT);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: "הגעת למגבלת הבקשות היומית. תוכל להגיש בקשה חדשה מחר.", quotaReached: true },
+        { status: 429 }
+      );
+    }
+
+    // 3. AI moderation
+    const moderation = await moderateContent(text);
+    if (!moderation.isValid) {
+      // Block the user for a week
+      await prisma.userActivity.upsert({
+        where: { userId },
+        create: { userId, wishItemBlockedUntil: oneWeekFromNow },
+        update: { wishItemBlockedUntil: oneWeekFromNow },
+      });
+      return NextResponse.json(
+        { 
+          error: "הבקשה נדחתה עקב תוכן לא מתאים.", 
+          reason: moderation.reason || "תוכן לא מתאים",
+          blocked: true,
+          violation: true 
+        },
+        { status: 422 }
+      );
+    }
+  }
+
+  // 4. Check for duplicate
   const existingItem = await prisma.wishItem.findFirst({
     where: {
       text: {
@@ -87,29 +139,19 @@ export async function POST(req: NextRequest) {
   const targetPrice =
     body.targetPrice && body.targetPrice > 0 ? body.targetPrice : null;
 
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  const role = user.publicMetadata?.role;
-  const isAdmin = role === "ADMIN";
-
-  let remaining = 999;
-
-  if (!isAdmin) {
-    const quota = await checkWishItemQuota(userId, DAILY_WISH_ITEM_LIMIT);
-
-    if (!quota.allowed) {
-      return NextResponse.json(
-        { error: "You have reached the daily limit of wish items", remaining: 0 },
-        { status: 429 }
-      );
-    }
-    
-    remaining = quota.remaining - 1; // Since we are creating one now
-  }
-
+  // 5. Create the wish item
   const item = await prisma.wishItem.create({
     data: { text, targetPrice, categoryId: body.categoryId || null, createdById: userId },
   });
 
-  return NextResponse.json({ ...item, remaining }, { status: 201 });
+  // 6. Record the usage in UserActivity
+  if (!isAdmin) {
+    await prisma.userActivity.upsert({
+      where: { userId },
+      create: { userId, lastWishItemDate: now },
+      update: { lastWishItemDate: now },
+    });
+  }
+
+  return NextResponse.json({ ...item, remaining: 0 }, { status: 201 });
 }
