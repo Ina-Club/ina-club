@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -28,10 +28,25 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "@/contexts/snackbar-context";
 import { formatShekelAmount } from "@/lib/utils/currency";
+import confetti from "canvas-confetti";
 import type {
   NeedMoreInfoResponse,
   PriceResponse,
 } from "../../lib/types/price-analyzer";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import BlockIcon from "@mui/icons-material/Block";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+
+interface UserStatus {
+  isSignedIn: boolean;
+  canSubmitWishItem: boolean;
+  wishItemViolationBlocked: boolean;
+  wishItemQuotaReached: boolean;
+  remainingWishItems: number;
+  canAnalyzePrice: boolean;
+  priceAnalysisQuotaReached: boolean;
+  remainingPriceAnalysis: number;
+}
 
 export default function PriceAnalyzerComponent() {
   const theme = useTheme();
@@ -49,7 +64,48 @@ export default function PriceAnalyzerComponent() {
   const [priceResult, setPriceResult] = useState<PriceResponse | null>(null);
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  const { showSnackbar } = useSnackbar();
+
+  const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+
+  const [dialog, setDialog] = useState<{
+    open: boolean;
+    type: "success" | "blocked" | "error" | null;
+    title?: string;
+    description?: string;
+  }>({ open: false, type: null });
+
+  // Fetch status on mount
+  useEffect(() => {
+    if (isSignedIn) {
+      fetch("/api/user-status")
+        .then((res) => res.json())
+        .then((data) => setUserStatus(data))
+        .catch(() => { })
+        .finally(() => setStatusLoading(false));
+    } else {
+      setStatusLoading(false);
+    }
+  }, [isSignedIn]);
+
+  const refreshUserStatus = async () => {
+    try {
+      const res = await fetch("/api/user-status");
+      const data = await res.json();
+      setUserStatus(data);
+    } catch { }
+  };
+
+  const closeDialog = () => setDialog({ open: false, type: null });
+
+  const fireConfetti = () => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.7 },
+      colors: ["#1a2a5a", "#3b5cc4", "#f0a500", "#ffffff"],
+    });
+  };
 
   // Computed group price range values for the chart
   const minGroupPrice = priceResult ? Math.round(priceResult.minGroupPrice) : 0;
@@ -62,53 +118,10 @@ export default function PriceAnalyzerComponent() {
     Math.max(minGroupPrice, averageGroupPrice, maxGroupPrice) || 1;
   const calculateChartFillPercentage = (v: number) =>
     `${Math.max(5, Math.round((v / highestPrice) * 100))}%`;
-  const readyForSearch: boolean = !!searchText.trim() && !loading;
 
-  // if (!isSignedIn) {
-  //   return (
-  //     <Box
-  //       sx={{
-  //         display: "flex",
-  //         alignItems: "center",
-  //         gap: 1.5,
-  //         p: "12px 16px",
-  //         borderRadius: "14px",
-  //         border: "1.5px dashed rgba(0,0,0,0.15)",
-  //         cursor: "pointer",
-  //         bgcolor: "rgba(66,100,212,0.03)",
-  //         "&:hover": { bgcolor: "rgba(66,100,212,0.07)" },
-  //         transition: "background 0.2s",
-  //       }}
-  //       onClick={() => router.push("/sign-in")}
-  //     >
-  //       <Box
-  //         sx={{
-  //           width: 32,
-  //           height: 32,
-  //           borderRadius: "50%",
-  //           bgcolor: "rgba(66,100,212,0.12)",
-  //           display: "flex",
-  //           alignItems: "center",
-  //           justifyContent: "center",
-  //           fontSize: "1rem",
-  //         }}
-  //       >
-  //         ✦
-  //       </Box>
-  //       <Typography variant="body2" color="text.secondary">
-  //         <Typography
-  //           component="span"
-  //           variant="body2"
-  //           color="primary.main"
-  //           fontWeight={600}
-  //         >
-  //           התחבר
-  //         </Typography>{" "}
-  //         כדי להתחיל לנתח מחירים
-  //       </Typography>
-  //     </Box>
-  //   );
-  // }
+  const isBlocked = statusLoading || !userStatus ? true : userStatus.priceAnalysisQuotaReached;
+
+  const readyForSearch: boolean = !!searchText.trim() && !loading && !isBlocked;
 
   const handleSearch = async () => {
     if (!searchText.trim()) {
@@ -137,16 +150,16 @@ export default function PriceAnalyzerComponent() {
       const data = await response.json();
 
       if (data.needsMoreInfo) {
-        // צריך מידע נוסף - הוסף select חדש
         setDynamicSelects((prev) => [...prev, data as NeedMoreInfoResponse]);
       } else {
-        // קיבלנו תוצאה סופית
         setPriceResult(data as PriceResponse);
         setSelectedValues({});
-        setDynamicSelects([]); // נקה את ה-selects
+        setDynamicSelects([]);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה לא ידועה");
+      refreshUserStatus(); // Refresh to update remaining count
+    } catch (err: any) {
+      setError(err instanceof Error ? err.message : "לא ניתן לנתח מחיר לערך זה");
+      refreshUserStatus();
     } finally {
       setLoading(false);
     }
@@ -177,7 +190,6 @@ export default function PriceAnalyzerComponent() {
       const data = await response.json();
 
       if (data.needsMoreInfo) {
-        // צריך עוד מידע - הוסף select נוסף
         const alreadyExists = dynamicSelects.some(
           (opt) => opt.category === data.category,
         );
@@ -185,13 +197,14 @@ export default function PriceAnalyzerComponent() {
           setDynamicSelects((prev) => [...prev, data as NeedMoreInfoResponse]);
         }
       } else {
-        // קיבלנו תוצאה סופית
         setPriceResult(data as PriceResponse);
         setSelectedValues({});
-        setDynamicSelects([]); // נקה את ה-selects
+        setDynamicSelects([]);
       }
+      refreshUserStatus();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה לא ידועה");
+      setError(err instanceof Error ? err.message : "לא ניתן לנתח מחיר לערך זה");
+      refreshUserStatus();
     } finally {
       setLoading(false);
     }
@@ -222,70 +235,114 @@ export default function PriceAnalyzerComponent() {
           targetPrice: averageGroupPrice, // use the suggested group price
         }),
       });
-      
+
       const data = await res.json();
-      
+      await refreshUserStatus();
+
       if (res.ok) {
-        if (data.remaining !== undefined) {
-          setSuccessMsg(`המוצר נוסף בהצלחה ל-Wish Items של הקהילה! נותרו לך ${data.remaining} בקשות להיום.`);
-        } else {
-          setSuccessMsg("המוצר נוסף בהצלחה ל-Wish Items של הקהילה!");
-        }
+        fireConfetti();
+        setDialog({
+          open: true,
+          type: "success",
+          title: "הבקשה פורסמה בהצלחה",
+          description: "המוצר נוסף בהצלחה ל-Wish Items של הקהילה!",
+        });
       } else if (res.status === 409) {
-        showSnackbar("בקשה זהה כבר קיימת במערכת. עדיף לתת לה לייק!", "warning");
+        setDialog({
+          open: true,
+          type: "blocked",
+          title: "לא ניתן לפרסם",
+          description: "בקשה דומה כבר קיימת במערכת.",
+        });
       } else if (res.status === 429) {
-        showSnackbar("הגעת למגבלת הבקשות היומית.", "warning");
+        setDialog({
+          open: true,
+          type: "blocked",
+          title: "הגעת למכסה היומית",
+          description: "ניתן לפרסם שוב מחר.",
+        });
+      } else if (res.status === 422 || res.status === 403) {
+        setDialog({
+          open: true,
+          type: "blocked",
+          title: "הבקשה נדחתה",
+          description: data.error || "הבקשה לא עומדת בכללי הקהילה.",
+        });
       } else {
         throw new Error("אירעה שגיאה ביצירת הבקשה.");
       }
     } catch (err: any) {
-      setError("אירעה שגיאה ביצירת הבקשה.");
+      setDialog({
+        open: true,
+        type: "error",
+        title: "אירעה שגיאה",
+        description: "נסה שוב בעוד מספר רגעים.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
+
   return (
     <Box sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>
       {isSignedIn ? (
-        <Card
-          sx={{
-            p: 1,
-            mb: 3,
-            boxShadow: 3,
-            borderRadius: "12px",
-            border: "2px solid transparent",
-            "&:hover": { borderColor: "#1a2a5a" },
-          }}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === "Enter" && readyForSearch) handleSearch();
-          }}
-        >
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            <Box sx={{ flexGrow: 1 }}>
-              <SearchBar
-                searchText={searchText}
-                placeholderText={
-                  isMdUp
-                    ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)"
-                    : "חפשו מוצר..."
-                }
-                handleSearchTextChange={setSearchText}
-              />
-            </Box>
-            <Button
-              variant="contained"
-              onClick={handleSearch}
-              disabled={!readyForSearch}
-              startIcon={
-                loading ? <CircularProgress size={20} /> : <SearchIcon />
-              }
-              sx={{ minWidth: 120 }}
+        <Box sx={{ position: "relative", width: "100%" }}>
+          {!statusLoading && userStatus && (
+            <Typography
+              variant="caption"
+              sx={{
+                position: "absolute",
+                top: -24,
+                right: 8,
+                color: "text.secondary",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+              }}
             >
-              {loading ? "מחפש..." : "חפשו"}
-            </Button>
-          </Box>
-        </Card>
+              ניתן לנתח עד 2 פעמים ביום {userStatus.remainingPriceAnalysis !== undefined ? `(נותרו ${userStatus.remainingPriceAnalysis})` : ""}
+            </Typography>
+          )}
+          <Card
+            sx={{
+              p: 1,
+              mb: 3,
+              boxShadow: 3,
+              borderRadius: "12px",
+              border: "2px solid transparent",
+              "&:hover": { borderColor: "#1a2a5a" },
+            }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === "Enter" && readyForSearch) handleSearch();
+            }}
+          >
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <Box sx={{ flexGrow: 1 }}>
+                <SearchBar
+                  searchText={searchText}
+                  placeholderText={statusLoading
+                    ? "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)"
+                    :  userStatus?.priceAnalysisQuotaReached
+                        ? "הגעת למכסת ניתוחי המחיר היומית — ניתן לנתח שוב מחר"
+                        : "חפשו מוצר (למשל: אוטו, טלפון, מחשב נייד...)"}
+                  handleSearchTextChange={setSearchText}
+                  disabled={isBlocked}
+                />
+              </Box>
+              <Button
+                variant="contained"
+                onClick={handleSearch}
+                disabled={!readyForSearch}
+                startIcon={
+                  <SearchIcon />
+                }
+                sx={{ minWidth: 120 }}
+              >
+                {loading ? "מחפש..." : "חפשו"}
+              </Button>
+            </Box>
+          </Card>
+        </Box>
       ) : (
         <Box
           sx={{
@@ -333,20 +390,40 @@ export default function PriceAnalyzerComponent() {
 
       {/* Error Message */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {/* Success Message */}
-      {successMsg && (
-        <Alert
-          severity="success"
-          sx={{ mb: 3 }}
-          onClose={() => setSuccessMsg(null)}
+        <Card
+          sx={{
+            p: 3,
+            mb: 3,
+            maxWidth: 480,
+            mx: "auto",
+            textAlign: "center",
+          }}
         >
-          {successMsg}
-        </Alert>
+          <Box
+            sx={{
+              width: 60,
+              height: 60,
+              borderRadius: "50%",
+              background: "primary.light", // #BED6E9
+              bgcolor: "#BED6E9",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mx: "auto",
+              mb: 1.5,
+            }}
+          >
+            <BlockIcon sx={{ fontSize: 28, color: "primary.main" }} />
+          </Box>
+
+          <Typography variant="h2" sx={{ mb: 0.75 }}>
+            שגיאה בניתוח המחיר
+          </Typography>
+
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 2, lineHeight: 1.6 }}>
+            {error}
+          </Typography>
+        </Card>
       )}
 
       {/* Dynamic Selects */}
@@ -397,7 +474,7 @@ export default function PriceAnalyzerComponent() {
                     onClick={() =>
                       handleSelectChange(
                         option.category || "",
-                        "__SKIP_DETAILS__",
+                        "דלג על הפרטים",
                       )
                     }
                     disabled={loading}
@@ -437,7 +514,7 @@ export default function PriceAnalyzerComponent() {
                     onClick={() =>
                       handleSelectChange(
                         option.category || "",
-                        "__SKIP_DETAILS__",
+                        "דלג על הפרטים",
                       )
                     }
                     disabled={loading}
@@ -740,7 +817,7 @@ export default function PriceAnalyzerComponent() {
             <Button
               variant="outlined"
               onClick={handleCreateWishItem}
-              disabled={loading}
+              disabled={loading || !userStatus?.canSubmitWishItem}
               sx={{
                 borderColor: "primary.main",
                 color: "primary.main",
@@ -750,7 +827,7 @@ export default function PriceAnalyzerComponent() {
                 },
               }}
             >
-              בקש מוצר זה ב-Wish Items
+              {userStatus?.canSubmitWishItem ? "בקש מוצר זה ב-Wish Items" : "לא ניתן לפתוח בקשה כעת"}
             </Button>
           </Box>
 
@@ -780,7 +857,7 @@ export default function PriceAnalyzerComponent() {
       )}
 
       {/* Welcome Section - מוצג רק כשאין חיפוש פעיל */}
-      {!loading && dynamicSelects.length === 0 && !priceResult && (
+      {!loading && dynamicSelects.length === 0 && !priceResult && !error && (
         <Card
           sx={{
             p: 4,
@@ -827,17 +904,18 @@ export default function PriceAnalyzerComponent() {
                 <Chip
                   key={category}
                   label={category}
-                  onClick={() => setSearchText(category)}
+                  onClick={() => !isBlocked && setSearchText(category)}
                   sx={{
                     bgcolor: "primary.light",
                     color: "primary.main",
                     "&:hover": {
-                      bgcolor: "primary.main",
-                      color: "white",
+                      bgcolor: isBlocked ? "primary.light" : "primary.main",
+                      color: isBlocked ? "primary.main" : "white",
                     },
-                    cursor: "pointer",
+                    cursor: isBlocked ? "not-allowed" : "pointer",
                     fontSize: "0.875rem",
                     py: 1,
+                    opacity: isBlocked ? 0.5 : 1,
                   }}
                 />
               ))}
@@ -868,18 +946,19 @@ export default function PriceAnalyzerComponent() {
                 <Chip
                   key={example}
                   label={example}
-                  onClick={() => setSearchText(example)}
+                  onClick={() => !isBlocked && setSearchText(example)}
                   variant="outlined"
                   sx={{
                     borderColor: "secondary.main",
                     color: "secondary.main",
                     "&:hover": {
-                      bgcolor: "secondary.main",
-                      color: "white",
+                      bgcolor: isBlocked ? "transparent" : "secondary.main",
+                      color: isBlocked ? "secondary.main" : "white",
                       borderColor: "secondary.main",
                     },
-                    cursor: "pointer",
+                    cursor: isBlocked ? "not-allowed" : "pointer",
                     fontSize: "0.8rem",
+                    opacity: isBlocked ? 0.5 : 1,
                   }}
                 />
               ))}
@@ -898,6 +977,75 @@ export default function PriceAnalyzerComponent() {
           </Box>
         </Card>
       )}
+      {/* Dialog */}
+      <Dialog
+        open={dialog.open}
+        onClose={closeDialog}
+        PaperProps={{
+          sx: {
+            borderRadius: "22px",
+            width: "100%",
+            maxWidth: "420px",
+            boxShadow: "0 24px 80px rgba(15,23,42,0.18)",
+            border: "1px solid rgba(15,23,42,0.06)",
+            textAlign: "center",
+            p: 3,
+          },
+        }}
+      >
+        <Box
+          sx={{
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            background: dialog.type === "success"
+              ? "linear-gradient(135deg, #22c55e, #16a34a)"
+              : "linear-gradient(135deg, #ef4444, #b91c1c)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mx: "auto",
+            mb: 2.5,
+            boxShadow: dialog.type === "success"
+              ? "0 8px 24px rgba(34,197,94,0.4)"
+              : "0 8px 24px rgba(239,68,68,0.4)",
+          }}
+        >
+          {dialog.type === "success" ? (
+            <CheckCircleOutlineIcon sx={{ fontSize: 44, color: "white" }} />
+          ) : (
+            <BlockIcon sx={{ fontSize: 44, color: "white" }} />
+          )}
+        </Box>
+
+        <DialogTitle sx={{ fontWeight: 800, fontSize: "1.3rem", p: 0, mb: 1 }}>
+          {dialog.title}
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, mb: 3 }}>
+          <Typography variant="body1" sx={{ color: "text.secondary", lineHeight: 1.6 }}>
+            {dialog.description}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 0 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={closeDialog}
+            sx={{
+              background: "linear-gradient(135deg, #f0a500, #e09000)",
+              color: "white",
+              fontWeight: 700,
+              fontSize: "1rem",
+              py: 1.2,
+              borderRadius: "12px",
+              boxShadow: "0 4px 16px rgba(240,165,0,0.4)",
+              "&:hover": { background: "linear-gradient(135deg, #e09000, #c07800)" },
+            }}
+          >
+            {dialog.type === "success" ? "מעולה!" : "הבנתי"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
