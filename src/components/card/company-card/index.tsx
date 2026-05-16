@@ -21,6 +21,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
         borderRadius: 3,
         boxShadow: 2,
         width: "100%",
+        minWidth: 320,
         height: 120,
         display: "flex",
         alignItems: "center",

@@ -798,8 +798,7 @@ export default function PriceAnalyzerComponent() {
             מה תרצה לחפש היום?
           </Typography>
           <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
-            השתמש בחיפוש החכם שלנו כדי למצוא את המוצר המושלם ולהצטרף לקבוצת
-            רכישה שתחסוך לך כסף
+            השתמש במנתח המחירים שלנו כדי להבין מהו המחיר הממוצע של המוצר או השירות שאתה מחפש ולהצטרף לקבוצת רכישה שתחסוך לך כסף.
           </Typography>
 
           {/* Popular Categories */}
@@ -894,7 +893,7 @@ export default function PriceAnalyzerComponent() {
               sx={{ color: "secondary.main", fontWeight: 500 }}
             >
               איך זה עובד? פשוט תחפש את המוצר שמעניין אותך, ואנחנו נעזור לך
-              למצוא את המחיר הטוב ביותר דרך קבוצת רכישה
+              למצוא את המחיר הטוב ביותר דרך קבוצת רכישה.
             </Typography>
           </Box>
         </Card>

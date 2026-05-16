@@ -41,7 +41,7 @@ const CompanySectionWrapper: React.FC<CompanySectionWrapperProps> = ({ }) => {
   return (
     <SectionWrapper
       title={`חברות מובילות`}
-      subTitle={`הסטארטאפים והמותגים ששווה להכיר`}
+      subTitle={`העסקים והמותגים ששווה להכיר`}
       linkLabel={`צפה בכל החברות`}
       linkUrl={`/companies`}
     >

@@ -1,18 +1,21 @@
-"use client";
-
 import { Container, Box } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import PriceAnalyzerComponent from "@/components/price-analyzer";
+import { BetaTag } from "@/components/beta-tag";
 
 export default function PriceAnalyzerPage() {
   const headerText = "מנתח מחירים";
   const descriptionText = "מצא את המוצר המושלם עבורך באמצעות מנתח מחירים מבוסס AI וגלה כמה תוכל לחסוך בעזרת קבוצת רכישה.";
+  const betaContent = "מנתח המחירים נמצא כרגע בגרסת Beta. המערכת עשויה להציג נתונים לא מדויקים או חלקיים בזמן שאנחנו משפרים את המודלים שלנו.";
 
   return (
     <>
       <DefaultPageBanner
         header={headerText}
         description={descriptionText}
+        headerExtra={
+          <BetaTag content={betaContent} />
+        }
         hintBullets={[
           "מתארים מוצר או מדביקים קישור — המערכת מציעה הערכת מחיר והשוואה לרכישה קבוצתית.",
           "התוצאה אינפורמטיבית; לפני רכישה כדאי לוודא מול הספק או הקבוצה.",

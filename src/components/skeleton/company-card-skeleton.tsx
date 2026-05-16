@@ -8,7 +8,7 @@ export default function CompanyCardSkeleton() {
             sx={{
                 borderRadius: 3,
                 boxShadow: 2,
-                width: "100%",
+                width: 320,
                 height: 120,
                 overflow: "hidden",
                 display: "flex",
