@@ -24,7 +24,11 @@ const STEPS = [
   { n: 3, title: "בוחרים בתוצאות רלוונטיות", body: "מהתוצאות המתאימות ניתן להוסיף למועדפים או לעבור לדף של קבוצה קיימת." },
 ];
 
-export const SmartSearchHelper = () => {
+interface SmartSearchHelperProps {
+  onExampleClick: (text: string) => void;
+}
+
+export const SmartSearchHelper = ({ onExampleClick }: SmartSearchHelperProps) => {
   return (
     <Container maxWidth="md" sx={{ px: { xs: 2, md: 3 }, mb: 6 }}>
       <Card
@@ -100,7 +104,7 @@ export const SmartSearchHelper = () => {
           </Stack>
 
           <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>
-            נסו ללחוץ על דוגמה או להעתיק לשדה החיפוש:
+            נסו ללחוץ על דוגמה על מנת להעתיק אותה לשדה החיפוש:
           </Typography>
           <Stack direction="row" flexWrap="wrap" useFlexGap spacing={1} sx={{ mb: 2 }}>
             {EXAMPLES.map((ex) => (
@@ -109,6 +113,7 @@ export const SmartSearchHelper = () => {
                 icon={<SearchIcon sx={{ fontSize: "18px !important" }} />}
                 label={ex}
                 variant="outlined"
+                onClick={() => onExampleClick(ex)}
                 sx={{
                   borderColor: "rgba(26, 42, 90, 0.25)",
                   fontWeight: 500,
