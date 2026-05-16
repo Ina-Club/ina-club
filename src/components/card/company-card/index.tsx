@@ -20,7 +20,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
       sx={{
         borderRadius: 3,
         boxShadow: 2,
-        width: 320,
+        width: "100%",
         height: 120,
         display: "flex",
         alignItems: "center",
@@ -75,15 +75,17 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
           gap: 0.5,
         }}
       >
-        <IconButton
-          size="small"
-          href={company.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{ color: "primary.main" }}
-        >
-          <LaunchIcon fontSize="small" />
-        </IconButton>
+        {company.url && (
+          <IconButton
+            size="small"
+            href={company.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ color: "primary.main" }}
+          >
+            <LaunchIcon fontSize="small" />
+          </IconButton>
+        )}
       </Box>
     </Card>
   );

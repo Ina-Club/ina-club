@@ -34,6 +34,7 @@ export const fetchActiveGroups = async ({
             minParticipants: true,
             maxParticipants: true,
             ...(includeDetails && { registrationTerms: true }),
+            companyId: true,
             images: {
                 select: { image: { select: { url: true } }, order: true },
                 orderBy: { order: "asc" },
@@ -58,6 +59,7 @@ export const fetchActiveGroups = async ({
         participantCount: r._count.participants,
         minParticipants: r.minParticipants,
         maxParticipants: r.maxParticipants,
+        companyId: r.companyId,
         ...(includeDetails && { registrationTerms: r.registrationTerms }),
     }));
 

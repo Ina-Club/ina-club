@@ -20,6 +20,7 @@ export interface ActiveGroup {
   deadline: Date;
   createdAt?: Date;
   registrationTerms?: string;
+  companyId?: string;
   company?: Company;
   participantCount: number;
   participants?: User[];
