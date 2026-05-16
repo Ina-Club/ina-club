@@ -141,8 +141,6 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
             display: "flex",
             flexDirection: "column",
             gap: 3,
-            position: { md: "sticky" },
-            top: { md: 96 },
           }}
         >
           <Paper
@@ -154,10 +152,14 @@ export default async function ActiveGroupDetail({ params }: { params: Promise<{ 
               borderRadius: 3,
             }}
           >
-            <Typography variant="body2" color="text.secondary">
-              מחיר יחידה: {formatShekelAmount(ag.basePrice)} <br />
-              מחיר קבוצתי: {formatShekelAmount(ag.groupPrice)} <br />
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ textDecoration: "line-through" }}>
+                מחיר יחידה: {formatShekelAmount(ag.basePrice)}
+              </Typography>
+              <Typography variant="h6" fontWeight={700} color="primary.main">
+                מחיר קבוצתי: {formatShekelAmount(ag.groupPrice)}
+              </Typography>
+            </Box>
             <Suspense fallback={<GroupMembershipPanelSkeleton />}>
               <GroupMembershipPanelLoader
                 groupId={id}
