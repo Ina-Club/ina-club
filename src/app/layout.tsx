@@ -6,6 +6,7 @@ import { UserProfileProvider } from "@/contexts/user-profile-context";
 import { FavoritesProvider } from "@/contexts/favorites-context";
 import { Box } from "@mui/material";
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "Ina Club — קניות קבוצתיות חכמות",
@@ -50,6 +51,7 @@ export default function RootLayout({
                 </FavoritesProvider>
               </SnackbarProvider>
             </UserProfileProvider>
+            <SpeedInsights />
           </body>
         </html>
       </ThemeRegistry>
