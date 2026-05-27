@@ -13,9 +13,11 @@ import {
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
+import PriorityHighOutlinedIcon from '@mui/icons-material/PriorityHighOutlined'
 import { useRouter } from "next/navigation";
 import { formatShekelAmount } from "@/lib/utils/currency";
 import { useAuth } from "@clerk/nextjs";
+import ReportDialog from "@/components/report-dialog/ReportDialog";
 
 export interface WishItemData {
   id: string;
@@ -42,6 +44,7 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
   const [liked, setLiked] = useState(item.isLikedByMe);
   const [likeCount, setLikeCount] = useState(item.likeCount);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const isTrending = likeCount >= TRENDING_THRESHOLD;
 
@@ -132,6 +135,25 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
           <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
             {item.authorName} · {timeAgo}
           </Typography>
+
+          <IconButton
+            size="small"
+            onClick={() => {
+              if (!isSignedIn) {
+                router.push("/sign-in");
+                return;
+              }
+              setReportOpen(true);
+            }}
+            sx={{
+              p: "3px",
+              color: "text.disabled",
+              transition: "color 0.2s ease",
+              "&:hover": { color: "#e65100", bgcolor: "rgba(230, 81, 0, 0.08)" },
+            }}
+          >
+            <PriorityHighOutlinedIcon sx={{ fontSize: 16 }} />
+          </IconButton>
 
           {isTrending && (
             <Chip
@@ -224,6 +246,14 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
           </Box>
         </Box>
       </CardContent>
+
+      {/* Report dialog */}
+      <ReportDialog
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        targetType="WISH_ITEM"
+        targetId={item.id}
+      />
     </Card>
   );
 }

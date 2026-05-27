@@ -16,3 +16,19 @@ export async function checkWishItemQuota(userId: string, dailyLimit: number): Pr
     remaining: Math.max(0, dailyLimit - count) 
   };
 }
+
+export async function checkReportQuota(userId: string, dailyLimit: number): Promise<{ allowed: boolean; remaining: number }> {
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  const count = await prisma.report.count({
+    where: {
+      reporterId: userId,
+      createdAt: { gte: twentyFourHoursAgo },
+    },
+  });
+
+  return {
+    allowed: count < dailyLimit,
+    remaining: Math.max(0, dailyLimit - count),
+  };
+}

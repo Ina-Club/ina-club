@@ -256,3 +256,29 @@ enum CouponStatus {
   EXPIRED
   USED
 }
+
+model Report {
+  id          String           @id @default(uuid())
+  reporterId  String
+  targetType  ReportTargetType
+  targetId    String
+  reason      ReportReason
+  description String? 
+  createdAt   DateTime @default(now())
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([reporterId, createdAt])
+  @@index([targetType, targetId])
+}
+
+enum ReportTargetType {
+  WISH_ITEM
+}
+
+enum ReportReason {
+  SPAM
+  INAPPROPRIATE
+  DUPLICATE
+  MISLEADING
+  OTHER
+}
