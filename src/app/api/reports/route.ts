@@ -29,31 +29,16 @@ export async function POST(req: Request) {
     const { targetType, targetId, reason, description } = body;
 
     if (!targetType || !VALID_TARGET_TYPES.has(targetType as ReportTargetType)) {
-        return NextResponse.json(
-            { error: "Invalid or missing targetType" },
-            { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid or missing targetType" }, { status: 400 });
     }
-
     if (!targetId) {
-        return NextResponse.json(
-            { error: "targetId is required" },
-            { status: 400 }
-        );
+        return NextResponse.json({ error: "targetId is required" }, { status: 400 });
     }
-
     if (!reason || !VALID_REASONS.has(reason as ReportReason)) {
-        return NextResponse.json(
-            { error: "Invalid or missing reason" },
-            { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid or missing reason" }, { status: 400 });
     }
-
     if (description && description.length > MAX_DESCRIPTION_LENGTH) {
-        return NextResponse.json(
-            { error: `description must be ≤${MAX_DESCRIPTION_LENGTH} chars` },
-            { status: 400 }
-        );
+        return NextResponse.json({ error: `description must be maximum ${MAX_DESCRIPTION_LENGTH} chars` }, { status: 400 });
     }
 
     // Fetch the owner ID based on the target type
@@ -76,18 +61,12 @@ export async function POST(req: Request) {
     }
 
     if (!targetOwnerId) {
-        return NextResponse.json(
-            { error: "Reported content not found" },
-            { status: 404 }
-        );
+        return NextResponse.json({ error: "Reported content not found" }, { status: 404 });
     }
 
     // Block self-reports
     if (targetOwnerId === userId) {
-        return NextResponse.json(
-            { error: "You cannot report your own content" },
-            { status: 403 }
-        );
+        return NextResponse.json({ error: "You cannot report your own content" }, { status: 403 });
     }
 
     const existingReport = await prisma.report.findFirst({
@@ -99,18 +78,12 @@ export async function POST(req: Request) {
     });
 
     if (existingReport) {
-        return NextResponse.json(
-            { error: "You have already reported this content" },
-            { status: 409 }
-        );
+        return NextResponse.json({ error: "You have already reported this content" }, { status: 409 });
     }
 
     const quota = await checkReportQuota(userId, DAILY_REPORT_LIMIT);
     if (!quota.allowed) {
-        return NextResponse.json(
-            { error: "You have reached the daily report limit", remaining: 0 },
-            { status: 429 }
-        );
+        return NextResponse.json({ error: "You have reached the daily report limit", remaining: 0 }, { status: 429 });
     }
 
     const report = await prisma.report.create({

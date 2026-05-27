@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { formatShekelAmount } from "@/lib/utils/currency";
 import { useAuth } from "@clerk/nextjs";
 import ReportDialog from "@/components/report-dialog/ReportDialog";
+import { ReportTargetType } from "@/lib/types/report";
 
 export interface WishItemData {
   id: string;
@@ -251,7 +252,7 @@ export default function WishItemCard({ item, onLikeToggle }: WishItemCardProps) 
       <ReportDialog
         open={reportOpen}
         onClose={() => setReportOpen(false)}
-        targetType="WISH_ITEM"
+        targetType={ReportTargetType.WISH_ITEM}
         targetId={item.id}
       />
     </Card>

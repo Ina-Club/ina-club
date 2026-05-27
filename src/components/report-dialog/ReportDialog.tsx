@@ -20,6 +20,7 @@ import {
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import CloseIcon from "@mui/icons-material/Close";
 import { useRouter } from "next/navigation";
+import { ReportTargetType } from "@/lib/types/report";
 
 const REPORT_REASONS = [
   { value: "SPAM", label: "ספאם" },
@@ -32,7 +33,7 @@ const REPORT_REASONS = [
 interface ReportDialogProps {
   open: boolean;
   onClose: () => void;
-  targetType: string; // e.g. "WISH_ITEM"
+  targetType: ReportTargetType;
   targetId: string;
 }
 
