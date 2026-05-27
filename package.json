@@ -26,7 +26,8 @@
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-number-format": "^5.4.4",
-    "stylis-plugin-rtl": "^2.1.1"
+    "stylis-plugin-rtl": "^2.1.1",
+    "resend": "^6.6.0"
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",
