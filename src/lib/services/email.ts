@@ -36,9 +36,7 @@ async function sendEmail(payload: EmailPayload): Promise<void> {
     html: payload.html,
   });
 
-    if (error) {
-      console.error("[email] Failed to send email:", error);
-    }
+  if (error) console.error("[email] Failed to send email:", error);
 }
 
 export async function sendReportEmail({
