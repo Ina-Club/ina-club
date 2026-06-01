@@ -97,6 +97,7 @@ export async function POST(req: Request) {
     });
 
     // Sending email without waiting for it.
+    // TODO: migrate to events instead of direct email sending
     sendReportEmail({
         targetType,
         targetId,
