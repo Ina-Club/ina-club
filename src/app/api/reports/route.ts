@@ -96,8 +96,10 @@ export async function POST(req: Request) {
         },
     });
 
-    // Sending email without waiting for it.
-    sendReportEmail({
+    // TODO: migrate to events instead of direct email sending
+    // We are awaiting it here to make sure the email is sent before the response is sent.
+    // Ideally, this should be handled in a background job/worker.
+    await sendReportEmail({
         targetType,
         targetId,
         reason,

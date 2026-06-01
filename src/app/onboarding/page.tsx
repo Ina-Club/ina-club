@@ -150,7 +150,7 @@ export default function OnboardingPage() {
           component="h1"
           sx={{ fontWeight: 700, color: "#1a2a5a", mb: 1 }}
         >
-          ברוך הבא ל-Ina Club! 🎉
+          !InaClub ברוך הבא אל
         </Typography>
         <Typography variant="body2" sx={{ color: "#6b7280", mb: 4 }}>
           יצרנו עבורך תמונת פרופיל ייחודית, אך תוכל/י להעלות תמונה משלך אם תרצה/י.
