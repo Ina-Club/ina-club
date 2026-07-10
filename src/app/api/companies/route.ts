@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "lib/prisma";
+import { Prisma } from "@prisma/client";
 import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
 
 export async function GET(req: Request) {
@@ -8,6 +9,11 @@ export async function GET(req: Request) {
         const cursor = searchParams.get("cursor") || undefined;
         const rawLimit: number = Number(searchParams.get("limit")) || DEFAULT_PAGINATION;
         const limit: number = Math.min(rawLimit, MAX_PAGINATION_LIMIT);
+        const search = searchParams.get("search");
+
+        const where: Prisma.CompanyWhereInput = search
+            ? { title: { contains: search, mode: "insensitive" } }
+            : {};
 
         const rows = await prisma.company.findMany({
             take: limit + 1,
@@ -19,6 +25,7 @@ export async function GET(req: Request) {
                 categories: true,
                 websiteUrl: true
             },
+            where,
             orderBy: { createdAt: "desc" },
             ...(cursor && { cursor: { id: cursor } }),
         });

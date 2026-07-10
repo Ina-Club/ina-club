@@ -25,12 +25,16 @@ export async function GET(req: NextRequest) {
 
   // Optional: only items created after this ISO date
   const sinceParam = searchParams.get("since");
-  const where: Record<string, unknown> = {};
+  const categoryParams = searchParams.getAll("category").filter(Boolean);
+  const where: Record<string, any> = {};
   if (sinceParam) {
     const sinceDate = new Date(sinceParam);
     if (!isNaN(sinceDate.getTime())) {
       where.createdAt = { gte: sinceDate };
     }
+  }
+  if (categoryParams.length > 0) {
+    where.category = { name: { in: categoryParams } };
   }
 
   const orderByParam = searchParams.get("orderBy");

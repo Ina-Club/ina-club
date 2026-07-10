@@ -35,7 +35,12 @@ export default function GroupImages({ images, children }: Props) {
         component="img"
         image={mainImage}
         alt="main"
-        sx={{ width: "100%", height: 300, objectFit: "cover" }}
+        sx={{
+          width: "100%",
+          maxHeight: 420,
+          objectFit: "contain",
+          bgcolor: "grey.50",
+        }}
       />
       {children}
 

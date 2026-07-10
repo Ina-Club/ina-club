@@ -68,16 +68,11 @@ export default function CommitmentDialog({
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
 
-  const handleNext = () => {
-    if (agreed) setStep(2);
-  };
-
   const handleSubmit = async () => {
-    if (!cardNumber || !expiry || !cvv) return;
-
     setLoading(true);
     try {
-      await onSubmitPaymentDetails(cardNumber, expiry, cvv);
+      // Credit card details are disabled per user request. We send empty strings to the backend membership route.
+      await onSubmitPaymentDetails("", "", "");
       setStep(3);
     } catch (error) {
       console.error("Token submission failed", error);
@@ -98,7 +93,7 @@ export default function CommitmentDialog({
 
   const stepTitles: Record<number, string> = {
     1: "הסכם התחייבות הקבוצה",
-    2: "פרטי אשראי להתחייבות",
+    2: "פרטי אשראי להתחייבות (מנוטרל)",
     3: "הצטרפת בהצלחה!",
   };
 
@@ -153,6 +148,8 @@ export default function CommitmentDialog({
             </Box>
           </Box>
         ) : step === 2 ? (
+          /* 
+          // Credit card inputs are commented out per user request:
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
             <Typography variant="body2" color="text.secondary" mb={1}>
               לצורך אימות בלבד. (זהו רכיב הדגמה MVP בלבד)
@@ -187,6 +184,8 @@ export default function CommitmentDialog({
               />
             </Box>
           </Box>
+          */
+          null
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, py: 2 }}>
             <CheckCircleOutlineIcon sx={{ fontSize: 64, color: "success.main" }} />
@@ -217,20 +216,14 @@ export default function CommitmentDialog({
             <Button onClick={handleClose} disabled={loading} color="inherit">
               ביטול
             </Button>
-            {step === 1 ? (
-              <Button onClick={handleNext} disabled={!agreed || penaltyAmount === null} variant="contained">
-                המשך
-              </Button>
-            ) : (
-              <Button
-                onClick={handleSubmit}
-                disabled={!cardNumber || !expiry || !cvv || loading}
-                variant="contained"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
-              >
-                אישור השתתפות
-              </Button>
-            )}
+            <Button
+              onClick={handleSubmit}
+              disabled={!agreed || penaltyAmount === null || loading}
+              variant="contained"
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+            >
+              אישור השתתפות
+            </Button>
           </>
         )}
       </DialogActions>
