@@ -14,8 +14,10 @@ export async function GET(req: Request) {
     const lastWeekParam = searchParams.get('lastWeek');
     const searchParam = searchParams.get("search");
     const categoryParams = searchParams.getAll("category").filter(Boolean);
+    const companyParams = searchParams.getAll("company").filter(Boolean);
     const minPriceParam = searchParams.get("minPrice");
     const maxPriceParam = searchParams.get("maxPrice");
+    const participantRangeParam = searchParams.get("participantRange");
     const orderByParam = searchParams.get("orderBy");
 
     const cursor = searchParams.get("cursor") || undefined;
@@ -59,6 +61,11 @@ export async function GET(req: Request) {
         category: { name: { in: categoryParams } },
       });
     }
+    if (companyParams.length > 0) {
+      filters.push({
+        company: { title: { in: companyParams } },
+      });
+    }
     if (searchParam?.trim()) {
       const searchText = searchParam.trim();
       filters.push({
@@ -81,6 +88,44 @@ export async function GET(req: Request) {
           ...(hasMaxPrice ? { lte: maxPrice } : {}),
         },
       });
+    }
+
+    if (participantRangeParam) {
+      if (participantRangeParam === "0") {
+        filters.push({
+          participants: {
+            _count: {
+              equals: 0
+            }
+          }
+        });
+      } else if (participantRangeParam === "1-5") {
+        filters.push({
+          participants: {
+            _count: {
+              gte: 1,
+              lte: 5
+            }
+          }
+        });
+      } else if (participantRangeParam === "6-15") {
+        filters.push({
+          participants: {
+            _count: {
+              gte: 6,
+              lte: 15
+            }
+          }
+        });
+      } else if (participantRangeParam === "16+") {
+        filters.push({
+          participants: {
+            _count: {
+              gte: 16
+            }
+          }
+        });
+      }
     }
 
     const where = filters.length ? { AND: filters } : {};

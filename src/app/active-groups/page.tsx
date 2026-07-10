@@ -30,8 +30,9 @@ export default function Page() {
   const [filterState, setFilterState] = useState<FilterState>({
     searchText: "",
     categories: [],
-    locations: [],
-    popularities: [],
+    companies: [],
+    statuses: [],
+    participantRange: "",
     priceRange: [0, 10_000], //TODO: Change this to the price of highest active group
   });
   const [cursor, setCursor] = useState<string | null>(null);
@@ -41,12 +42,25 @@ export default function Page() {
     const params = new URLSearchParams({
       limit: DEFAULT_PAGINATION.toString(),
     });
-    params.append("status", GroupStatus.OPEN);
-    params.append("status", GroupStatus.ACTIVATED);
+    
+    if (debouncedParams.statuses && debouncedParams.statuses.length > 0) {
+      debouncedParams.statuses.forEach((status) => params.append("status", status));
+    } else {
+      params.append("status", GroupStatus.OPEN);
+      params.append("status", GroupStatus.ACTIVATED);
+    }
+
+    if (debouncedParams.participantRange) {
+      params.set("participantRange", debouncedParams.participantRange);
+    }
+
     const trimmedSearch = debouncedParams.searchText.trim();
     if (nextCursor) params.set("cursor", nextCursor);
     if (trimmedSearch) params.set("search", trimmedSearch);
     debouncedParams.categories.forEach((category) => params.append("category", category));
+    if (debouncedParams.companies) {
+      debouncedParams.companies.forEach((company) => params.append("company", company));
+    }
     if (debouncedParams.priceRange) {
       const [minPrice, maxPrice] = debouncedParams.priceRange;
       if (minPrice > 0) params.set("minPrice", minPrice.toString());

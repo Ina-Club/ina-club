@@ -46,7 +46,7 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
       onClick={goToActiveGroup}
     >
       {/* Image Section */}
-      <Box sx={{ position: "relative", pt: "50%" }}>
+      <Box sx={{ position: "relative", pt: "60%", bgcolor: "grey.50" }}>
         <CardMedia
           component="img"
           image={activeGroup.images[currentImage]}
@@ -56,7 +56,7 @@ const ActiveGroupCard: React.FC<ActiveGroupCardProps> = ({ activeGroup }) => {
             inset: 0,
             width: "100%",
             height: "100%",
-            objectFit: "cover",
+            objectFit: "contain",
           }}
         />
 

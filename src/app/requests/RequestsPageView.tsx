@@ -5,6 +5,7 @@ import { Box, Container } from "@mui/material";
 import { DefaultPageBanner } from "@/components/default-page-banner";
 import WishItemComposer from "@/components/demand-pulse/WishItemComposer";
 import WishItemFeed from "@/components/demand-pulse/WishItemFeed";
+import CategoryFilterBar from "@/components/demand-pulse/CategoryFilterBar";
 
 const HINT = [
   "בשורה הצפה מפרסמים בקשה חדשה (אחרי התחברות).",
@@ -14,6 +15,7 @@ const HINT = [
 
 export function RequestsPageView() {
   const [feedKey, setFeedKey] = useState(0);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   return (
     <>
@@ -57,7 +59,11 @@ export function RequestsPageView() {
               border: "1px solid rgba(26, 42, 90, 0.08)",
             }}
           >
-            <WishItemFeed key={feedKey} />
+            <CategoryFilterBar
+              selectedCategories={selectedCategories}
+              onChange={setSelectedCategories}
+            />
+            <WishItemFeed key={feedKey} selectedCategories={selectedCategories} />
           </Box>
         </Container>
       </Box>

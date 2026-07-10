@@ -33,14 +33,16 @@ async function commitJoinTransaction(
 }
 
 async function processJoin(groupId: string, userId: string, req: Request) {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const { cardNumber, expiry, cvv } = body;
 
-    // TODO: Add validation for payment details + DONT SEND RAW CC TO SERVER
+    // Credit card payment details validation disabled per user request
+    /*
     if (!cardNumber || !expiry || !cvv) {
         console.error("Commitment payment details required to join active group");
         return NextResponse.json({ error: "שגיאה בהצטרפות לקבוצה" }, { status: 500 });
     }
+    */
 
     // Since this is an MVP mock, we generate the mock token here
     // instead of expecting the frontend to know about the PSP.

@@ -14,6 +14,7 @@ interface WishItemFeedProps {
   orderBy?: "likes";
   /** "grid" = wrapping grid (default, /requests page); "horizontal" = paged 2×3 carousel (home page) */
   layout?: "grid" | "horizontal";
+  selectedCategories?: string[];
 }
 
 export default function WishItemFeed({
@@ -21,6 +22,7 @@ export default function WishItemFeed({
   sinceDays,
   orderBy,
   layout = "grid",
+  selectedCategories = [],
 }: WishItemFeedProps) {
   const [items, setItems] = useState<WishItemData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,9 @@ export default function WishItemFeed({
         params.set("since", since.toISOString());
       }
       if (orderBy) params.set("orderBy", orderBy);
+      if (selectedCategories && selectedCategories.length > 0) {
+        selectedCategories.forEach((cat) => params.append("category", cat));
+      }
 
       const res = await fetch("/api/wish-items/?" + params.toString(), { cache: "no-store" });
       if (res.ok) {
@@ -57,9 +62,10 @@ export default function WishItemFeed({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [limit, sinceDays, orderBy, selectedCategories]);
 
   useEffect(() => {
+    setLoading(true);
     fetchItems();
   }, [fetchItems]);
 
