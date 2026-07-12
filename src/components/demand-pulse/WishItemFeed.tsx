@@ -26,6 +26,7 @@ export default function WishItemFeed({
 }: WishItemFeedProps) {
   const [items, setItems] = useState<WishItemData[]>([]);
   const [loading, setLoading] = useState(true);
+  const selectedCategoryKey = selectedCategories.filter(Boolean).join("\n");
 
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -48,8 +49,10 @@ export default function WishItemFeed({
         params.set("since", since.toISOString());
       }
       if (orderBy) params.set("orderBy", orderBy);
-      if (selectedCategories && selectedCategories.length > 0) {
-        selectedCategories.forEach((cat) => params.append("category", cat));
+      if (selectedCategoryKey) {
+        selectedCategoryKey
+          .split("\n")
+          .forEach((cat) => params.append("category", cat));
       }
 
       const res = await fetch("/api/wish-items/?" + params.toString(), { cache: "no-store" });
@@ -62,7 +65,7 @@ export default function WishItemFeed({
     } finally {
       setLoading(false);
     }
-  }, [limit, sinceDays, orderBy, selectedCategories]);
+  }, [limit, sinceDays, orderBy, selectedCategoryKey]);
 
   useEffect(() => {
     setLoading(true);
