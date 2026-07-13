@@ -9,6 +9,7 @@ type FetchWishItemCardsOptions = {
     | Prisma.WishItemOrderByWithRelationInput
     | Prisma.WishItemOrderByWithRelationInput[];
   take?: number;
+  cursor?: Prisma.WishItemWhereUniqueInput;
   currentUserId?: string | null;
 };
 
@@ -16,12 +17,14 @@ export async function fetchWishItemCards({
   where,
   orderBy = { createdAt: "desc" },
   take,
+  cursor,
   currentUserId,
 }: FetchWishItemCardsOptions = {}): Promise<WishItemData[]> {
   const items = await prisma.wishItem.findMany({
     where,
     orderBy,
     take,
+    ...(cursor && { cursor, skip: 1 }),
     select: {
       id: true,
       text: true,
