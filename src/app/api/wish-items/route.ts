@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateSession } from "@/lib/auth";
 import { auth } from "@clerk/nextjs/server";
 import { fetchWishItemCards } from "@/lib/wish-items";
-import { MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
+import { DEFAULT_PAGINATION, MAX_PAGINATION_LIMIT } from "@/app/config/pagination";
 import { clerkClient } from "@clerk/nextjs/server";
 import { checkWishItemQuota } from "@/lib/services/quota";
 import { DAILY_WISH_ITEM_LIMIT } from "@/app/config/quota";
@@ -16,10 +16,12 @@ export async function GET(req: NextRequest) {
   // Feed is public, personalization is optional.
   const { userId } = await auth();
   const { searchParams } = new URL(req.url);
+  const cursor = searchParams.get("cursor") || undefined;
+  const shouldPaginate = searchParams.get("paginated") === "true";
 
   // Server-side cap prevents abuse regardless of client input
   const take = Math.min(
-    Number(searchParams.get("limit")) || WISH_ITEM_DEFAULT_TAKE,
+    Number(searchParams.get("limit")) || (shouldPaginate ? DEFAULT_PAGINATION : WISH_ITEM_DEFAULT_TAKE),
     MAX_PAGINATION_LIMIT
   );
 
@@ -41,14 +43,27 @@ export async function GET(req: NextRequest) {
 
   const result = await fetchWishItemCards({
     currentUserId: userId,
-    take,
+    take: shouldPaginate ? take + 1 : take,
     where,
+    cursor: cursor ? { id: cursor } : undefined,
   });
 
   // TODO: Implement DB level sort for likes when reaching scale issues.
   // (likes live in a separate polymorphic table, so Prisma can't sort by them)
   if (orderByParam === "likes") {
     result.sort((a, b) => b.likeCount - a.likeCount);
+  }
+
+  if (shouldPaginate) {
+    let nextCursor: string | null = null;
+    const limit = take;
+
+    if (result.length > limit) {
+      const nextItem = result.pop()!;
+      nextCursor = nextItem.id;
+    }
+
+    return NextResponse.json({ wishItems: result, nextCursor });
   }
 
   return NextResponse.json(result);

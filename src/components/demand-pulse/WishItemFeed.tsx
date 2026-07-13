@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Grid, Skeleton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import WishItemCard, { WishItemData } from "./WishItemCard";
 import HorizontalNavigationWrapper from "@/components/wrapper/horizontal-navigation-wrapper";
 import useHorizontalNavigationWrapper from "@/hooks/useHorizontalNavigationWrapper";
+import ResponsiveVerticalCardWrapper from "@/components/wrapper/responsive-vertical-card-wrapper";
+import { DEFAULT_PAGINATION } from "@/app/config/pagination";
 
 const ITEMS_PER_PAGE = 6; // 2 rows × 3 columns
 
@@ -26,7 +28,14 @@ export default function WishItemFeed({
 }: WishItemFeedProps) {
   const [items, setItems] = useState<WishItemData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const loadingRef = useRef(false);
+  const loadingMoreRef = useRef(false);
+  const latestRequestIdRef = useRef(0);
   const selectedCategoryKey = selectedCategories.filter(Boolean).join("\n");
+  const shouldPaginate = layout === "grid";
 
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -39,10 +48,27 @@ export default function WishItemFeed({
     handleTabsScroll,
   } = useHorizontalNavigationWrapper();
 
-  const fetchItems = useCallback(async () => {
+  const fetchItems = useCallback(async (opts?: { cursor?: string | null; append?: boolean; signal?: AbortSignal }) => {
+    const append = opts?.append ?? false;
+    const nextCursor = opts?.cursor ?? null;
+    const requestId = ++latestRequestIdRef.current;
+
+    if (append) {
+      if (!nextCursor || loadingMoreRef.current || loadingRef.current) return;
+      loadingMoreRef.current = true;
+      setLoadingMore(true);
+    } else {
+      loadingRef.current = true;
+      setLoading(true);
+    }
+
     try {
       const params = new URLSearchParams();
-      if (limit) params.set("limit", String(limit));
+      if (limit || shouldPaginate) {
+        params.set("limit", String(limit ?? DEFAULT_PAGINATION));
+      }
+      if (shouldPaginate) params.set("paginated", "true");
+      if (nextCursor) params.set("cursor", nextCursor);
       if (sinceDays) {
         const since = new Date();
         since.setDate(since.getDate() - sinceDays);
@@ -55,22 +81,57 @@ export default function WishItemFeed({
           .forEach((cat) => params.append("category", cat));
       }
 
-      const res = await fetch("/api/wish-items/?" + params.toString(), { cache: "no-store" });
+      const res = await fetch("/api/wish-items/?" + params.toString(), {
+        cache: "no-store",
+        signal: opts?.signal,
+      });
       if (res.ok) {
-        const data: WishItemData[] = await res.json();
-        setItems(data);
+        const data: WishItemData[] | { wishItems?: WishItemData[]; nextCursor?: string | null } = await res.json();
+        const incoming = Array.isArray(data) ? data : data.wishItems ?? [];
+
+        if (!Array.isArray(data)) {
+          setCursor(data.nextCursor ?? null);
+          setHasMore(!!data.nextCursor);
+        }
+
+        setItems((prev) => {
+          if (!append) return incoming;
+
+          const seen = new Set(prev.map((item) => item.id));
+          const filtered = incoming.filter((item) => !seen.has(item.id));
+
+          return [...prev, ...filtered];
+        });
       }
-    } catch {
-      // Silently fail
+    } catch (err: any) {
+      if (err?.name === "AbortError") return;
+
+      if (!append) setItems([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestIdRef.current) {
+        if (append) {
+          loadingMoreRef.current = false;
+          setLoadingMore(false);
+        } else {
+          loadingRef.current = false;
+          setLoading(false);
+        }
+      }
     }
-  }, [limit, sinceDays, orderBy, selectedCategoryKey]);
+  }, [limit, orderBy, selectedCategoryKey, shouldPaginate, sinceDays]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchItems();
+    setCursor(null);
+    setHasMore(true);
+    const controller = new AbortController();
+    fetchItems({ append: false, cursor: null, signal: controller.signal });
+    return () => controller.abort();
   }, [fetchItems]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!cursor || !hasMore) return;
+    fetchItems({ cursor, append: true });
+  }, [cursor, fetchItems, hasMore]);
 
   const handleLikeToggle = (id: string, liked: boolean) => {
     setItems((prev) =>
@@ -191,7 +252,7 @@ export default function WishItemFeed({
 
   const skeletonGrid = (
     <Grid container spacing={1.5}>
-      {[1, 2, 3].map((i) => (
+      {Array.from({ length: DEFAULT_PAGINATION }).map((_, i) => (
         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
           <Skeleton variant="rounded" height={110} sx={{ borderRadius: "16px" }} />
         </Grid>
@@ -202,13 +263,19 @@ export default function WishItemFeed({
   return (
     <Box>
       {loading ? skeletonGrid : items.length === 0 ? emptyState : (
-        <Grid container spacing={1.5}>
-          {items.map((item) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
-              <WishItemCard item={item} onLikeToggle={handleLikeToggle} />
-            </Grid>
-          ))}
-        </Grid>
+        <ResponsiveVerticalCardWrapper
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          onLoadMore={handleLoadMore}
+        >
+          <Grid container spacing={1.5}>
+            {items.map((item) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
+                <WishItemCard item={item} onLikeToggle={handleLikeToggle} />
+              </Grid>
+            ))}
+          </Grid>
+        </ResponsiveVerticalCardWrapper>
       )}
     </Box>
   );
