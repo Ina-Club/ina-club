@@ -27,7 +27,7 @@ const ResponsiveVerticalCardWrapper: React.FC<ResponsiveVerticalCardWrapperProps
     {({ wrapperRef, sentinelRef }) => (
       <Box
         ref={wrapperRef as React.RefObject<HTMLDivElement>}
-        sx={{ width: "100%", display: "flex", flexDirection: "column", flex: 1 }}
+        sx={{ width: "100%", display: "flex", flexDirection: "column", flex: 1, mt: 2 }}
       >
         {children}
         <Box ref={sentinelRef as React.RefObject<HTMLDivElement>} sx={{ height: 1, width: "100%" }} />

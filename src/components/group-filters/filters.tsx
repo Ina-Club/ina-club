@@ -49,7 +49,7 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
 }));
 
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
-  padding: "3px 14px 14px 18px",
+  padding: "4px 16px 16px 16px",
 }));
 
 const OptionItem = styled(MenuItem)(({ theme }) => ({
