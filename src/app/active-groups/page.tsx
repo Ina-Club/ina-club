@@ -15,11 +15,14 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import ResponsiveVerticalCardWrapper from "@/components/wrapper/responsive-vertical-card-wrapper";
 import { GroupStatus } from "lib/types/status";
 
+// Height of sticky AppBar (Toolbar default = 64px)
+const APPBAR_H = 100;
+
 export default function Page() {
   const headerText = "כל הקבוצות";
   const descriptionText =
     "גלה את כל הקבוצות הפעילות, הצטרף לרכישות קבוצתיות וחסוך כסף יחד עם אחרים.";
-  const debounceDelay: number = 400; //Time in milliseconds
+  const debounceDelay: number = 400;
   const [activeGroups, setActiveGroups] = useState<ActiveGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -33,7 +36,7 @@ export default function Page() {
     companies: [],
     statuses: [],
     participantRange: "",
-    priceRange: [0, 10_000], //TODO: Change this to the price of highest active group
+    priceRange: [0, 10_000],
   });
   const [cursor, setCursor] = useState<string | null>(null);
   const debouncedParams: FilterState = useDebouncedValue(filterState, debounceDelay);
@@ -42,7 +45,7 @@ export default function Page() {
     const params = new URLSearchParams({
       limit: DEFAULT_PAGINATION.toString(),
     });
-    
+
     if (debouncedParams.statuses && debouncedParams.statuses.length > 0) {
       debouncedParams.statuses.forEach((status) => params.append("status", status));
     } else {
@@ -77,7 +80,6 @@ export default function Page() {
     const append = opts?.append ?? false;
     const nextCursor = opts?.cursor ?? null;
 
-    // מזהה של הבקשה הנוכחית
     const requestId = ++latestRequestIdRef.current;
 
     if (append) {
@@ -115,7 +117,6 @@ export default function Page() {
 
       if (!append) setActiveGroups([]);
     } finally {
-      // כיבוי loading רק אם זו עדיין הבקשה האחרונה
       if (requestId === latestRequestIdRef.current) {
         if (append) {
           loadingMoreRef.current = false;
@@ -127,7 +128,6 @@ export default function Page() {
       }
     }
   }, [buildParams]);
-
 
   useEffect(() => {
     setCursor(null);
@@ -142,8 +142,31 @@ export default function Page() {
     fetchPage({ cursor, append: true });
   }, [cursor, fetchPage, hasMore]);
 
+  // ── Filter panel: prevent wheel scroll from propagating to the page ─────────
+  // The filter panel has its own overflowY:auto scroll. By stopping propagation
+  // when the pointer is over it, scrolling the filter never moves the page body.
+  const filterColRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = filterColRef.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const atTop = scrollTop === 0 && e.deltaY < 0;
+      const atBottom = scrollTop + clientHeight >= scrollHeight && e.deltaY > 0;
+      // Only prevent if there is still content to scroll inside the panel
+      if (!atTop && !atBottom) {
+        e.stopPropagation();
+      }
+    };
+    el.addEventListener("wheel", handler, { passive: true });
+    return () => el.removeEventListener("wheel", handler);
+  }, []);
+
   return (
-    <>
+    // The page itself scrolls normally — no height/overflow constraints here
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
+      {/* ─── Banner ─────────────────────────────────────────── */}
       <DefaultPageBanner
         mainSx={{ top: -66, zIndex: 900, position: "sticky" }}
         header={headerText}
@@ -155,12 +178,12 @@ export default function Page() {
         ]}
       />
 
-      {/* Top bar: Search + Mobile filters trigger */}
+      {/* ─── Sticky search bar ──────────────────────────────── */}
       <Box
         sx={{
-          maxWidth: 800,
           mx: { xs: 2, md: "auto" },
-          // position: "relative",
+          maxWidth: { xs: "calc(100% - 32px)", md: 800 },
+          width: { md: 800 },
           mt: { xs: -4, md: -3 },
           bgcolor: "white",
           boxShadow: 3,
@@ -168,7 +191,7 @@ export default function Page() {
           p: 1,
           display: "flex",
           position: "sticky",
-          top: 82,
+          top: APPBAR_H,
           zIndex: 1000,
           alignItems: "center",
           border: "2px solid transparent",
@@ -180,6 +203,7 @@ export default function Page() {
           placeholderText="חיפוש קבוצות..."
           handleSearchTextChange={handleSearchTextChange}
         />
+        {/* Mobile filter trigger (bottom-sheet drawer) */}
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
           <GroupFilters
             mode="trigger"
@@ -190,98 +214,143 @@ export default function Page() {
         </Box>
       </Box>
 
-      {/* Content area */}
+      {/* ─── Two-column layout ──────────────────────────────── */}
       <Box
         sx={{
-          maxWidth: { xs: "100%", md: "85%" },
           display: "flex",
-          flexDirection: "row",
-          py: { xs: 2, md: 3 },
-          px: { xs: 0, md: 5 },
-          gap: 5,
+          flexDirection: { xs: "column", md: "row" },
+          mt: 2,
+          px: { xs: 0, md: 3 },
+          gap: { md: 3 },
           alignItems: "flex-start",
+          pb: 4,
         }}
       >
-        {/* Desktop sidebar filters */}
+        {/* ── Filter panel (desktop sidebar) ─────────────────── */}
+        {/*
+          position:sticky so it stays visible while the cards column scrolls the page.
+          top = appbar + searchbar + a small gap.
+          max-height + overflowY:auto give it its own internal scroll.
+          The wheel handler above prevents the internal scroll from
+          propagating to the page body.
+        */}
         <Box
+          ref={filterColRef}
           sx={{
-            display: { xs: "none", md: "block" },
+            display: { xs: "none", md: "flex" },
+            flexDirection: "column",
+            width: 270,
+            flexShrink: 0,
             position: "sticky",
-            top: 176,
-            alignSelf: "flex-start",
-            zIndex: 1,
+            mt: 2,
+            direction: "rtl",
+            top: APPBAR_H + 68, // appbar + searchbar height + gap
+            maxHeight: `calc(100vh - ${APPBAR_H + 68 + 24}px)`,
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            "&::-webkit-scrollbar": { width: 4 },
+            "&::-webkit-scrollbar-thumb": { bgcolor: "grey.300", borderRadius: 4 },
           }}
-        >
-          <GroupFilters
-            mode="sidebar"
-            group="active"
-            filterState={filterState}
-            onFilterChange={setFilterState}
-          />
-        </Box>
-
-        {/* Cards grid */}
-        <ResponsiveVerticalCardWrapper
-          hasMore={hasMore}
-          loadingMore={loadingMore}
-          onLoadMore={handleLoadMore}
-          loadingSkeleton={
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-                px: { xs: 2, md: 2 },
-                gap: { xs: 3, md: 2 },
-                mt: 2,
-              }}
-            >
-              {Array.from({ length: 1 }).map((_, i) => (
-                <ActiveGroupCardSkeleton key={i} />
-              ))}
-            </Box>
-          }
         >
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-              flex: 1,
-              px: { xs: 2, md: 2 },
-              justifyContent: "center",
-              alignItems: "center",
-              gap: { xs: 3, md: 2 },
+              bgcolor: "white",
+              borderRadius: 3,
+              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+              border: "1px solid",
+              borderColor: "grey.200",
+               direction: "ltr",
             }}
           >
-            <Suspense fallback={<GroupSectionSkeleton />}>
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <ActiveGroupCardSkeleton key={i} />
-                ))
-              ) : activeGroups.length > 0 ? (
-                activeGroups.map((activeGroup, index) => (
-                  <ActiveGroupCard key={index} activeGroup={activeGroup} />
-                ))
-              ) : (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    left: "50%",
-                    width: "100%",
-                    transform: "translateX(-50%)",
-                    mt: { xs: 4, md: 2 },
-                    display: "flex",
-                    justifyContent: "center",
-                    color: "text.secondary",
-                    textAlign: "center",
-                  }}
-                >
-                  לא נמצאו קבוצות התואמות לחיפוש שלך
-                </Box>
-              )}
-            </Suspense>
+            <Box
+              sx={{
+                px: 2.5,
+                py: 2,
+                borderBottom: "1px solid",
+                borderColor: "grey.100",
+                bgcolor: "#f8f9fc",
+              }}
+            >
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  color: "#1a2a5a",
+                  letterSpacing: 0.2,
+                }}
+              >
+                סינון
+              </Box>
+            </Box>
+            <GroupFilters
+              mode="sidebar"
+              group="active"
+              filterState={filterState}
+              onFilterChange={setFilterState}
+            />
           </Box>
-        </ResponsiveVerticalCardWrapper>
+        </Box>
+
+        {/* ── Cards column ─────────────────────────────────────── */}
+        {/* Normal flow — the page body scrolls this naturally */}
+        <Box sx={{ flex: 1, minWidth: 0, width: { xs: "100%" } }}>
+          <ResponsiveVerticalCardWrapper
+            hasMore={hasMore}
+            loadingMore={loadingMore}
+            onLoadMore={handleLoadMore}
+            loadingSkeleton={
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+                  px: { xs: 2, md: 1 },
+                  gap: { xs: 3, md: 2 },
+                  mt: 2,
+                }}
+              >
+                {Array.from({ length: DEFAULT_PAGINATION }).map((_, i) => (
+                  <ActiveGroupCardSkeleton key={i} />
+                ))}
+              </Box>
+            }
+          >
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+                px: { xs: 2, md: 1 },
+                gap: { xs: 3, md: 2 },
+              }}
+            >
+              <Suspense fallback={<GroupSectionSkeleton />}>
+                {loading ? (
+                  Array.from({ length: DEFAULT_PAGINATION }).map((_, i) => (
+                    <ActiveGroupCardSkeleton key={i} />
+                  ))
+                ) : activeGroups.length > 0 ? (
+                  activeGroups.map((activeGroup, index) => (
+                    <ActiveGroupCard key={index} activeGroup={activeGroup} />
+                  ))
+                ) : (
+                  <Box
+                    sx={{
+                      gridColumn: "1 / -1",
+                      display: "flex",
+                      justifyContent: "center",
+                      mt: { xs: 4, md: 6 },
+                      color: "text.secondary",
+                      textAlign: "center",
+                    }}
+                  >
+                    לא נמצאו קבוצות התואמות לחיפוש שלך
+                  </Box>
+                )}
+              </Suspense>
+            </Box>
+          </ResponsiveVerticalCardWrapper>
+        </Box>
       </Box>
-    </>
+    </Box>
   );
 }
