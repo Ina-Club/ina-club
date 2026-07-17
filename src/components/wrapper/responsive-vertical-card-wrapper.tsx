@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import ScrollPaginationWrapper from "./scroll-pagination-wrapper";
 
 interface ResponsiveVerticalCardWrapperProps {
@@ -8,6 +8,7 @@ interface ResponsiveVerticalCardWrapperProps {
   onLoadMore: () => void;
   hasMore?: boolean;
   loadingMore?: boolean;
+  loadingSkeleton?: React.ReactNode;
 }
 
 const ResponsiveVerticalCardWrapper: React.FC<ResponsiveVerticalCardWrapperProps> = ({
@@ -15,6 +16,7 @@ const ResponsiveVerticalCardWrapper: React.FC<ResponsiveVerticalCardWrapperProps
   onLoadMore,
   hasMore = false,
   loadingMore = false,
+  loadingSkeleton,
 }) => (
   <ScrollPaginationWrapper
     orientation="vertical"
@@ -29,11 +31,7 @@ const ResponsiveVerticalCardWrapper: React.FC<ResponsiveVerticalCardWrapperProps
       >
         {children}
         <Box ref={sentinelRef as React.RefObject<HTMLDivElement>} sx={{ height: 1, width: "100%" }} />
-        {loadingMore && hasMore && (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-            <CircularProgress />
-          </Box>
-        )}
+        {loadingMore && hasMore && loadingSkeleton}
       </Box>
     )}
   </ScrollPaginationWrapper>

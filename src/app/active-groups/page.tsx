@@ -225,6 +225,21 @@ export default function Page() {
           hasMore={hasMore}
           loadingMore={loadingMore}
           onLoadMore={handleLoadMore}
+          loadingSkeleton={
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+                px: { xs: 2, md: 2 },
+                gap: { xs: 3, md: 2 },
+                mt: 2,
+              }}
+            >
+              {Array.from({ length: 1 }).map((_, i) => (
+                <ActiveGroupCardSkeleton key={i} />
+              ))}
+            </Box>
+          }
         >
           <Box
             sx={{
