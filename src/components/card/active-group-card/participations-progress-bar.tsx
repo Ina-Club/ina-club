@@ -38,18 +38,18 @@ const ParticipantsProgress: React.FC<ParticipantsProgressProps> = ({ current, mi
       </Box>
       <Box sx={{ position: "relative" }}>
         <LinearProgress
-          variant="determinate"
-          value={progress}
-          sx={{
-            height: 10,
-            borderRadius: 5,
-            bgcolor: "#e0e0e0",
-            "& .MuiLinearProgress-bar": {
-              borderRadius: 5,
-              bgcolor: barColor,
-            },
-          }}
-        />
+            variant="determinate"
+            value={progress}
+            sx={{
+              height: 4,
+              borderRadius: 4,
+              bgcolor: "#e8eaf0",
+              "& .MuiLinearProgress-bar": {
+                borderRadius: 4,
+                bgcolor: barColor,
+              },
+            }}
+          />
         {/* Divider overlay */}
         {min && max &&
           <Box

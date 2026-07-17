@@ -185,17 +185,24 @@ export default function Page() {
           maxWidth: { xs: "calc(100% - 32px)", md: 800 },
           width: { md: 800 },
           mt: { xs: -4, md: -3 },
-          bgcolor: "white",
-          boxShadow: 3,
-          borderRadius: "12px",
-          p: 1,
+          mb: { xs: 0, md: "8px" },
+          bgcolor: "rgba(255,255,255,0.88)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          boxShadow: "0 2px 16px rgba(26,42,90,0.10)",
+          borderRadius: "14px",
+          p: "6px 10px",
           display: "flex",
           position: "sticky",
           top: APPBAR_H,
           zIndex: 1000,
           alignItems: "center",
-          border: "2px solid transparent",
-          "&:hover": { borderColor: "#1a2a5a" },
+          border: "1.5px solid rgba(26,42,90,0.10)",
+          transition: "box-shadow 0.2s, border-color 0.2s",
+          "&:hover": {
+            borderColor: "rgba(26,42,90,0.28)",
+            boxShadow: "0 4px 24px rgba(26,42,90,0.13)",
+          },
         }}
       >
         <SearchBar
@@ -219,82 +226,74 @@ export default function Page() {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          mt: 2,
-          px: { xs: 0, md: 3 },
-          gap: { md: 3 },
+          mt: { xs: 2, md: 3 },
+          px: { xs: 0, md: 4 },
+          gap: { md: "28px" },
           alignItems: "flex-start",
-          pb: 4,
+          pb: 6,
         }}
       >
         {/* ── Filter panel (desktop sidebar) ─────────────────── */}
-        {/*
-          position:sticky so it stays visible while the cards column scrolls the page.
-          top = appbar + searchbar + a small gap.
-          max-height + overflowY:auto give it its own internal scroll.
-          The wheel handler above prevents the internal scroll from
-          propagating to the page body.
-        */}
         <Box
           ref={filterColRef}
           sx={{
             display: { xs: "none", md: "flex" },
             flexDirection: "column",
-            width: 270,
+            width: 340,
             flexShrink: 0,
             position: "sticky",
-            mt: 2,
+            mt: 1,
             direction: "rtl",
-            top: APPBAR_H + 68, // appbar + searchbar height + gap
+            top: APPBAR_H + 68,
             maxHeight: `calc(100vh - ${APPBAR_H + 68 + 24}px)`,
             overflowY: "auto",
             overscrollBehavior: "contain",
             "&::-webkit-scrollbar": { width: 4 },
-            "&::-webkit-scrollbar-thumb": { bgcolor: "grey.300", borderRadius: 4 },
+            "&::-webkit-scrollbar-thumb": {
+              bgcolor: "rgba(26,42,90,0.15)",
+              borderRadius: 4,
+            },
           }}
         >
           <Box
             sx={{
-              bgcolor: "white",
-              borderRadius: 3,
-              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-              border: "1px solid",
-              borderColor: "grey.200",
-               direction: "ltr",
+              bgcolor: "#ffffff",
+              borderRadius: "16px",
+              boxShadow: "0 2px 16px rgba(26,42,90,0.08)",
+              border: "1px solid rgba(26,42,90,0.08)",
+              direction: "ltr",
             }}
           >
             <Box
               sx={{
-                px: 2.5,
+                px: 3,
                 py: 2,
-                borderBottom: "1px solid",
-                borderColor: "grey.100",
+                borderBottom: "1px solid rgba(26,42,90,0.07)",
                 bgcolor: "#f8f9fc",
+                display: "flex",
+                alignItems: "center",
               }}
             >
               <Box
                 component="span"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: "1rem",
-                  color: "#1a2a5a",
-                  letterSpacing: 0.2,
-                }}
+                sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#1a2a5a", letterSpacing: 0.3 }}
               >
                 סינון
               </Box>
             </Box>
-            <GroupFilters
-              mode="sidebar"
-              group="active"
-              filterState={filterState}
-              onFilterChange={setFilterState}
-            />
+            <Box sx={{ px: 1, py: 1 }}>
+              <GroupFilters
+                mode="sidebar"
+                group="active"
+                filterState={filterState}
+                onFilterChange={setFilterState}
+              />
+            </Box>
           </Box>
         </Box>
 
         {/* ── Cards column ─────────────────────────────────────── */}
-        {/* Normal flow — the page body scrolls this naturally */}
-        <Box sx={{ flex: 1, minWidth: 0, width: { xs: "100%" } }}>
+        <Box sx={{ flex: 1, minWidth: 0, width: { xs: "100%" }, px: { xs: 2, md: 0 } }}>
           <ResponsiveVerticalCardWrapper
             hasMore={hasMore}
             loadingMore={loadingMore}
@@ -304,8 +303,7 @@ export default function Page() {
                 sx={{
                   display: "grid",
                   gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
-                  px: { xs: 2, md: 1 },
-                  gap: { xs: 3, md: 2 },
+                  gap: "24px",
                   mt: 2,
                 }}
               >
@@ -319,8 +317,7 @@ export default function Page() {
               sx={{
                 display: "grid",
                 gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
-                px: { xs: 2, md: 1 },
-                gap: { xs: 3, md: 2 },
+                gap: "24px",
               }}
             >
               <Suspense fallback={<GroupSectionSkeleton />}>

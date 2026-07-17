@@ -122,12 +122,17 @@ export const PriceRangeSlider = styled(Slider)(({ theme }) => ({
 }));
 
 export const CircleOutlinedInput = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    height: 46,
+    borderRadius: "10px",
+    fontSize: "0.875rem",
+  },
   "& .MuiOutlinedInput-input": {
     [theme.breakpoints.down("sm")]: {
       padding: "3.5px 14px",
     },
     [theme.breakpoints.up("md")]: {
-      padding: "7.5px 5px 7.5px 14px",
+      padding: "10px 8px 10px 14px",
       maxWidth: "100px",
     },
   },
