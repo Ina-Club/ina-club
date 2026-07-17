@@ -6,8 +6,9 @@ export default function ActiveGroupCardSkeleton() {
   return (
     <Card
       sx={{
-        borderRadius: 4,
-        boxShadow: 3,
+        borderRadius: "16px",
+        boxShadow: "0 2px 12px rgba(26,42,90,0.08)",
+        border: "1px solid rgba(26,42,90,0.06)",
         flex: 1,
         overflow: "hidden",
         display: "flex",
@@ -15,69 +16,43 @@ export default function ActiveGroupCardSkeleton() {
         bgcolor: "background.paper",
       }}
     >
-      {/* Image Section */}
-      <Box sx={{ position: "relative" }}>
-        <Skeleton variant="rectangular" height={150} />
-
-        {/* Category Chip */}
+      {/* Image — matches 65% aspect ratio */}
+      <Box sx={{ position: "relative", pt: "65%" }}>
+        <Skeleton
+          variant="rectangular"
+          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+        />
         <Chip
-          label={<Skeleton width={60} />}
+          label={<Skeleton width={56} />}
           size="small"
           sx={{
+            position: "absolute",
             bottom: 8,
             left: 8,
             bgcolor: "rgba(255,255,255,0.9)",
             border: "1px solid",
-            borderColor: "grey.300",
-            color: "grey",
-            position: "absolute",
-            px: 1,
+            borderColor: "grey.200",
           }}
         />
-
-        {/* Dots */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 8,
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: 0.5,
-          }}
-        >
-          {Array.from({ length: 3 }).map((_, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                bgcolor: "rgba(255,255,255,0.7)",
-                border: "1px solid white",
-              }}
-            />
-          ))}
-        </Box>
       </Box>
 
-      {/* Content Section */}
-      <CardContent sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+      {/* Content */}
+      <CardContent sx={{ p: "12px 14px 14px", flexGrow: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
         {/* Title */}
-        <Skeleton variant="text" width="60%" height={35} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="65%" height={26} />
 
-        {/* Price Section */}
-        <Skeleton variant="text" width="20%" height={18} sx={{ mb: 1 }} />
-        <Skeleton variant="text" width="25%" height={24} sx={{ mb: 1 }} />
+        {/* Price row */}
+        <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mt: "auto" }}>
+          <Skeleton variant="text" width="30%" height={32} />
+          <Skeleton variant="text" width="20%" height={18} />
+        </Box>
 
         {/* Countdown */}
-        <Skeleton variant="text" width="20%" height={18} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="45%" height={18} />
 
-        {/* Participants */}
-        <Skeleton variant="text" width="30%" height={18} sx={{ mb: 1 }} />
-
-        {/* Gauge */}
-        <Skeleton variant="rounded" height={10} />
+        {/* Progress label + bar */}
+        <Skeleton variant="text" width="55%" height={16} />
+        <Skeleton variant="rounded" height={4} sx={{ borderRadius: 4 }} />
       </CardContent>
     </Card>
   );

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Grid, Skeleton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import WishItemCard, { WishItemData } from "./WishItemCard";
+import WishItemCardSkeleton from "@/components/skeleton/wish-item-card-skeleton";
 import HorizontalNavigationWrapper from "@/components/wrapper/horizontal-navigation-wrapper";
 import useHorizontalNavigationWrapper from "@/hooks/useHorizontalNavigationWrapper";
 import ResponsiveVerticalCardWrapper from "@/components/wrapper/responsive-vertical-card-wrapper";
@@ -254,7 +255,17 @@ export default function WishItemFeed({
     <Grid container spacing={1.5}>
       {Array.from({ length: DEFAULT_PAGINATION }).map((_, i) => (
         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
-          <Skeleton variant="rounded" height={110} sx={{ borderRadius: "16px" }} />
+          <WishItemCardSkeleton />
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  const wishItemLoadingSkeleton = (
+    <Grid container spacing={1.5} sx={{ mt: 1 }}>
+      {Array.from({ length: 1 }).map((_, i) => (
+        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
+          <WishItemCardSkeleton />
         </Grid>
       ))}
     </Grid>
@@ -267,6 +278,7 @@ export default function WishItemFeed({
           hasMore={hasMore}
           loadingMore={loadingMore}
           onLoadMore={handleLoadMore}
+          loadingSkeleton={wishItemLoadingSkeleton}
         >
           <Grid container spacing={1.5}>
             {items.map((item) => (
